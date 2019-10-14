@@ -49,6 +49,11 @@ namespace YuzuTest.Migrations
 			[YuzuMember]
 			public Bad V;
 		}
+		public class Foo2
+		{
+			[YuzuMember]
+			public Bad V { get; private set; } = new Bad();
+		}
 		public class Baz
 		{
 			[YuzuMember]
@@ -82,6 +87,9 @@ namespace YuzuTest.Migrations
 			var o3 = (Foo)jd.FromString(new Foo(), s);
 			Assert.AreEqual(111, o3.V.V);
 			Assert.AreEqual("foo", o3.V.B);
+			var o4 = jd.FromString<Foo2>(s);
+			Assert.AreEqual(111, o4.V.V);
+			Assert.AreEqual("foo", o4.V.B);
 		}
 	}
 
@@ -114,6 +122,91 @@ namespace YuzuTest.Migrations
 			Assert.AreEqual(666, (o2).V);
 			var o3 = jd.FromString(new Bar(), s);
 			Assert.AreEqual(666, ((Bar)o3).V);
+		}
+	}
+
+	[TestClass]
+	public class TestMigrateListItems
+	{
+		public class Foo
+		{
+			[YuzuMember]
+			public List<Bar> List = new List<Bar>();
+		}
+		public class Foo2
+		{
+			[YuzuMember]
+			public List<Bar> List { get; private set; } = new List<Bar>();
+		}
+		public class Bar
+		{
+			[YuzuMember]
+			public int V;
+		}
+		public class Baz : Bar
+		{
+			[YuzuMember]
+			public string B;
+		}
+		public class Bad : Bar
+		{
+			[YuzuMember]
+			public string B;
+		}
+		[YuzuTypeMigration(0)]
+		public static Baz Migrate(Bad bad) => new Baz {
+			V = bad.V,
+			B = bad.B,
+		};
+		[TestMethod]
+		public void Test1()
+		{
+			Yuzu.Migrations.Storage.Clear();
+			Yuzu.Migrations.Storage.RegisterMigrations(typeof(TestMigrateListItems));
+			Yuzu.Migrations.Storage.BuildMigrations();
+			var s = "{'class':'YuzuTest.Migrations.TestMigrateListItems+Foo, YuzuTest','List':[" +
+				"{'class':'YuzuTest.Migrations.TestMigrateListItems+Bar, YuzuTest','V':0}," +
+				"{'class':'YuzuTest.Migrations.TestMigrateListItems+Bad, YuzuTest','V':1,'B':'1'}," +
+				"{'class':'YuzuTest.Migrations.TestMigrateListItems+Bar, YuzuTest','V':2}," +
+				"{'class':'YuzuTest.Migrations.TestMigrateListItems+Bad, YuzuTest','V':3,'B':'3'}," +
+				"{'class':'YuzuTest.Migrations.TestMigrateListItems+Bad, YuzuTest','V':4,'B':'4'}," +
+				"{'class':'YuzuTest.Migrations.TestMigrateListItems+Bar, YuzuTest','V':5}," +
+				"{'class':'YuzuTest.Migrations.TestMigrateListItems+Bad, YuzuTest','V':6,'B':'6'}" +
+				"]}";
+			s = s.TRQ();
+			var jd = Helper.JD();
+			var o = jd.FromString<Foo>(s);
+			for (int i = 0; i < 7; i++) {
+				Assert.AreEqual(i, o.List[i].V);
+			}
+			foreach (int i in new[] { 1, 3, 4, 6 }) {
+				Assert.AreEqual(i.ToString(), ((Baz)o.List[i]).B);
+			}
+		}
+		[TestMethod]
+		public void Test2()
+		{
+			Yuzu.Migrations.Storage.Clear();
+			Yuzu.Migrations.Storage.RegisterMigrations(typeof(TestMigrateListItems));
+			Yuzu.Migrations.Storage.BuildMigrations();
+			var s = "{'class':'YuzuTest.Migrations.TestMigrateListItems+Foo2, YuzuTest','List':[" +
+				"{'class':'YuzuTest.Migrations.TestMigrateListItems+Bar, YuzuTest','V':0}," +
+				"{'class':'YuzuTest.Migrations.TestMigrateListItems+Bad, YuzuTest','V':1,'B':'1'}," +
+				"{'class':'YuzuTest.Migrations.TestMigrateListItems+Bar, YuzuTest','V':2}," +
+				"{'class':'YuzuTest.Migrations.TestMigrateListItems+Bad, YuzuTest','V':3,'B':'3'}," +
+				"{'class':'YuzuTest.Migrations.TestMigrateListItems+Bad, YuzuTest','V':4,'B':'4'}," +
+				"{'class':'YuzuTest.Migrations.TestMigrateListItems+Bar, YuzuTest','V':5}," +
+				"{'class':'YuzuTest.Migrations.TestMigrateListItems+Bad, YuzuTest','V':6,'B':'6'}" +
+				"]}";
+			s = s.TRQ();
+			var jd = Helper.JD();
+			var o = jd.FromString<Foo2>(s);
+			for (int i = 0; i < 7; i++) {
+				Assert.AreEqual(i, o.List[i].V);
+			}
+			foreach (int i in new[] { 1, 3, 4, 6 }) {
+				Assert.AreEqual(i.ToString(), ((Baz)o.List[i]).B);
+			}
 		}
 	}
 

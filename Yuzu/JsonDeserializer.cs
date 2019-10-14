@@ -417,20 +417,51 @@ namespace Yuzu.Json
 				return;
 			}
 			var rf = ReadValueFunc(typeof(T));
-			// TODO: check for migrations
 			do {
-				list.Add((T)rf());
+				var r = rf();
+				if (r is ValueWrappedForTypeMigration wrappedValue) {
+					MigrationContext.AddTypeMigration(wrappedValue.Value, (v) => {
+						list.Add((T)v);
+					});
+				} else {
+					list.Add((T)r);
+				}
+			} while (Require(']', ',') == ',');
+		}
+
+		protected void ReadIntoList<T>(IList<T> list)
+		{
+			// ReadValue might invoke a new serializer, so we must not rely on PutBack.
+			if (SkipSpacesCarefully() == ']') {
+				Require(']');
+				return;
+			}
+			var rf = ReadValueFunc(typeof(T));
+			int index = 0;
+			do {
+				var r = rf();
+				if (r is ValueWrappedForTypeMigration wrappedValue) {
+					var indexInClosure = index;
+					MigrationContext.AddTypeMigration(wrappedValue.Value, (v) => {
+						list.Insert(indexInClosure, (T)v);
+					});
+				} else {
+					list.Add((T)r);
+				}
+				index++;
 			} while (Require(']', ',') == ',');
 		}
 
 		protected void ReadIntoCollectionNG<T>(object list) => ReadIntoCollection((ICollection<T>)list);
+
+		protected void ReadIntoListNG<T>(object list) => ReadIntoList((IList<T>)list);
 
 		protected List<T> ReadList<T>()
 		{
 			if (RequireOrNull('['))
 				return null;
 			var list = new List<T>();
-			ReadIntoCollection(list);
+			ReadIntoList(list);
 			return list;
 		}
 
@@ -753,6 +784,12 @@ namespace Yuzu.Json
 				var m = Utils.GetPrivateCovariantGenericAll(GetType(), nameof(ReadIntoDictionaryNG), t);
 				var d = MakeDelegateAction(m);
 				return obj => { Require('{'); d(obj); };
+			}
+			var iList = Utils.GetIList(t);
+			if (iList != null) {
+				var m = Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadIntoListNG), iList);
+				var d = MakeDelegateAction(m);
+				return obj => { Require('['); d(obj); };
 			}
 			var icoll = Utils.GetICollection(t);
 			if (icoll != null) {

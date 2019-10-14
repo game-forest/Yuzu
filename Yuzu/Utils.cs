@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -51,6 +51,16 @@ namespace Yuzu.Util
 				return t.GetInterface("ICollection`1");
 			} catch (AmbiguousMatchException) {
 				throw new YuzuException("Multiple ICollection interfaces for type " + t.Name);
+			}
+		}
+
+		public static Type GetIList(Type t)
+		{
+			if (t.Name == "IList`1") return t;
+			try {
+				return t.GetInterface("IList`1");
+			} catch (AmbiguousMatchException) {
+				throw new YuzuException("Multiple IList interfaces for type " + t.Name);
 			}
 		}
 
