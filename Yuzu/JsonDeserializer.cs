@@ -505,9 +505,22 @@ namespace Yuzu.Json
 
 			var rf = ReadValueFunc(typeof(V));
 			do {
-				var key = RequireString();
+				var keyString = RequireString();
 				Require(':');
-				dict.Add((K)rk(key), (V)rf());
+				var key = rk(keyString);
+				var value = rf();
+				var wrappedKey = key as ValueWrappedForTypeMigration;
+				var wrappedValue = value as ValueWrappedForTypeMigration;
+				if (wrappedKey != null && wrappedValue != null) {
+					MigrationContext.AddTypeMigration(wrappedKey.Value, (v) => Console.Write("what do"));
+					MigrationContext.AddTypeMigration(wrappedValue.Value, (v) => Console.Write("what do"));
+				} else if (wrappedKey != null) {
+					MigrationContext.AddTypeMigration(wrappedKey.Value, (k) => dict.Add((K)k, (V)value));
+				} else if (wrappedValue != null) {
+					MigrationContext.AddTypeMigration(wrappedValue.Value, (v) => dict.Add((K)key, (V)v));
+				} else {
+					dict.Add((K)key, (V)value);
+				}
 			} while (Require('}', ',') == ',');
 		}
 
