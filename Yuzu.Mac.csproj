@@ -83,18 +83,19 @@
     <Compile Include="Yuzu\Grisu\Grisu.cs" />
     <Compile Include="Yuzu\Grisu\GrisuDouble.cs" />
     <Compile Include="Yuzu\Grisu\PowersOfTenCache.cs" />
+    <Compile Include="Yuzu\JsonDeserializer.cs" />
+    <Compile Include="Yuzu\JsonGenerators.cs" />
     <Compile Include="Yuzu\JsonHelpers.cs" />
+    <Compile Include="Yuzu\JsonSerializer.cs" />
+    <Compile Include="Yuzu\Meta.cs" />
+    <Compile Include="Yuzu\Migrations.cs" />
+    <Compile Include="Yuzu\Properties\AssemblyInfo.cs" />
+    <Compile Include="Yuzu\ProtoBuf.cs" />
     <Compile Include="Yuzu\ReaderDeserializer.cs" />
     <Compile Include="Yuzu\Surrogates.cs" />
     <Compile Include="Yuzu\UnsafeReader.cs" />
-    <Compile Include="Yuzu\JsonDeserializer.cs" />
-    <Compile Include="Yuzu\JsonGenerators.cs" />
-    <Compile Include="Yuzu\JsonSerializer.cs" />
-    <Compile Include="Yuzu\Meta.cs" />
-    <Compile Include="Yuzu\ProtoBuf.cs" />
     <Compile Include="Yuzu\Utils.cs" />
     <Compile Include="Yuzu\Yuzu.cs" />
-    <Compile Include="Yuzu\Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />
 </Project>
