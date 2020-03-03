@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -300,7 +300,8 @@ namespace Yuzu
 
 		public MetaOptions AddOverride(Type t, Action<MetaOverride> after = null)
 		{
-			var result = overrides.GetOrAdd(t, t1 => new MetaOverride { Info = t1 });
+			var value = new MetaOverride { Info = t };
+			var result = overrides.TryAdd(t, value) ? value : overrides[t];
 			after?.Invoke(result);
 			return this;
 		}

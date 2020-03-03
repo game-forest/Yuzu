@@ -462,7 +462,8 @@ namespace Yuzu.Metadata
 			if (alias != null) {
 				var aliases = Options.GetReadAliases(alias);
 				if (aliases != null) {
-					AliasCacheType readAliases = readAliasCache.GetOrAdd(options, MakeReadAliases);
+					var value = MakeReadAliases(options);
+					AliasCacheType readAliases = readAliasCache.TryAdd(options, value) ? value : readAliasCache[options];
 					foreach (var a in aliases) {
 						if (String.IsNullOrWhiteSpace(a))
 							throw Error("Empty read alias");
@@ -483,8 +484,13 @@ namespace Yuzu.Metadata
 		}
 
 		private static Func<Tuple<Type, CommonOptions>, Meta> MakeMeta = key => new Meta(key.Item1, key.Item2);
-		public static Meta Get(Type t, CommonOptions options) =>
-			cache.GetOrAdd(Tuple.Create(t, options), MakeMeta);
+
+		public static Meta Get(Type t, CommonOptions options)
+		{
+			var key = Tuple.Create(t, options);
+			var value = MakeMeta(key);
+			return cache.TryAdd(key, value) ? value : cache[key];
+		}
 
 		public static Type GetTypeByReadAlias(string alias, CommonOptions options)
 		{

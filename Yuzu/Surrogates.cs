@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
@@ -75,7 +75,7 @@ namespace Yuzu.Metadata
 		private void SetTypeState(Type t, State newState)
 		{
 			var k = Tuple.Create(t, options);
-			State oldState = surrogateTypes.GetOrAdd(k, newState);
+			State oldState = surrogateTypes.TryAdd(k, newState) ? newState : surrogateTypes[k];
 			if ((oldState | newState) == State.Both)
 				throw Error("Surrogate chain for type '{0}'", t.Name);
 		}
