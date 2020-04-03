@@ -643,7 +643,88 @@ namespace Yuzu.Json
 				case '[':
 					return ReadList<object>();
 				default:
+					if (JsonOptions.DeduceMinimalTypeForUnknownNumbers)
+						return RequireNumber();
 					return RequireDouble();
+			}
+		}
+
+		protected object RequireNumber()
+		{
+			// Optimization: Do not extract helper methods.
+			bool special = false;
+			bool hasDecimalPoint = false;
+			bool hasExponent = false;
+			int count = 0;
+			sb.Clear();
+			var ch = SkipSpaces();
+			bool neg = ch == '-';
+			if (neg) {
+				sb.Append(ch);
+				ch = Reader.ReadChar();
+			}
+			if (ch == 'N') {
+				special = true;
+				Require("aN");
+				sb.Append("NaN");
+			} else if (ch == 'I') {
+				special = true;
+				Require("nfinity");
+				sb.Append(neg ? "-Infinity" : "Infinity");
+			} else {
+				while ('0' <= ch && ch <= '9') {
+					count++;
+					sb.Append(ch);
+					ch = Reader.ReadChar();
+				}
+				if (ch == '.') {
+					hasDecimalPoint = true;
+					sb.Append(ch);
+					ch = Reader.ReadChar();
+					while ('0' <= ch && ch <= '9') {
+						sb.Append(ch);
+						ch = Reader.ReadChar();
+					}
+				}
+				if (ch == 'e' || ch == 'E') {
+					hasExponent = true;
+					sb.Append(ch);
+					ch = Reader.ReadChar();
+					if (ch == '+' || ch == '-') {
+						sb.Append(ch);
+						ch = Reader.ReadChar();
+					}
+					while ('0' <= ch && ch <= '9') {
+						sb.Append(ch);
+						ch = Reader.ReadChar();
+					}
+				}
+				PutBack(ch);
+			}
+
+			var s = sb.ToString();
+			if (hasDecimalPoint || hasExponent || special) {
+				if (float.TryParse(s, out float resultFloat))
+					return resultFloat;
+				return double.Parse(s);
+			} else {
+				if (neg) {
+					if (sbyte.TryParse(s, out sbyte resultSbyte))
+						return resultSbyte;
+					if (short.TryParse(s, out short resultShort))
+						return resultShort;
+					if (int.TryParse(s, out int resultInt))
+						return resultInt;
+					return long.Parse(s);
+				} else {
+					if (byte.TryParse(s, out byte resultByte))
+						return resultByte;
+					if (ushort.TryParse(s, out ushort resultUshort))
+						return resultUshort;
+					if (uint.TryParse(s, out uint resultUint))
+						return resultUint;
+					return ulong.Parse(s);
+				}
 			}
 		}
 

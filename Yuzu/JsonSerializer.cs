@@ -72,6 +72,11 @@ namespace Yuzu.Json
 		public string FloatingPointFormat {
 			get { return floatingPointFormat; } set { floatingPointFormat = value; generation++; }
 		}
+
+		private bool deduceMinimalTypeForUnknownNumbers = false;
+		public bool DeduceMinimalTypeForUnknownNumbers {
+			get => deduceMinimalTypeForUnknownNumbers; set { deduceMinimalTypeForUnknownNumbers = value; generation++; }
+		}
 	};
 
 	public class JsonSerializer : AbstractWriterSerializer
