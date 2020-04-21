@@ -532,4 +532,22 @@ namespace Yuzu
 		void Generate<T>();
 		void Generate(Type t);
 	}
+
+	public interface IReferenceResolver
+	{
+		Type ReferenceType();
+		object ResolveReference(object reference);
+		bool IsReferenced(object value);
+		void AddReference(object reference, object value);
+		object GetReference(object value);
+	}
+
+	public interface IReferenceResolver<TReference> where TReference : class, new()
+	{
+		Type ReferenceType();
+		object ResolveReference(TReference reference);
+		bool IsReferenced(object value);
+		void AddReference(TReference reference, object value);
+		TReference GetReference(object value);
+	}
 }

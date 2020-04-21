@@ -31,6 +31,8 @@ namespace Yuzu.Json
 		public string Indent = "\t";
 		public string ClassTag = "class";
 		public string ValueTag = "value";
+		public string ReferenceTag = "reference";
+		public string ReferenceIdTag = "reference-id";
 
 		private int maxOnelineFields = 0;
 		public int MaxOnelineFields { get { return maxOnelineFields; } set { maxOnelineFields = value; generation++; } }
@@ -77,8 +79,18 @@ namespace Yuzu.Json
 	public class JsonSerializer : AbstractWriterSerializer
 	{
 		public JsonSerializeOptions JsonOptions = new JsonSerializeOptions();
+		private IReferenceResolver referenceResolver;
+		public IReferenceResolver ReferenceResolver { get => referenceResolver; set
+			{
+				referenceResolver = value;
+				referenceMeta = Meta.Get(ReferenceResolver.ReferenceType(), Options);
+				referenceFieldWriters = GetFieldWriters(referenceMeta);
+			} }
 
-		public JsonSerializer() { InitWriters(); }
+		public JsonSerializer()
+		{
+			InitWriters();
+		}
 
 		private int depth = 0;
 
@@ -509,8 +521,9 @@ namespace Yuzu.Json
 		}
 
 		// This condition must be equivalent to MakeWriteFunc returning WriteObject*.
-		private bool IsUserObject(Type t)
+		public static bool IsUserObject(Type t)
 		{
+			if (t == typeof(Guid)) return false;
 			if (t == typeof(string)) return false;
 			if (Utils.IsStruct(t)) return true;
 			if (!t.IsClass && !t.IsInterface) return false;
@@ -680,11 +693,23 @@ namespace Yuzu.Json
 			isRoot && JsonOptions.SaveClass.HasFlag(JsonSaveClass.KnownRoot) ||
 			JsonOptions.SaveClass.HasFlag(JsonSaveClass.KnownNonRoot);
 
+		private Meta referenceMeta;
+		private List<Action<object>> referenceFieldWriters;
+
 		private void WriteObject(object obj, Meta meta, List<Action<object>> fieldWriters)
 		{
 			if (obj == null) {
 				writer.Write(nullBytes);
 				return;
+			}
+			object reference = null;
+			if (ReferenceResolver != null && obj.GetType() != ReferenceResolver.ReferenceType()) {
+				if (ReferenceResolver.IsReferenced(obj)) {
+					GetWriteFunc(ReferenceResolver.ReferenceType())(ReferenceResolver.GetReference(obj));
+					return;
+				} else {
+					reference = ReferenceResolver.GetReference(obj);
+				}
 			}
 			var expectedType = meta == null ? null : meta.Type;
 			var actualType = obj.GetType();
@@ -699,6 +724,15 @@ namespace Yuzu.Json
 			try {
 				depth += 1;
 				var isFirst = true;
+				if (ReferenceResolver != null) {
+					if (meta.Type == ReferenceResolver.ReferenceType()) {
+						WriteName(JsonOptions.ReferenceTag, ref isFirst);
+						WriteUnescapedString("whatever");
+					} else if (reference != null) {
+						WriteName(JsonOptions.ReferenceIdTag, ref isFirst);
+						WriteObject(reference, referenceMeta, referenceFieldWriters);
+					}
+				}
 				if (
 					NeedToSaveClass(
 						isTypeUnknown: expectedType != actualType || meta.WriteAlias != null,

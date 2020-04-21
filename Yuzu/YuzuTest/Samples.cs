@@ -391,7 +391,7 @@ namespace YuzuTest
 	internal class SampleGuid
 	{
 		[YuzuRequired]
-		public Guid G;
+		public Guid G { get; set; }
 	}
 
 	public class SampleWithNullField

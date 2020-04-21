@@ -13,6 +13,7 @@ namespace Yuzu.Json
 	{
 		public static JsonDeserializer Instance = new JsonDeserializer();
 		public JsonSerializeOptions JsonOptions = new JsonSerializeOptions();
+		public IReferenceResolver ReferenceResolver;
 
 		private char? buf;
 
@@ -907,16 +908,35 @@ namespace Yuzu.Json
 					Require("ull");
 					return null;
 				case '{':
+					object reference = null;
 					var name = GetNextName(first: true);
+					if (name == JsonOptions.ReferenceTag) {
+						var whatever = RequireUnescapedString();
+						var meta = Meta.Get(ReferenceResolver.ReferenceType(), Options);
+						reference = ReadFields(meta.Factory(), GetNextName(first: false));
+						return (T)ReferenceResolver.ResolveReference(reference);
+					}
+					if (name == JsonOptions.ReferenceIdTag) {
+						var meta = Meta.Get(ReferenceResolver.ReferenceType(), Options);
+						reference = MakeReaderFunc(ReferenceResolver.ReferenceType())();
+					}
 					if (name != JsonOptions.ClassTag) {
 						var meta = Meta.Get(typeof(T), Options);
-						return (T)ReadFields(meta.Factory(), name);
+						var r = (T)ReadFields(meta.Factory(), name);
+						if (reference != null) {
+							ReferenceResolver.AddReference(reference, r);
+						}
+						return r;
 					}
 					var typeName = RequireUnescapedString();
 					var t = FindType(typeName);
 					if (typeof(T).IsAssignableFrom(t)) {
 						var meta = Meta.Get(t, Options);
-						return (T)ReadFields(meta.Factory(), GetNextName(first: false));
+						var r = (T)ReadFields(meta.Factory(), GetNextName(first: false));
+						if (reference != null) {
+							ReferenceResolver.AddReference(reference, r);
+						}
+						return r;
 					}
 					return (T)GetSurrogate<T>(t).FuncFrom(
 						ReadFields(Activator.CreateInstance(t), GetNextName(first: false)));

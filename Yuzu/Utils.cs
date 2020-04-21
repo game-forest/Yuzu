@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace Yuzu.Util
 {
-	internal static class Utils
+	public static class Utils
 	{
 		public static object[] ZeroObjects = new object[] { };
 
@@ -271,7 +271,7 @@ namespace Yuzu.Util
 			var imap = t.GetInterfaceMap(icoll);
 			var addIndex = Array.FindIndex(imap.InterfaceMethods, m => m.Name == "Add");
 			return string.Format(
-				imap.TargetMethods[addIndex].Name == "Add" ? "{0}.Add({1});\n" : "(({2}){0}).Add({1});\n", 
+				imap.TargetMethods[addIndex].Name == "Add" ? "{0}.Add({1});\n" : "(({2}){0}).Add({1});\n",
 				collName, elementName, Utils.GetTypeSpec(icoll));
 		}
 
