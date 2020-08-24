@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -658,13 +658,23 @@ namespace Yuzu.Json
 			if (RequireUnescapedString() != JsonOptions.ValueTag)
 				throw Error("Primitive type value expected");
 			Require(':');
-			var result = ReadValueFunc(t)();
+			var icoll = Utils.GetICollection(t);
+			var idict = Utils.GetIDictionary(t);
+			Func<object> func;
+			if (icoll != null) {
+				func = MakePrimitiveSequenceOrDictionaryReaderFunc(t);
+			} else if (idict != null) {
+				func = MakePrimitiveSequenceOrDictionaryReaderFunc(t);
+			} else {
+				func = ReadValueFunc(t);
+			}
+			var result = func();
 			Require('}');
 			return result;
 		}
 
 		private static Type[] systemTypes = {
-			typeof(DateTime), typeof(DateTimeOffset), typeof(TimeSpan), typeof(Guid),
+			typeof(DateTime), typeof(DateTimeOffset), typeof(TimeSpan), typeof(Guid), typeof(string)
 		};
 
 		protected object ReadAnyObject()
@@ -701,7 +711,9 @@ namespace Yuzu.Json
 							ReadIntoDictionary(result.Fields);
 						return result;
 					}
-					if (t.IsPrimitive || t.IsEnum || systemTypes.Contains(t))
+					var icoll = Utils.GetICollection(t);
+					var idict = Utils.GetIDictionary(t);
+					if (t.IsPrimitive || t.IsEnum || systemTypes.Contains(t) || icoll != null || idict != null)
 						return ReadTypedPrimitive(t);
 					var meta = Meta.Get(t, Options);
 					return ReadFields(meta.Factory(), GetNextName(first: false));
@@ -797,6 +809,39 @@ namespace Yuzu.Json
 			{ typeof(Guid), RequireGuidObj },
 			{ typeof(object), ReadAnyObject },
 		};
+
+		private Func<object> MakePrimitiveSequenceOrDictionaryReaderFunc(Type t)
+		{
+			if (t.IsGenericType) {
+				var g = t.GetGenericTypeDefinition();
+				if (g == typeof(List<>))
+					return MakeDelegate(Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadList), t));
+			}
+			if (t.IsArray) {
+				if (t.GetArrayRank() > 1)
+					return () => ReadArrayNDim(t);
+				var n = JsonOptions.ArrayLengthPrefix ? nameof(ReadArrayWithLengthPrefix) : nameof(ReadArray);
+				return MakeDelegate(Utils.GetPrivateCovariantGeneric(GetType(), n, t));
+			}
+			var idict = Utils.GetIDictionary(t);
+			if (idict != null) {
+				var kv = idict.GetGenericArguments();
+				return MakeDelegate(Utils.GetPrivateGeneric(GetType(), nameof(ReadIDictionary), t, kv[0], kv[1]));
+			}
+			var icoll = Utils.GetICollection(t);
+			if (icoll != null) {
+				var m = Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadIntoCollectionNG), icoll);
+				var d = MakeDelegateAction(m);
+				return () => {
+					if (RequireOrNull('['))
+						return null;
+					var list = Activator.CreateInstance(t);
+					d(list);
+					return list;
+				};
+			}
+			throw new NotImplementedException(t.Name);
+		}
 
 		private Func<object> MakeReaderFunc(Type t)
 		{
