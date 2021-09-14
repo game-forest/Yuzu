@@ -39,6 +39,7 @@ namespace Yuzu.Json
 		public string ReferenceTag = "ref";
 		public string ClassTag = "class";
 		public string ValueTag = "value";
+		public bool FlatHierarchy = false;
 
 		private int maxOnelineFields = 0;
 		public int MaxOnelineFields { get { return maxOnelineFields; } set { maxOnelineFields = value; generation++; } }
@@ -94,9 +95,11 @@ namespace Yuzu.Json
 
 		private int depth = 0;
 
-		private byte[] nullBytes = [(byte)'n', (byte)'u', (byte)'l', (byte)'l'];
+		private readonly byte[] nullBytes = [(byte)'n', (byte)'u', (byte)'l', (byte)'l'];
 
 		private Dictionary<string, byte[]> strCache = new();
+
+		private readonly List<object> serializationQueue = new List<object>();
 
 		public IReferenceResolver ReferenceResolver { get; set; }
 
@@ -837,10 +840,13 @@ namespace Yuzu.Json
 					ReferenceResolver != null &&
 					ReferenceResolver.TryGetReference(obj, out var reference, out var referenceGenerated)
 				) {
-					if (!referenceGenerated) {
+					if ((!JsonOptions.FlatHierarchy && !referenceGenerated) || (JsonOptions.FlatHierarchy && depth > 2)) {
 						WriteName(JsonOptions.ReferenceTag, ref isFirst);
 						GetWriteFunc(ReferenceResolver.ReferenceType())(reference);
 						WriteFieldSeparator();
+						if (referenceGenerated && JsonOptions.FlatHierarchy && depth > 2) {
+							serializationQueue.Add(obj);
+						}
 						return;
 					}
 					WriteName(JsonOptions.IdTag, ref isFirst);
@@ -977,11 +983,41 @@ namespace Yuzu.Json
 				writer.Write(nullBytes);
 				return;
 			}
-			var t = obj.GetType();
-			if (JsonOptions.SaveClass.HasFlag(JsonSaveClass.UnknownPrimitive) && !IsUserObject(t))
-				WriteTypedPrimitive(obj, t);
-			else
-				GetWriteFunc(t)(obj);
+			if (JsonOptions.FlatHierarchy) {
+				writer.Write((byte)'[');
+				WriteFieldSeparator();
+				depth += 1;
+				serializationQueue.Add(obj);
+				var isFirst = true;
+				do {
+					if (!isFirst) {
+						writer.Write((byte)',');
+						WriteFieldSeparator();
+					}
+					isFirst = false;
+					WriteIndent();
+					obj = serializationQueue[0];
+					var t = obj.GetType();
+					if (JsonOptions.SaveClass.HasFlag(JsonSaveClass.UnknownPrimitive) && !IsUserObject(t)) {
+						WriteTypedPrimitive(obj, t);
+					} else {
+						GetWriteFunc(t)(obj);
+					}
+					if (serializationQueue.Count > 0) {
+						serializationQueue.RemoveAt(0);
+					}
+				} while (serializationQueue.Count > 0);
+				depth -= 1;
+				WriteFieldSeparator();
+				writer.Write((byte)']');
+			} else {
+				var t = obj.GetType();
+				if (JsonOptions.SaveClass.HasFlag(JsonSaveClass.UnknownPrimitive) && !IsUserObject(t)) {
+					WriteTypedPrimitive(obj, t);
+				} else {
+					GetWriteFunc(t)(obj);
+				}
+			}
 		}
 	}
 
