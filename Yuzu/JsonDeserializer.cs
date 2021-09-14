@@ -1216,8 +1216,28 @@ namespace Yuzu.Json
 
 		public override object FromReaderInt()
 		{
+			return FromReaderIntHelper(ReadAnyObject);
+		}
+
+		private T FromReaderIntHelper<T>(Func<T> f)
+		{
 			try {
-				return ReadAnyObject();
+				if (JsonOptions.FlatHierarchy) {
+					var isFirst = true;
+					T result = default;
+					Require('[');
+					do {
+						if (isFirst) {
+							isFirst = false;
+							result = f();
+						} else {
+							ReadAnyObject();
+						}
+					} while (Require(']', ',') == ',');
+					return result;
+				} else {
+					return f();
+				}
 			} finally {
 				foreach (var a in afterDeserializationActions) {
 					a();
@@ -1228,7 +1248,7 @@ namespace Yuzu.Json
 
 		public override object FromReaderInt(object obj)
 		{
-			try {
+			return FromReaderIntHelper(() => {
 				KillBuf();
 				var expectedType = obj.GetType();
 				if (expectedType == typeof(object))
@@ -1258,24 +1278,12 @@ namespace Yuzu.Json
 					default:
 						throw new YuzuAssert();
 				}
-			} finally {
-				foreach (var a in afterDeserializationActions) {
-					a();
-				}
-				afterDeserializationActions.Clear();
-			}
+			});
 		}
 
 		public override T FromReaderInt<T>()
 		{
-			try {
-				return (T)ReadValueFunc(typeof(T))();
-			} finally {
-				foreach (var a in afterDeserializationActions) {
-					a();
-				}
-				afterDeserializationActions.Clear();
-			}
+			return FromReaderIntHelper(() => (T)ReadValueFunc(typeof(T))());
 		}
 	}
 }
