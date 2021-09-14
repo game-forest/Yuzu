@@ -12,8 +12,16 @@ namespace Yuzu.Json
 {
 	public class JsonDeserializer : AbstractReaderDeserializer
 	{
+		class UnresolvedReference
+		{
+			public object Reference { get; set; }
+		}
+
 		public static JsonDeserializer Instance = new();
 		public JsonSerializeOptions JsonOptions = new();
+
+		private readonly List<Action> afterDeserializationActions = new List<Action>();
+		public IReferenceResolver ReferenceResolver { get; set; }
 
 		private char? buf;
 
@@ -524,9 +532,26 @@ namespace Yuzu.Json
 				return;
 			}
 			var rf = ReadValueFunc(typeof(T));
+			List<object> unresolvedTail = null;
 			do {
-				list.Add((T)rf());
+				var v = rf();
+				if (v is UnresolvedReference ur || unresolvedTail != null) {
+					(unresolvedTail ??= new List<object>()).Add(v);
+				} else {
+					list.Add((T)v);
+				}
 			} while (Require(']', ',') == ',');
+			if (unresolvedTail != null) {
+				afterDeserializationActions.Add(() => {
+					foreach (var v in unresolvedTail) {
+						if (v is UnresolvedReference ur) {
+							list.Add((T)ReferenceResolver.GetObject(ur.Reference));
+						} else {
+							list.Add((T)v);
+						}
+					}
+				});
+			}
 		}
 
 		protected void ReadIntoCollectionNG<T>(object list) => ReadIntoCollection((ICollection<T>)list);
@@ -579,11 +604,25 @@ namespace Yuzu.Json
 				throw new YuzuAssert("Unable to find key parser for type: " + typeof(K).Name);
 
 			var rf = ReadValueFunc(typeof(V));
+			List<(K, UnresolvedReference)> unresolvedItems = null;
 			do {
 				var key = RequireString();
 				Require(':');
-				dict.Add((K)rk(key), (V)rf());
+				var k = (K)rk(key);
+				var v = rf();
+				if (v is UnresolvedReference ur) {
+					(unresolvedItems ??= new List<(K, UnresolvedReference)>()).Add((k, ur));
+				} else {
+					dict.Add(k, (V)v);
+				}
 			} while (Require('}', ',') == ',');
+			if (unresolvedItems != null) {
+				afterDeserializationActions.Add(() => {
+					foreach (var (k, v) in unresolvedItems) {
+						dict.Add(k, (V)ReferenceResolver.GetObject(v.Reference));
+					}
+				});
+			}
 		}
 
 		protected void ReadIntoDictionaryNG<K, V>(object dict) => ReadIntoDictionary((IDictionary<K, V>)dict);
@@ -632,9 +671,13 @@ namespace Yuzu.Json
 				}
 				int count = 0;
 				do {
-					if (dim == n - 1)
-						flatArray.Add(readElemFunc());
-					else
+					if (dim == n - 1) {
+						var v = readElemFunc();
+						if (v is UnresolvedReference) {
+							throw new NotImplementedException();
+						}
+						flatArray.Add(v);
+					} else
 						readRecursive(dim + 1);
 					++count;
 				} while (Require(']', ',') == ',');
@@ -680,7 +723,11 @@ namespace Yuzu.Json
 			var rf = ReadValueFunc(typeof(T));
 			for (int i = 0; i < array.Length; ++i) {
 				Require(',');
-				array[i] = (T)rf();
+				var v = rf();
+				if (v is UnresolvedReference) {
+					throw new NotImplementedException();
+				}
+				array[i] = (T)v;
 			}
 			Require(']');
 			return array;
@@ -725,12 +772,32 @@ namespace Yuzu.Json
 					return null;
 				case '{':
 					Next();
+					object id = null;
 					var name = GetNextName(first: true);
+					if (name == JsonOptions.ReferenceTag) {
+						var r = ReadValueFunc(ReferenceResolver.ReferenceType())();
+						Require('}');
+						return ReferenceResolver.TryGetObject(r, out var o)
+							? o : new UnresolvedReference { Reference = r };
+					}
+					if (name == JsonOptions.IdTag) {
+						id = ReadValueFunc(ReferenceResolver.ReferenceType())();
+						name = GetNextName(first: false);
+					}
 					if (name != JsonOptions.ClassTag) {
 						var any = new Dictionary<string, object>();
+						if (id != null) {
+							ReferenceResolver.AddObject(id, any);
+						}
 						if (name != null) {
 							var val = ReadAnyObject();
-							any.Add(name, val);
+							if (val is UnresolvedReference ur) {
+								afterDeserializationActions.Add(() => {
+									any.Add(name, ReferenceResolver.GetObject(ur.Reference));
+								});
+							} else {
+								any.Add(name, val);
+							}
 							if (Require(',', '}') == ',')
 								ReadIntoDictionary(any);
 						}
@@ -740,6 +807,9 @@ namespace Yuzu.Json
 					var t = Meta.GetTypeByReadAlias(typeName, Options) ?? TypeSerializer.Deserialize(typeName);
 					if (t == null) {
 						var result = new YuzuUnknown { ClassTag = typeName };
+						if (id != null) {
+							ReferenceResolver.AddObject(id, result);
+						}
 						if (Require(',', '}') == ',')
 							ReadIntoDictionary(result.Fields);
 						return result;
@@ -747,7 +817,11 @@ namespace Yuzu.Json
 					if (t.IsPrimitive || t.IsEnum || SystemForcedPrimitiveTypes.Contains(t))
 						return ReadTypedPrimitive(t);
 					var meta = Meta.Get(t, Options);
-					return ReadFields(meta.Factory(), GetNextName(first: false));
+					var obj = meta.Factory();
+					if (id != null) {
+						ReferenceResolver.AddObject(id, obj);
+					}
+					return ReadFields(obj, GetNextName(first: false));
 				case '[':
 					return ReadList<object>();
 				default:
@@ -963,10 +1037,7 @@ namespace Yuzu.Json
 						}
 						if (!yi.IsOptional)
 							requiredCountActiual += 1;
-						if (yi.SetValue != null)
-							yi.SetValue(obj, ReadValueFunc(yi.Type)());
-						else
-							MergeValueFunc(yi.Type)(yi.GetValue(obj));
+						ReadValue(obj, yi);
 						name = GetNextName(false);
 					}
 					if (requiredCountActiual != meta.RequiredCount)
@@ -984,10 +1055,7 @@ namespace Yuzu.Json
 								throw Error("Expected field '{0}', but found '{1}'", yi.NameTagged(Options), name);
 							continue;
 						}
-						if (yi.SetValue != null)
-							yi.SetValue(obj, ReadValueFunc(yi.Type)());
-						else
-							MergeValueFunc(yi.Type)(yi.GetValue(obj));
+						ReadValue(obj, yi);
 						name = GetNextName(false);
 					}
 					ReadUnknownFieldsTail(storage, name);
@@ -999,10 +1067,7 @@ namespace Yuzu.Json
 								throw Error("Expected field '{0}', but found '{1}'", yi.NameTagged(Options), name);
 							continue;
 						}
-						if (yi.SetValue != null)
-							yi.SetValue(obj, ReadValueFunc(yi.Type)());
-						else
-							MergeValueFunc(yi.Type)(yi.GetValue(obj));
+						ReadValue(obj, yi);
 						name = GetNextName(false);
 					}
 					if (name != null)
@@ -1014,6 +1079,25 @@ namespace Yuzu.Json
 			}
 			meta.AfterDeserialization.Run(obj);
 			return obj;
+		}
+
+		private void ReadValue(object obj, Meta.Item yi)
+		{
+			if (yi.SetValue != null) {
+				var v = ReadValueFunc(yi.Type)();
+				if (v is UnresolvedReference ur) {
+					afterDeserializationActions.Add(
+						() => yi.SetValue(
+							obj,
+							ReferenceResolver.GetObject(ur.Reference)
+						)
+					);
+				} else {
+					yi.SetValue(obj, v);
+				}
+			} else {
+				MergeValueFunc(yi.Type)(yi.GetValue(obj));
+			}
 		}
 
 		protected virtual object ReadFieldsCompact(object obj)
@@ -1065,7 +1149,7 @@ namespace Yuzu.Json
 		}
 
 		// T is neither a collection nor a bare object.
-		private T ReadObject<T>() where T: class {
+		private object ReadObject<T>() where T: class {
 			KillBuf();
 			var ch = SkipSpaces();
 			switch (ch) {
@@ -1073,34 +1157,54 @@ namespace Yuzu.Json
 					Require("ull");
 					return null;
 				case '{':
+					object id = null;
+					object instance = null;
 					var name = GetNextName(first: true);
+					if (name == JsonOptions.ReferenceTag) {
+						var r = ReadValueFunc(ReferenceResolver.ReferenceType())();
+						Require('}');
+						return ReferenceResolver.TryGetObject(r, out var o) 
+							? o : new UnresolvedReference { Reference = r };
+					}
+					if (name == JsonOptions.IdTag) {
+						id = ReadValueFunc(ReferenceResolver.ReferenceType())();
+						name = GetNextName(first: false);
+					}
 					if (name != JsonOptions.ClassTag) {
 						var meta = Meta.Get(typeof(T), Options);
-						return (T)ReadFields(meta.Factory(), name);
+						return ReadFields(meta.Factory(), name);
 					}
 					var typeName = RequireUnescapedString();
 					var t = FindType(typeName);
 					if (typeof(T).IsAssignableFrom(t)) {
 						var meta = Meta.Get(t, Options);
-						return (T)ReadFields(meta.Factory(), GetNextName(first: false));
+						instance = meta.Factory();
+						if (id != null) {
+							ReferenceResolver.AddObject(id, instance);
+						}
+						return ReadFields(instance, GetNextName(first: false));
 					}
-					return (T)GetSurrogate<T>(t).FuncFrom(
-						ReadFields(Activator.CreateInstance(t), GetNextName(first: false)));
+					instance = Activator.CreateInstance(t);
+					if (id != null) {
+						ReferenceResolver.AddObject(id, instance);
+					}
+					return GetSurrogate<T>(t).FuncFrom(
+						ReadFields(instance, GetNextName(first: false)));
 				case '[': {
 					var meta = Meta.Get(typeof(T), Options);
-					return (T)ReadFieldsCompact(meta.Factory());
+					return ReadFieldsCompact(meta.Factory());
 				}
 				case '"':
 					PutBack(ch);
-					return (T)GetSurrogate<T>(typeof(string)).FuncFrom(RequireString());
+					return GetSurrogate<T>(typeof(string)).FuncFrom(RequireString());
 				case 't':
 				case 'f':
 					PutBack(ch);
-					return (T)GetSurrogate<T>(typeof(bool)).FuncFrom(RequireBool());
+					return GetSurrogate<T>(typeof(bool)).FuncFrom(RequireBool());
 				default:
 					PutBack(ch);
 					var sg = GetSurrogate<T>(null);
-					return (T)sg.FuncFrom(ReadValueFunc(sg.SurrogateType)()); // TODO: Optimize
+					return sg.FuncFrom(ReadValueFunc(sg.SurrogateType)()); // TODO: Optimize
 			}
 		}
 
@@ -1157,41 +1261,68 @@ namespace Yuzu.Json
 			}
 		}
 
-		public override object FromReaderInt() => ReadAnyObject();
-
-		public override object FromReaderInt(object obj)
+		public override object FromReaderInt()
 		{
-			KillBuf();
-			var expectedType = obj.GetType();
-			if (expectedType == typeof(object))
-				throw Error("Unable to read into bare object");
-			switch (RequireBracketOrNull()) {
-				case 'n':
-					return null;
-				case '{':
-					if (expectedType.IsGenericType && expectedType.GetGenericTypeDefinition() == typeof(Dictionary<,>)) {
-						var m = Utils.GetPrivateCovariantGenericAll(GetType(), nameof(ReadIntoDictionaryNG), expectedType);
-						MakeDelegateAction(m)(obj);
-						return obj;
-					}
-					var name = GetNextName(first: true);
-					if (name != JsonOptions.ClassTag)
-						return ReadFields(obj, name);
-					CheckExpectedType(RequireUnescapedString(), expectedType);
-					return ReadFields(obj, GetNextName(first: false));
-				case '[':
-					var icoll = Utils.GetICollection(expectedType);
-					if (icoll != null) {
-						var m = Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadIntoCollectionNG), icoll);
-						MakeDelegateAction(m)(obj);
-						return obj;
-					}
-					return ReadFieldsCompact(obj);
-				default:
-					throw new YuzuAssert();
+			try {
+				return ReadAnyObject();
+			} finally {
+				foreach (var a in afterDeserializationActions) {
+					a();
+				}
+				afterDeserializationActions.Clear();
 			}
 		}
 
-		public override T FromReaderInt<T>() => (T)ReadValueFunc(typeof(T))();
+		public override object FromReaderInt(object obj)
+		{
+			try {
+				KillBuf();
+				var expectedType = obj.GetType();
+				if (expectedType == typeof(object))
+					throw Error("Unable to read into bare object");
+				switch (RequireBracketOrNull()) {
+					case 'n':
+						return null;
+					case '{':
+						if (expectedType.IsGenericType && expectedType.GetGenericTypeDefinition() == typeof(Dictionary<,>)) {
+							var m = Utils.GetPrivateCovariantGenericAll(GetType(), nameof(ReadIntoDictionaryNG), expectedType);
+							MakeDelegateAction(m)(obj);
+							return obj;
+						}
+						var name = GetNextName(first: true);
+						if (name != JsonOptions.ClassTag)
+							return ReadFields(obj, name);
+						CheckExpectedType(RequireUnescapedString(), expectedType);
+						return ReadFields(obj, GetNextName(first: false));
+					case '[':
+						var icoll = Utils.GetICollection(expectedType);
+						if (icoll != null) {
+							var m = Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadIntoCollectionNG), icoll);
+							MakeDelegateAction(m)(obj);
+							return obj;
+						}
+						return ReadFieldsCompact(obj);
+					default:
+						throw new YuzuAssert();
+				}
+			} finally {
+				foreach (var a in afterDeserializationActions) {
+					a();
+				}
+				afterDeserializationActions.Clear();
+			}
+		}
+
+		public override T FromReaderInt<T>()
+		{
+			try {
+				return (T)ReadValueFunc(typeof(T))();
+			} finally {
+				foreach (var a in afterDeserializationActions) {
+					a();
+				}
+				afterDeserializationActions.Clear();
+			}
+		}
 	}
 }

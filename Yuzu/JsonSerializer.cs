@@ -35,6 +35,8 @@ namespace Yuzu.Json
 
 		public string FieldSeparator = "\n";
 		public string Indent = "\t";
+		public string IdTag = "id";
+		public string ReferenceTag = "ref";
 		public string ClassTag = "class";
 		public string ValueTag = "value";
 
@@ -94,7 +96,10 @@ namespace Yuzu.Json
 
 		private byte[] nullBytes = [(byte)'n', (byte)'u', (byte)'l', (byte)'l'];
 
-		private Dictionary<string, byte[]> strCache = [];
+		private Dictionary<string, byte[]> strCache = new();
+
+		public IReferenceResolver ReferenceResolver { get; set; }
+
 		private byte[] StrToBytesCached(string s)
 		{
 			if (!strCache.TryGetValue(s, out byte[] b)) {
@@ -822,13 +827,26 @@ namespace Yuzu.Json
 				meta = Meta.Get(actualType, Options);
 				fieldWriters = GetFieldWriters(meta);
 			}
-			meta.BeforeSerialization.Run(obj);
 			writer.Write((byte)'{');
 			WriteFieldSeparator();
 			objStack.Push(obj);
 			try {
 				depth += 1;
 				var isFirst = true;
+				if (
+					ReferenceResolver != null &&
+					ReferenceResolver.TryGetReference(obj, out var reference, out var referenceGenerated)
+				) {
+					if (!referenceGenerated) {
+						WriteName(JsonOptions.ReferenceTag, ref isFirst);
+						GetWriteFunc(ReferenceResolver.ReferenceType())(reference);
+						WriteFieldSeparator();
+						return;
+					}
+					WriteName(JsonOptions.IdTag, ref isFirst);
+					GetWriteFunc(ReferenceResolver.ReferenceType())(reference);
+				}
+				meta.BeforeSerialization.Run(obj);
 				if (
 					NeedToSaveClass(
 						isTypeUnknown: expectedType != actualType || meta.WriteAlias != null,
@@ -878,14 +896,14 @@ namespace Yuzu.Json
 				}
 				if (!isFirst)
 					WriteFieldSeparator();
+				meta.AfterSerialization.Run(obj);
 			}
 			finally {
 				depth -= 1;
 				objStack.Pop();
+				WriteIndent();
+				writer.Write((byte)'}');
 			}
-			WriteIndent();
-			writer.Write((byte)'}');
-			meta.AfterSerialization.Run(obj);
 		}
 
 		private void WriteObjectCompact(object obj, Meta meta, List<Action<object>> fieldWriters)
