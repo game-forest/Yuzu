@@ -19,6 +19,21 @@ namespace YuzuGenClone
 			return result;
 		}
 
+		protected static global::YuzuTest.TestReferences.Node Clone_YuzuTest__TestReferences__Node(Cloner cl, object src)
+		{
+			if (src == null) return null;
+			if (src.GetType() != typeof(global::YuzuTest.TestReferences.Node))
+				return (global::YuzuTest.TestReferences.Node)cl.DeepObject(src);
+			var s = (global::YuzuTest.TestReferences.Node)src;
+			var result = new global::YuzuTest.TestReferences.Node();
+			result.Id = s.Id;
+			if (s.Nodes != null && result.Nodes != null) {
+				foreach (var tmp1 in s.Nodes)
+					result.Nodes.Add(Clone_YuzuTest__TestReferences__Node(cl, tmp1));
+			}
+			return result;
+		}
+
 		protected static global::YuzuTest.Sample1 Clone_YuzuTest__Sample1(Cloner cl, object src)
 		{
 			if (src == null) return null;
@@ -578,6 +593,7 @@ namespace YuzuGenClone
 		static ClonerGen()
 		{
 			clonerCache[typeof(global::YuzuTest.Color)] = Clone_YuzuTest__Color;
+			clonerCache[typeof(global::YuzuTest.TestReferences.Node)] = Clone_YuzuTest__TestReferences__Node;
 			clonerCache[typeof(global::YuzuTest.Sample1)] = Clone_YuzuTest__Sample1;
 			clonerCache[typeof(global::YuzuTest.Sample2)] = Clone_YuzuTest__Sample2;
 			clonerCache[typeof(global::YuzuTest.Sample3)] = Clone_YuzuTest__Sample3;

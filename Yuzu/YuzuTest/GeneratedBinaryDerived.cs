@@ -38,9 +38,12 @@ namespace YuzuGenBin
 			if (fd.OurIndex != ReaderClassDef.EOF) throw dg.Error("Unfinished object");
 		}
 
-		private static object Make_YuzuTest__SampleMergeNonPrimitive(BinaryDeserializer d, ReaderClassDef def)
+		private static object Make_YuzuTest__SampleMergeNonPrimitive(BinaryDeserializer d, ReaderClassDef def, object id)
 		{
 			var result = new global::YuzuTest.SampleMergeNonPrimitive();
+			if (id != null) {
+				d.ReferenceResolver?.AddObject(id, result);
+			}
 			Read_YuzuTest__SampleMergeNonPrimitive(d, def, result);
 			return result;
 		}

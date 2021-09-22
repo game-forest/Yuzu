@@ -69,18 +69,17 @@
     <Compile Include="GeneratedClonerDerived.cs" />
     <Compile Include="SampleAlias.cs" />
     <Compile Include="Samples.cs" />
-    <Compile Include="Speed.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GeneratedJson.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="TestBinary.cs" />
     <Compile Include="TestClone.cs" />
     <Compile Include="TestInterop.cs" />
     <Compile Include="TestJson.cs" />
     <Compile Include="TestMeta.cs" />
     <Compile Include="TestProtobuf.cs" />
+    <Compile Include="TestReferences.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Yuzu.Win.csproj">

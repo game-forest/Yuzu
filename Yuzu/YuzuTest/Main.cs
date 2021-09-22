@@ -220,6 +220,8 @@ namespace YuzuTest
 				bd.Generate<YuzuTestAssembly.SampleAssemblyDerivedQ>();
 				bd.Generate<YuzuTest2.SampleNamespace>();
 				bd.Generate<SampleExplicitCollection<int>>();
+				bd.Generate<YuzuTest.TestReferences.Node>();
+				bd.Generate<YuzuTest.TestReferences.Employee>();
 			});
 			var bdg1 = new BinaryDeserializerGenerator(
 				className: "BinaryDeserializerGenDerived", baseClassName: "BinaryDeserializerGen");
@@ -271,6 +273,7 @@ namespace YuzuTest
 				cd.Generate<SampleCollection<Sample1>>();
 				cd.Generate<SampleWithCollectionMerge>();
 				cd.Generate<SampleExplicitCollection<int>>();
+				cd.Generate<YuzuTest.TestReferences.Node>();
 			});
 			var cg1 = new ClonerGenerator(
 				className: "ClonerGenDerived", baseClassName: "ClonerGen", parentGen: cg);
