@@ -11,6 +11,8 @@ namespace Yuzu.Binary
 		public byte[] Signature = new byte[] { (byte)'Y', (byte)'B', (byte)'0', (byte)'1' };
 		public bool AutoSignature = false;
 		public bool Unordered = false;
+		public const short IdTag = -1;
+		public const short ReferenceTag = -2;
 	}
 
 	// These values are part of format.

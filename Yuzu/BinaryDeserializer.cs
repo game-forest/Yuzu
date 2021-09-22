@@ -14,6 +14,8 @@ namespace Yuzu.Binary
 
 		public BinarySerializeOptions BinaryOptions = new ();
 
+		public IReferenceResolver ReferenceResolver { get; set; }
+
 		public BinaryDeserializer() { InitReaders(); }
 
 		public override void Initialize() {}
@@ -320,8 +322,9 @@ namespace Yuzu.Binary
 		{
 			var result = new ReaderClassDef {
 				Meta = Meta.Unknown,
-				Make = (bd, def) => {
+				Make = (bd, def, objId) => {
 					var obj = new YuzuUnknownBinary { ClassTag = typeName, Def = def };
+					ReferenceResolver?.AddObject(objId, obj);
 					ReadFields(bd, def, obj);
 					return obj;
 				},
@@ -506,6 +509,14 @@ namespace Yuzu.Binary
 			var classId = Reader.ReadInt16();
 			if (classId == 0)
 				throw Error("Unable to read null into object");
+			object reference = null;
+			if (classId == BinarySerializeOptions.IdTag) {
+				reference = ReadValueFunc(ReferenceResolver.ReferenceType())();
+				classId = Reader.ReadInt16();
+			}
+			if (classId == BinarySerializeOptions.ReferenceTag) {
+				throw Error("Unable to resolve reference into object");
+			}
 			var def = GetClassDef(classId);
 			var expectedType = obj.GetType();
 			if (
@@ -519,17 +530,25 @@ namespace Yuzu.Binary
 		protected void ReadIntoObjectUnchecked<T>(object obj)
 		{
 			var classId = Reader.ReadInt16();
+			object reference = null;
+			if (classId == BinarySerializeOptions.IdTag) {
+				reference = ReadValueFunc(ReferenceResolver.ReferenceType())();
+				classId = Reader.ReadInt16();
+			}
+			if (classId == BinarySerializeOptions.ReferenceTag) {
+				throw Error("Unable to resolve reference into object");
+			}
 			var def = GetClassDef(classId);
 			def.ReadFields(this, def, obj);
 		}
 
-		private object MakeAndCheckAssignable<T>(ReaderClassDef def)
+		private object MakeAndCheckAssignable<T>(ReaderClassDef def, object objectId)
 		{
 			var srcType = def.Meta.Type;
 			var dstType = typeof(T);
 			if (srcType != typeof(YuzuUnknown) && !dstType.IsAssignableFrom(srcType))
 				throw Error("Unable to assign type \"{0}\" to \"{1}\"", srcType.ToString(), dstType);
-			var result = def.Make?.Invoke(this, def);
+			var result = def.Make?.Invoke(this, def, objectId);
 			if (srcType == typeof(YuzuUnknown) && !dstType.IsInstanceOfType(result))
 				throw Error("Unable to assign type \"{0}\" to \"{1}\"", ((YuzuUnknownBinary)result).ClassTag, dstType);
 			return result;
@@ -540,10 +559,22 @@ namespace Yuzu.Binary
 			var classId = Reader.ReadInt16();
 			if (classId == 0)
 				return null;
+			object objectId = null;
+			if (classId == BinarySerializeOptions.IdTag) {
+				objectId = ReadValueFunc(ReferenceResolver.ReferenceType())();
+				classId = Reader.ReadInt16();
+			}
+			if (classId == BinarySerializeOptions.ReferenceTag) {
+				var reference = ReadValueFunc(ReferenceResolver.ReferenceType())();
+				return ReferenceResolver.GetObject(reference);
+			}
 			var def = GetClassDef(classId);
-			var result = MakeAndCheckAssignable<T>(def);
+			var result = MakeAndCheckAssignable<T>(def, objectId);
 			if (result == null) {
 				result = def.Meta.Factory();
+				if (objectId != null) {
+					ReferenceResolver.AddObject(objectId, result);
+				}
 				def.ReadFields(this, def, result);
 			}
 			return result;
@@ -554,9 +585,18 @@ namespace Yuzu.Binary
 			var classId = Reader.ReadInt16();
 			if (classId == 0)
 				return null;
+			object objectId = null;
+			if (classId == BinarySerializeOptions.IdTag) {
+				objectId = ReadValueFunc(ReferenceResolver.ReferenceType())();
+				classId = Reader.ReadInt16();
+			}
+			if (classId == BinarySerializeOptions.ReferenceTag) {
+				var reference = ReadValueFunc(ReferenceResolver.ReferenceType())();
+				return ReferenceResolver.GetObject(reference);
+			}
 			var def = GetClassDef(classId);
 			if (def.Make != null)
-				return def.Make(this, def);
+				return def.Make(this, def, objectId);
 			var result = def.Meta.Factory();
 			def.ReadFields(this, def, result);
 			return result;
@@ -575,7 +615,7 @@ namespace Yuzu.Binary
 			if (classId == 0)
 				return null;
 			var def = GetClassDef(classId);
-			var result = MakeAndCheckAssignable<T>(def);
+			var result = MakeAndCheckAssignable<T>(def, null);
 			if (result == null) {
 				result = def.Meta.Factory();
 				def.ReadFields(this, def, result);
@@ -589,7 +629,7 @@ namespace Yuzu.Binary
 			if (classId == 0)
 				return;
 			var def = GetClassDef(classId);
-			var result = MakeAndCheckAssignable<T>(def);
+			var result = MakeAndCheckAssignable<T>(def, null);
 			if (result == null) {
 				result = def.Meta.Factory();
 				def.ReadFields(this, def, result);
@@ -604,7 +644,7 @@ namespace Yuzu.Binary
 				return null;
 			var def = GetClassDef(classId);
 			if (def.Make != null)
-				return def.Make(this, def);
+				return def.Make(this, def, null);
 			var result = def.Meta.Factory();
 			def.ReadFields(this, def, result);
 			return result;
