@@ -12,6 +12,8 @@ namespace Yuzu.Binary
 	{
 		public BinarySerializeOptions BinaryOptions = new();
 
+		public IReferenceResolver ReferenceResolver { get; set; }
+
 		protected void WriteSByte(object obj) => writer.Write((sbyte)obj);
 		protected void WriteByte(object obj) => writer.Write((byte)obj);
 		protected void WriteShort(object obj) => writer.Write((short)obj);
@@ -535,10 +537,23 @@ namespace Yuzu.Binary
 
 		private void WriteObject(object obj)
 		{
-			if (obj == null)
+			if (obj == null) {
 				writer.Write((short)0);
-			else
-				WriteFields(WriteClassId(obj), obj);
+				return;
+			} else if (
+				 ReferenceResolver != null &&
+				 ReferenceResolver.TryGetReference(obj, out var reference, out var referenceGenerated)
+			) {
+				if (referenceGenerated) {
+					writer.Write(BinarySerializeOptions.IdTag);
+					GetWriteFunc(ReferenceResolver.ReferenceType())(reference);
+				} else {
+					writer.Write((short)BinarySerializeOptions.ReferenceTag);
+					GetWriteFunc(ReferenceResolver.ReferenceType())(reference);
+					return;
+				}
+			}
+			WriteFields(WriteClassId(obj), obj);
 		}
 
 		private void WriteObjectUnknown(object obj)

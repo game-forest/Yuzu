@@ -8,7 +8,7 @@ using Yuzu.Util;
 namespace Yuzu.Binary
 {
 	using ReadCacheAction = Action<BinaryDeserializer, ReaderClassDef, object>;
-	using MakeCacheAction = Func<BinaryDeserializer, ReaderClassDef, object>;
+	using MakeCacheAction = Func<BinaryDeserializer, ReaderClassDef, object, object>;
 
 	public class BinaryDeserializerGenBase: BinaryDeserializer
 	{
@@ -359,13 +359,17 @@ namespace Yuzu.Binary
 			}
 
 			var makerName = "Make_" + Utils.GetMangledTypeNameNS(t);
-			cw.Put("private static object {0}(BinaryDeserializer d, {1} def)\n", makerName, classDefName);
+			cw.Put("private static object {0}(BinaryDeserializer d, {1} def, object id)\n", makerName, classDefName);
 			cw.Put("{\n");
 			cw.Put("var result = {0};\n", GenerateFactoryCall(meta));
-			if (Utils.IsStruct(t))
+			if (Utils.IsStruct(t)) {
 				GenerateReaderBody(meta);
-			else
+			} else {
+				cw.Put("if (id != null) {\n");
+				cw.Put("d.ReferenceResolver?.AddObject(id, result);\n");
+				cw.Put("}\n");
 				cw.Put("{0}(d, def, result);\n", readerName);
+			}
 			cw.Put("return result;\n");
 			cw.PutEndBlock();
 			cw.Put("\n");
