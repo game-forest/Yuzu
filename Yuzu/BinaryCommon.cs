@@ -11,6 +11,8 @@ namespace Yuzu.Binary
 		public byte[] Signature = new byte[] { (byte)'Y', (byte)'B', (byte)'0', (byte)'1' };
 		public bool AutoSignature = false;
 		public bool Unordered = false;
+		public const short IdTag = -1;
+		public const short ReferenceTag = -2;
 	}
 
 	// These values are part of format.
@@ -78,7 +80,7 @@ namespace Yuzu.Binary
 		internal Meta Meta;
 		public const int EOF = short.MaxValue;
 		public Action<BinaryDeserializer, ReaderClassDef, object> ReadFields;
-		public Func<BinaryDeserializer, ReaderClassDef, object> Make;
+		public Func<BinaryDeserializer, ReaderClassDef, object, object> Make;
 		public List<FieldDef> Fields = new List<FieldDef> { new FieldDef { OurIndex = EOF } };
 	}
 
