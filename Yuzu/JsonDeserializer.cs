@@ -769,10 +769,7 @@ namespace Yuzu.Json
 					if (t.IsPrimitive || t.IsEnum || SystemForcedPrimitiveTypes.Contains(t))
 						return ReadTypedPrimitive(t);
 					var meta = Meta.Get(t, Options);
-					var obj = meta.Factory();
-					if (id != null) {
-						ReferenceResolver.AddObject(id, obj);
-					}
+					var obj = CreateAndRegisterObject(meta, id);
 					return ReadFields(obj, GetNextName(first: false));
 				case '[':
 					return ReadList<object>();
@@ -1125,16 +1122,14 @@ namespace Yuzu.Json
 					}
 					if (name != JsonOptions.ClassTag) {
 						var meta = Meta.Get(typeof(T), Options);
-						return ReadFields(meta.Factory(), name);
+						var obj = CreateAndRegisterObject(meta, id);
+						return ReadFields(obj, name);
 					}
 					var typeName = RequireUnescapedString();
 					var t = FindType(typeName);
 					if (typeof(T).IsAssignableFrom(t)) {
 						var meta = Meta.Get(t, Options);
-						instance = meta.Factory();
-						if (id != null) {
-							ReferenceResolver.AddObject(id, instance);
-						}
+						instance = CreateAndRegisterObject(meta, id);						
 						return ReadFields(instance, GetNextName(first: false));
 					}
 					instance = Activator.CreateInstance(t);
@@ -1161,6 +1156,15 @@ namespace Yuzu.Json
 			}
 		}
 
+		private object CreateAndRegisterObject(Meta meta, object id)
+		{
+			var obj = meta.Factory();
+			if (id != null) {
+				ReferenceResolver?.AddObject(id, obj);
+			}
+			return obj;
+		}
+
 		// T is neither a collection nor a bare object.
 		private void ReadIntoObject<T>(object obj) where T : class
 		{
@@ -1184,17 +1188,29 @@ namespace Yuzu.Json
 			}
 		}
 
-		private T ReadInterface<T>() where T : class
+		private object ReadInterface<T>() where T : class
 		{
 			KillBuf();
 			if (RequireOrNull('{')) return null;
-			CheckClassTag(GetNextName(first: true));
+			object id = null;
+			var name = GetNextName(first: true);
+			if (name == JsonOptions.ReferenceTag) {
+				var r = ReadValueFunc(ReferenceResolver.ReferenceType())();
+				Require('}');
+				return ReferenceResolver.TryGetObject(r, out var o)
+					? o : new UnresolvedReference { Reference = r };
+			}
+			if (name == JsonOptions.IdTag) {
+				id = ReadValueFunc(ReferenceResolver.ReferenceType())();
+				name = GetNextName(first: false);
+			}
+			CheckClassTag(name);
 			var typeName = RequireUnescapedString();
 			var t = FindType(typeName);
 			if (!typeof(T).IsAssignableFrom(t))
 				throw Error("Expected interface '{0}', but got '{1}'", typeof(T), typeName);
 			var meta = Meta.Get(t, Options);
-			return (T)ReadFields(meta.Factory(), GetNextName(first: false));
+			return ReadFields(CreateAndRegisterObject(meta, id), GetNextName(first: false));
 		}
 
 		private object ReadStruct<T>() where T : new()
