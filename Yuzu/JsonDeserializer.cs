@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -20,7 +20,7 @@ namespace Yuzu.Json
 		public static JsonDeserializer Instance = new JsonDeserializer();
 		public JsonSerializeOptions JsonOptions = new JsonSerializeOptions();
 		private readonly List<Action> afterDeserializationActions = new List<Action>();
-		public IReferenceResolver ReferenceResolver { get; set; }
+		public IDeserializerReferenceResolver ReferenceResolver { get; set; }
 
 		private char? buf;
 
