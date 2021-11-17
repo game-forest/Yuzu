@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -327,6 +327,7 @@ namespace Yuzu
 		public bool AllowEmptyTypes;
 		public bool ReportErrorPosition;
 		public bool CheckForEmptyCollections;
+		public bool ResolveClonedReferences;
 	}
 
 	public class YuzuPosition
