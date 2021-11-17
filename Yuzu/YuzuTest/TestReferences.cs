@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,7 +17,7 @@ namespace YuzuTest
 		[TestMethod]
 		public void TestObjectGraph()
 		{
-			foreach (var transformer in transformers) {
+			foreach (var roundtrip in roundtrips) {
 				var root = new Node();
 				for (int i = 0; i < 10; i++) {
 					root.Nodes.Add(new Node { Id = i });
@@ -26,7 +26,7 @@ namespace YuzuTest
 				for (int i = 0; i < 50; i++) {
 					root.Nodes[rnd.Next(root.Nodes.Count)].Nodes.Add(root.Nodes[rnd.Next(root.Nodes.Count)]);
 				}
-				var output = (Node)transformer(root);
+				var output = (Node)roundtrip(root);
 				for (int i = 0; i < root.Nodes.Count; i++) {
 					Assert.IsTrue(
 						output.Nodes[i].Nodes.Select(j => j.Id).SequenceEqual(root.Nodes[i].Nodes.Select(j => j.Id))
@@ -49,13 +49,13 @@ namespace YuzuTest
 		[TestMethod]
 		public void TestInterfaces()
 		{
-			foreach (var transformer in transformers) {
+			foreach (var roundtrip in roundtrips) {
 				var tyler = new Employee { Name = "Tyler Stein" };
 				var adrian = new Employee { Name = "Adrian King" };
 				tyler.DirectReports = new List<IEmployee> { adrian };
 				adrian.Manager = tyler;
 				IEmployee input = tyler;
-				var output = (IEmployee)transformer(input);
+				var output = (IEmployee)roundtrip(input);
 				Assert.AreEqual(output.DirectReports[0].Manager, output);
 			}
 		}
@@ -81,7 +81,7 @@ namespace YuzuTest
 			public List<IEmployee> DirectReports { get; set; }
 		}
 
-		List<Func<object, object>> transformers = new List<Func<object, object>> {
+		List<Func<object, object>> roundtrips = new List<Func<object, object>> {
 			// Json
 			i => {
 				var s = new JsonSerializer {
@@ -123,9 +123,18 @@ namespace YuzuTest
 				var buf = s.ToBytes(i);
 				return d.FromBytes(buf);
 			},
-			// Clone
+			// Cloner
 			i => {
-				var c = new Cloner { ReferenceResolver = new ReferenceResolver() };
+				var c = new Cloner {
+					Options = new CommonOptions { ResolveClonedReferences = true }
+				};
+				return c.DeepObject(i);
+			},
+			// Cloner generated
+			i => {
+				var c = new YuzuGenClone.ClonerGenDerived {
+					Options = new CommonOptions { ResolveClonedReferences = true }
+				};
 				return c.DeepObject(i);
 			}
 		};
