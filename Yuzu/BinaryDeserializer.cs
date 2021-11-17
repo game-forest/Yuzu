@@ -14,7 +14,7 @@ namespace Yuzu.Binary
 
 		public BinarySerializeOptions BinaryOptions = new();
 
-		public IReferenceResolver ReferenceResolver { get; set; }
+		public IDeserializerReferenceResolver ReferenceResolver { get; set; }
 
 		public BinaryDeserializer() { InitReaders(); }
 

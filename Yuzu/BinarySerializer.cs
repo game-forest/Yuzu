@@ -12,7 +12,7 @@ namespace Yuzu.Binary
 	{
 		public BinarySerializeOptions BinaryOptions = new();
 
-		public IReferenceResolver ReferenceResolver { get; set; }
+		public ISerializerReferenceResolver ReferenceResolver { get; set; }
 
 		protected void WriteSByte(object obj) => writer.Write((sbyte)obj);
 		protected void WriteByte(object obj) => writer.Write((byte)obj);

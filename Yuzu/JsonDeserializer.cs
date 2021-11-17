@@ -21,7 +21,7 @@ namespace Yuzu.Json
 		public JsonSerializeOptions JsonOptions = new();
 
 		private readonly List<Action> afterDeserializationActions = new List<Action>();
-		public IReferenceResolver ReferenceResolver { get; set; }
+		public IDeserializerReferenceResolver ReferenceResolver { get; set; }
 
 		private char? buf;
 
