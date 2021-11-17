@@ -98,7 +98,7 @@ namespace Yuzu.Json
 
 		private readonly List<object> serializationQueue = new List<object>();
 
-		public IReferenceResolver ReferenceResolver { get; set; }
+		public ISerializerReferenceResolver ReferenceResolver { get; set; }
 
 		private byte[] StrToBytesCached(string s)
 		{
