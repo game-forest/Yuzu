@@ -31,6 +31,9 @@ namespace Yuzu.Clone
 		private readonly ConcurrentDictionary<Type, Func<object, object>> clonerCache = [];
 		private readonly ConcurrentDictionary<Type, Action<object, object>> mergerCache = [];
 
+		public readonly Dictionary<object, object> ClonedInstances =
+			new Dictionary<object, object>();
+
 		public Cloner() { }
 
 		protected Cloner(IDictionary<Type, Func<Cloner, object, object>> initClonerCache)
@@ -184,7 +187,7 @@ namespace Yuzu.Clone
 				var surrogateCloner = MakeSurrogateCloner(meta);
 				if (surrogateCloner != null)
 					return surrogateCloner;
-				var oc = new ObjectCloner(this, meta);
+				var oc = new ObjectCloner(this, meta, Options.ResolveClonedReferences ? ClonedInstances : null);
 				return oc.Get();
 			}
 			throw new NotImplementedException("Unable to clone type: " + t.FullName);
@@ -261,8 +264,17 @@ namespace Yuzu.Clone
 			throw new NotImplementedException("Unable to merge type: " + t.FullName);
 		}
 
-		public override object DeepObject(object src) =>
-			src == null ? null : GetCloner(src.GetType())(src);
-		public override void MergeObject(object dst, object src) => GetMerger(src.GetType())(dst, src);
+		public override object DeepObject(object src)
+		{
+			var result = src == null ? null : GetCloner(src.GetType())(src);
+			ClonedInstances.Clear();
+			return result;
+		}
+
+		public override void MergeObject(object dst, object src)
+		{
+			GetMerger(src.GetType())(dst, src);
+			ClonedInstances.Clear();
+		}
 	}
 }
