@@ -542,9 +542,9 @@ namespace Yuzu.Binary
 				return;
 			} else if (
 				 ReferenceResolver != null &&
-				 ReferenceResolver.TryGetReference(obj, out var reference, out var referenceGenerated)
+				 ReferenceResolver.TryGetReference(obj, null, out var reference, out var writeObject)
 			) {
-				if (referenceGenerated) {
+				if (writeObject) {
 					writer.Write(BinarySerializeOptions.IdTag);
 					GetWriteFunc(ReferenceResolver.ReferenceType())(reference);
 				} else {

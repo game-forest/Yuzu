@@ -1239,22 +1239,7 @@ namespace Yuzu.Json
 		private T FromReaderIntHelper<T>(Func<T> f)
 		{
 			try {
-				if (JsonOptions.FlatHierarchy) {
-					var isFirst = true;
-					T result = default;
-					Require('[');
-					do {
-						if (isFirst) {
-							isFirst = false;
-							result = f();
-						} else {
-							ReadAnyObject();
-						}
-					} while (Require(']', ',') == ',');
-					return result;
-				} else {
-					return f();
-				}
+				return f();
 			} finally {
 				foreach (var a in afterDeserializationActions) {
 					a();
