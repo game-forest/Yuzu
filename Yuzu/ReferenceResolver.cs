@@ -14,6 +14,6 @@ namespace Yuzu
 	public interface ISerializerReferenceResolver
 	{
 		Type ReferenceType();
-		bool TryGetReference(object obj, out object reference, out bool referenceGenerated);
+		bool TryGetReference(object obj, object owner, out object reference, out bool writeObject);
 	}
 }
