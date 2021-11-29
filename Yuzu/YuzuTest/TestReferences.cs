@@ -87,14 +87,12 @@ namespace YuzuTest
 				var s = new JsonSerializer {
 					JsonOptions = new JsonSerializeOptions {
 						SaveClass = JsonSaveClass.UnknownOrRoot,
-						FlatHierarchy = true
 					},
 					ReferenceResolver = new ReferenceResolver()
 				};
 				var d = new JsonDeserializer {
 					JsonOptions = new JsonSerializeOptions {
 						SaveClass = JsonSaveClass.UnknownOrRoot,
-						FlatHierarchy = true
 					},
 					ReferenceResolver = new ReferenceResolver()
 				};
@@ -162,15 +160,15 @@ namespace YuzuTest
 
 			public void AddObject(object reference, object obj) => referenceToObjects.Add((int)reference, obj);
 
-			public bool TryGetReference(object obj, out object reference, out bool referenceGenerated)
+			public bool TryGetReference(object obj, object owner, out object reference, out bool writeObject)
 			{
 				if (objectsToReferences.TryGetValue(obj, out var key)) {
 					reference = key;
-					referenceGenerated = false;
+					writeObject = false;
 				} else {
 					reference = currentId++;
 					objectsToReferences.Add(obj, (int)reference);
-					referenceGenerated = true;
+					writeObject = true;
 				}
 				return true;
 			}

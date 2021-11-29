@@ -39,7 +39,6 @@ namespace Yuzu.Json
 		public string ReferenceTag = "ref";
 		public string ClassTag = "class";
 		public string ValueTag = "value";
-		public bool FlatHierarchy = false;
 
 		private int maxOnelineFields = 0;
 		public int MaxOnelineFields { get { return maxOnelineFields; } set { maxOnelineFields = value; generation++; } }
@@ -95,8 +94,6 @@ namespace Yuzu.Json
 		private readonly byte[] nullBytes = new byte[] { (byte)'n', (byte)'u', (byte)'l', (byte)'l' };
 
 		private readonly Dictionary<string, byte[]> strCache = new Dictionary<string, byte[]>();
-
-		private readonly List<object> serializationQueue = new List<object>();
 
 		public ISerializerReferenceResolver ReferenceResolver { get; set; }
 
@@ -273,6 +270,7 @@ namespace Yuzu.Json
 			writer.Write((byte)'[');
 			var isFirst = true;
 			try {
+				objStack.Push(obj);
 				depth += 1;
 				int index = -1;
 				foreach (var elem in list) {
@@ -290,6 +288,7 @@ namespace Yuzu.Json
 					WriteFieldSeparator();
 			}
 			finally {
+				objStack.Pop();
 				depth -= 1;
 			}
 			if (!isFirst)
@@ -308,6 +307,7 @@ namespace Yuzu.Json
 			writer.Write((byte)'{');
 			if (dict.Count > 0) {
 				try {
+					objStack.Push(obj);
 					depth += 1;
 					WriteFieldSeparator();
 					var isFirst = true;
@@ -322,6 +322,7 @@ namespace Yuzu.Json
 					WriteFieldSeparator();
 				}
 				finally {
+					objStack.Pop();
 					depth -= 1;
 				}
 				WriteIndent();
@@ -340,6 +341,7 @@ namespace Yuzu.Json
 			if (array.Length > 0) {
 				var wf = GetWriteFunc(typeof(T));
 				try {
+					objStack.Push(obj);
 					depth += 1;
 					if (JsonOptions.ArrayLengthPrefix) {
 						WriteIndent();
@@ -357,6 +359,7 @@ namespace Yuzu.Json
 					WriteFieldSeparator();
 				}
 				finally {
+					objStack.Pop();
 					depth -= 1;
 				}
 				WriteIndent();
@@ -376,6 +379,7 @@ namespace Yuzu.Json
 				writer.Write((byte)']');
 				return;
 			}
+			objStack.Push(obj);
 			++depth;
 			var ubs = new int[array.Rank];
 			var lbs = new int[array.Rank];
@@ -414,6 +418,7 @@ namespace Yuzu.Json
 				writeElemFunc(array.GetValue(indices));
 				++indices[dim];
 			}
+			objStack.Pop();
 		}
 
 		private void WriteTypedPrimitive(object obj, Type t)
@@ -766,21 +771,19 @@ namespace Yuzu.Json
 			}
 			writer.Write((byte)'{');
 			WriteFieldSeparator();
+			var owner = objStack.Count > 0 ? objStack.Peek() : null;
 			objStack.Push(obj);
 			try {
 				depth += 1;
 				var isFirst = true;
 				if (
 					ReferenceResolver != null &&
-					ReferenceResolver.TryGetReference(obj, out var reference, out var referenceGenerated)
+					ReferenceResolver.TryGetReference(obj, owner, out var reference, out var writeObject)
 				) {
-					if ((!JsonOptions.FlatHierarchy && !referenceGenerated) || (JsonOptions.FlatHierarchy && depth > 2)) {
+					if (!writeObject) {
 						WriteName(JsonOptions.ReferenceTag, ref isFirst);
 						GetWriteFunc(ReferenceResolver.ReferenceType())(reference);
 						WriteFieldSeparator();
-						if (referenceGenerated && JsonOptions.FlatHierarchy && depth > 2) {
-							serializationQueue.Add(obj);
-						}
 						return;
 					}
 					WriteName(JsonOptions.IdTag, ref isFirst);
@@ -917,40 +920,11 @@ namespace Yuzu.Json
 				writer.Write(nullBytes);
 				return;
 			}
-			if (JsonOptions.FlatHierarchy) {
-				writer.Write((byte)'[');
-				WriteFieldSeparator();
-				depth += 1;
-				serializationQueue.Add(obj);
-				var isFirst = true;
-				do {
-					if (!isFirst) {
-						writer.Write((byte)',');
-						WriteFieldSeparator();
-					}
-					isFirst = false;
-					WriteIndent();
-					obj = serializationQueue[0];
-					var t = obj.GetType();
-					if (JsonOptions.SaveClass.HasFlag(JsonSaveClass.UnknownPrimitive) && !IsUserObject(t)) {
-						WriteTypedPrimitive(obj, t);
-					} else {
-						GetWriteFunc(t)(obj);
-					}
-					if (serializationQueue.Count > 0) {
-						serializationQueue.RemoveAt(0);
-					}
-				} while (serializationQueue.Count > 0);
-				depth -= 1;
-				WriteFieldSeparator();
-				writer.Write((byte)']');
+			var t = obj.GetType();
+			if (JsonOptions.SaveClass.HasFlag(JsonSaveClass.UnknownPrimitive) && !IsUserObject(t)) {
+				WriteTypedPrimitive(obj, t);
 			} else {
-				var t = obj.GetType();
-				if (JsonOptions.SaveClass.HasFlag(JsonSaveClass.UnknownPrimitive) && !IsUserObject(t)) {
-					WriteTypedPrimitive(obj, t);
-				} else {
-					GetWriteFunc(t)(obj);
-				}
+				GetWriteFunc(t)(obj);
 			}
 		}
 	}
