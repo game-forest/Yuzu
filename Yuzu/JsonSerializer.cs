@@ -916,15 +916,19 @@ namespace Yuzu.Json
 
 		protected override void ToWriter(object obj)
 		{
-			if (obj == null) {
-				writer.Write(nullBytes);
-				return;
-			}
-			var t = obj.GetType();
-			if (JsonOptions.SaveClass.HasFlag(JsonSaveClass.UnknownPrimitive) && !IsUserObject(t)) {
-				WriteTypedPrimitive(obj, t);
-			} else {
-				GetWriteFunc(t)(obj);
+			try {
+				if (obj == null) {
+					writer.Write(nullBytes);
+					return;
+				}
+				var t = obj.GetType();
+				if (JsonOptions.SaveClass.HasFlag(JsonSaveClass.UnknownPrimitive) && !IsUserObject(t)) {
+					WriteTypedPrimitive(obj, t);
+				} else {
+					GetWriteFunc(t)(obj);
+				}
+			} finally {
+				ReferenceResolver?.Clear();
 			}
 		}
 	}

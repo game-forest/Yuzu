@@ -726,9 +726,13 @@ namespace Yuzu.Binary
 
 		protected override void ToWriter(object obj)
 		{
-			if (BinaryOptions.AutoSignature)
-				WriteSignature();
-			WriteAny(obj);
+			try {
+				if (BinaryOptions.AutoSignature)
+					WriteSignature();
+				WriteAny(obj);
+			} finally {
+				ReferenceResolver?.Clear();
+			}
 		}
 
 		public void WriteSignature() { writer.Write(BinaryOptions.Signature); }
