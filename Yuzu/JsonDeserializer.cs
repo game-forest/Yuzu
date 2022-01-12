@@ -1291,6 +1291,7 @@ namespace Yuzu.Json
 					a();
 				}
 				afterDeserializationActions.Clear();
+				ReferenceResolver?.Clear();
 			}
 		}
 

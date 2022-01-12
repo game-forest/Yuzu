@@ -96,8 +96,13 @@ namespace YuzuTest
 					},
 					ReferenceResolver = new ReferenceResolver()
 				};
-				var buf = s.ToString(i);
-				return d.FromString(buf);
+				try {
+					var buf = s.ToString(i);
+					return d.FromString(buf);
+				} finally {
+					Assert.IsTrue(((ReferenceResolver)s.ReferenceResolver).IsEmpty());
+					Assert.IsTrue(((ReferenceResolver)d.ReferenceResolver).IsEmpty());
+				}
 			},
 			// Binary
 			i => {
@@ -107,8 +112,13 @@ namespace YuzuTest
 				var d = new BinaryDeserializer {
 					ReferenceResolver = new ReferenceResolver()
 				};
-				var buf = s.ToBytes(i);
-				return d.FromBytes(buf);
+				try {
+					var buf = s.ToBytes(i);
+					return d.FromBytes(buf);
+				} finally {
+					Assert.IsTrue(((ReferenceResolver)s.ReferenceResolver).IsEmpty());
+					Assert.IsTrue(((ReferenceResolver)d.ReferenceResolver).IsEmpty());
+				}
 			},
 			// Binary generated
 			i => {
@@ -118,26 +128,39 @@ namespace YuzuTest
 				var d = new YuzuGenBin.BinaryDeserializerGenDerived {
 					ReferenceResolver = new ReferenceResolver()
 				};
-				var buf = s.ToBytes(i);
-				return d.FromBytes(buf);
+				try {
+					var buf = s.ToBytes(i);
+					return d.FromBytes(buf);
+				} finally {
+					Assert.IsTrue(((ReferenceResolver)s.ReferenceResolver).IsEmpty());
+					Assert.IsTrue(((ReferenceResolver)d.ReferenceResolver).IsEmpty());
+				}
 			},
 			// Cloner
 			i => {
 				var c = new Cloner {
-					Options = new CommonOptions { ResolveClonedReferences = true }
+					ReferenceResolver = new ReferenceResolver()
 				};
-				return c.DeepObject(i);
+				try {
+					return c.DeepObject(i);
+				} finally {
+					Assert.IsTrue(((ReferenceResolver)c.ReferenceResolver).IsEmpty());
+				}
 			},
 			// Cloner generated
 			i => {
 				var c = new YuzuGenClone.ClonerGenDerived {
-					Options = new CommonOptions { ResolveClonedReferences = true }
+					ReferenceResolver = new ReferenceResolver()
 				};
-				return c.DeepObject(i);
+				try {
+					return c.DeepObject(i);
+				} finally {
+					Assert.IsTrue(((ReferenceResolver)c.ReferenceResolver).IsEmpty());
+				}
 			}
 		};
 
-		private class ReferenceResolver : IDeserializerReferenceResolver, ISerializerReferenceResolver
+		private class ReferenceResolver : IDeserializerReferenceResolver, ISerializerReferenceResolver, IClonerReferenceResolver
 		{
 			private readonly Dictionary<int, object> referenceToObjects = new Dictionary<int, object>();
 			private readonly Dictionary<object, int> objectsToReferences = new Dictionary<object, int>();
@@ -172,6 +195,20 @@ namespace YuzuTest
 				}
 				return true;
 			}
+
+			public bool TryGetReference(object obj, out object reference, out bool newReference)
+			{
+				return TryGetReference(obj, null, out reference, out newReference);
+			}
+
+			public void Clear()
+			{
+				referenceToObjects.Clear();
+				objectsToReferences.Clear();
+				currentId = 1;
+			}
+
+			public bool IsEmpty() => referenceToObjects.Count == 0 && objectsToReferences.Count == 0;
 		}
 	}
 }
