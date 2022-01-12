@@ -9,14 +9,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.Color Clone_YuzuTest__Color(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.Color)clone;
 			if (src.GetType() != typeof(global::YuzuTest.Color))
 				return (global::YuzuTest.Color)cl.DeepObject(src);
 			var s = (global::YuzuTest.Color)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.Color)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.Color();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.B = s.B;
 			result.G = s.G;
 			result.R = s.R;
@@ -26,14 +27,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.TestReferences.Node Clone_YuzuTest__TestReferences__Node(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.TestReferences.Node)clone;
 			if (src.GetType() != typeof(global::YuzuTest.TestReferences.Node))
 				return (global::YuzuTest.TestReferences.Node)cl.DeepObject(src);
 			var s = (global::YuzuTest.TestReferences.Node)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.TestReferences.Node)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.TestReferences.Node();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.Id = s.Id;
 			if (s.Nodes != null && result.Nodes != null) {
 				foreach (var tmp1 in s.Nodes)
@@ -45,14 +47,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.Sample1 Clone_YuzuTest__Sample1(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.Sample1)clone;
 			if (src.GetType() != typeof(global::YuzuTest.Sample1))
 				return (global::YuzuTest.Sample1)cl.DeepObject(src);
 			var s = (global::YuzuTest.Sample1)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.Sample1)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.Sample1();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.X = s.X;
 			if (s.Y != "ttt") {
 				result.Y = s.Y;
@@ -63,14 +66,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.Sample2 Clone_YuzuTest__Sample2(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.Sample2)clone;
 			if (src.GetType() != typeof(global::YuzuTest.Sample2))
 				return (global::YuzuTest.Sample2)cl.DeepObject(src);
 			var s = (global::YuzuTest.Sample2)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.Sample2)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.Sample2();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.X = s.X;
 			if (s.SaveYIf()) {
 				result.Y = s.Y;
@@ -84,14 +88,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.Sample3 Clone_YuzuTest__Sample3(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.Sample3)clone;
 			if (src.GetType() != typeof(global::YuzuTest.Sample3))
 				return (global::YuzuTest.Sample3)cl.DeepObject(src);
 			var s = (global::YuzuTest.Sample3)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.Sample3)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.Sample3();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.S1 = Clone_YuzuTest__Sample1(cl, s.S1);
 			result.F = s.F;
 			result.S2 = Clone_YuzuTest__Sample2(cl, s.S2);
@@ -101,14 +106,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleAfter2 Clone_YuzuTest__SampleAfter2(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleAfter2)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleAfter2))
 				return (global::YuzuTest.SampleAfter2)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleAfter2)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleAfter2)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleAfter2();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.X = s.X;
 			result.After2();
 			result.After3();
@@ -119,14 +125,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleAfterDeserialization Clone_YuzuTest__SampleAfterDeserialization(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleAfterDeserialization)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleAfterDeserialization))
 				return (global::YuzuTest.SampleAfterDeserialization)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleAfterDeserialization)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleAfterDeserialization)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleAfterDeserialization();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.X = s.X;
 			result.After();
 			return result;
@@ -135,14 +142,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleAfterSerialization Clone_YuzuTest__SampleAfterSerialization(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleAfterSerialization)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleAfterSerialization))
 				return (global::YuzuTest.SampleAfterSerialization)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleAfterSerialization)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleAfterSerialization)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleAfterSerialization();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.X = s.X;
 			s.After();
 			return result;
@@ -151,14 +159,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleArray Clone_YuzuTest__SampleArray(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleArray)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleArray))
 				return (global::YuzuTest.SampleArray)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleArray)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleArray)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleArray();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			if (s.A != null) {
 				result.A = (string[])s.A.Clone();
 			}
@@ -168,14 +177,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleArrayNDim Clone_YuzuTest__SampleArrayNDim(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleArrayNDim)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleArrayNDim))
 				return (global::YuzuTest.SampleArrayNDim)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleArrayNDim)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleArrayNDim)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleArrayNDim();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			if (s.A != null) {
 				result.A = (int[,])s.A.Clone();
 			}
@@ -188,14 +198,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleArrayNDimOfClass Clone_YuzuTest__SampleArrayNDimOfClass(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleArrayNDimOfClass)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleArrayNDimOfClass))
 				return (global::YuzuTest.SampleArrayNDimOfClass)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleArrayNDimOfClass)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleArrayNDimOfClass)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleArrayNDimOfClass();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			if (s.A != null) {
 				result.A = (global::YuzuTest.Sample1[,,])Array.CreateInstance(typeof(global::YuzuTest.Sample1),
 					new int[] { s.A.GetLength(0), s.A.GetLength(1), s.A.GetLength(2) },
@@ -214,14 +225,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleArrayOfClass Clone_YuzuTest__SampleArrayOfClass(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleArrayOfClass)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleArrayOfClass))
 				return (global::YuzuTest.SampleArrayOfClass)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleArrayOfClass)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleArrayOfClass)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleArrayOfClass();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			if (s.A != null) {
 				result.A = new global::YuzuTest.Sample1[s.A.Length];
 				for(int tmp1 = 0; tmp1 < s.A.Length; ++tmp1)
@@ -233,14 +245,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleBase Clone_YuzuTest__SampleBase(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleBase)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleBase))
 				return (global::YuzuTest.SampleBase)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleBase)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleBase)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleBase();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.FBase = s.FBase;
 			return result;
 		}
@@ -248,17 +261,18 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleBefore2 Clone_YuzuTest__SampleBefore2(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleBefore2)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleBefore2))
 				return (global::YuzuTest.SampleBefore2)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleBefore2)src;
 			s.Before2();
 			s.Before3();
 			s.Before();
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleBefore2)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleBefore2();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.X = s.X;
 			return result;
 		}
@@ -266,14 +280,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleBeforeDeserialization Clone_YuzuTest__SampleBeforeDeserialization(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleBeforeDeserialization)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleBeforeDeserialization))
 				return (global::YuzuTest.SampleBeforeDeserialization)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleBeforeDeserialization)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleBeforeDeserialization)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleBeforeDeserialization();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.Before();
 			result.X = s.X;
 			return result;
@@ -282,15 +297,16 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleBeforeSerialization Clone_YuzuTest__SampleBeforeSerialization(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleBeforeSerialization)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleBeforeSerialization))
 				return (global::YuzuTest.SampleBeforeSerialization)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleBeforeSerialization)src;
 			s.Before();
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleBeforeSerialization)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleBeforeSerialization();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.X = s.X;
 			return result;
 		}
@@ -298,14 +314,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleCollection<int> Clone_YuzuTest__SampleCollection_Int32(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleCollection<int>)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleCollection<int>))
 				return (global::YuzuTest.SampleCollection<int>)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleCollection<int>)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleCollection<int>)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleCollection<int>();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			int tmp2 = 0;
 			foreach (var tmp1 in s) {
 				if (s.SaveItemIf(tmp2++, tmp1))
@@ -317,14 +334,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleCollection<global::YuzuTest.Sample1> Clone_YuzuTest__SampleCollection_Sample1(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleCollection<global::YuzuTest.Sample1>)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleCollection<global::YuzuTest.Sample1>))
 				return (global::YuzuTest.SampleCollection<global::YuzuTest.Sample1>)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleCollection<global::YuzuTest.Sample1>)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleCollection<global::YuzuTest.Sample1>)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleCollection<global::YuzuTest.Sample1>();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			int tmp2 = 0;
 			foreach (var tmp1 in s) {
 				if (s.SaveItemIf(tmp2++, tmp1))
@@ -339,14 +357,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleDerivedA Clone_YuzuTest__SampleDerivedA(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleDerivedA)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleDerivedA))
 				return (global::YuzuTest.SampleDerivedA)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleDerivedA)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleDerivedA)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleDerivedA();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.FBase = s.FBase;
 			result.FA = s.FA;
 			return result;
@@ -355,14 +374,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleDerivedB Clone_YuzuTest__SampleDerivedB(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleDerivedB)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleDerivedB))
 				return (global::YuzuTest.SampleDerivedB)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleDerivedB)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleDerivedB)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleDerivedB();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.FBase = s.FBase;
 			result.FB = s.FB;
 			return result;
@@ -371,14 +391,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleDict Clone_YuzuTest__SampleDict(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleDict)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleDict))
 				return (global::YuzuTest.SampleDict)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleDict)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleDict)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleDict();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.Value = s.Value;
 			if (s.Children != null) {
 				result.Children = [];
@@ -391,14 +412,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleDictKeys Clone_YuzuTest__SampleDictKeys(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleDictKeys)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleDictKeys))
 				return (global::YuzuTest.SampleDictKeys)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleDictKeys)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleDictKeys)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleDictKeys();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			if (s.E != null) {
 				result.E = [];
 				foreach (var tmp1 in s.E)
@@ -421,14 +443,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleExplicitCollection<int> Clone_YuzuTest__SampleExplicitCollection_Int32(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleExplicitCollection<int>)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleExplicitCollection<int>))
 				return (global::YuzuTest.SampleExplicitCollection<int>)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleExplicitCollection<int>)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleExplicitCollection<int>)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleExplicitCollection<int>();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			foreach (var tmp1 in s)
 				((global::System.Collections.Generic.ICollection<int>)result).Add(tmp1);
 			return result;
@@ -437,14 +460,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleGenNoGen Clone_YuzuTest__SampleGenNoGen(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleGenNoGen)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleGenNoGen))
 				return (global::YuzuTest.SampleGenNoGen)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleGenNoGen)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleGenNoGen)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleGenNoGen();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.NG = (global::YuzuTest.SampleNoGen)cl.DeepObject(s.NG);
 			return result;
 		}
@@ -452,14 +476,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleItemObj Clone_YuzuTest__SampleItemObj(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleItemObj)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleItemObj))
 				return (global::YuzuTest.SampleItemObj)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleItemObj)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleItemObj)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleItemObj();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			if (s.D != null) {
 				result.D = [];
 				foreach (var tmp1 in s.D)
@@ -477,14 +502,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleList Clone_YuzuTest__SampleList(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleList)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleList))
 				return (global::YuzuTest.SampleList)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleList)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleList)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleList();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			if (s.E != null) {
 				result.E = [];
 				result.E.Capacity += s.E.Capacity;
@@ -497,14 +523,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleMatrix Clone_YuzuTest__SampleMatrix(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleMatrix)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleMatrix))
 				return (global::YuzuTest.SampleMatrix)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleMatrix)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleMatrix)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleMatrix();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			if (s.M != null) {
 				result.M = [];
 				var tmp2 = cl.GetCloner<global::System.Collections.Generic.List<int>>();
@@ -518,14 +545,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleMerge Clone_YuzuTest__SampleMerge(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleMerge)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleMerge))
 				return (global::YuzuTest.SampleMerge)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleMerge)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleMerge)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleMerge();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			if (s.DI != null) {
 				foreach (var tmp1 in s.DI)
 					result.DI.Add(tmp1.Key, tmp1.Value);
@@ -542,14 +570,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleMergeNonPrimitive Clone_YuzuTest__SampleMergeNonPrimitive(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleMergeNonPrimitive)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleMergeNonPrimitive))
 				return (global::YuzuTest.SampleMergeNonPrimitive)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleMergeNonPrimitive)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleMergeNonPrimitive)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleMergeNonPrimitive();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			if (s.DI != null) {
 				foreach (var tmp1 in s.DI)
 					result.DI.Add(tmp1.Key, Clone_YuzuTest__Sample1(cl, tmp1.Value));
@@ -566,14 +595,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleNullable Clone_YuzuTest__SampleNullable(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleNullable)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleNullable))
 				return (global::YuzuTest.SampleNullable)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleNullable)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleNullable)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleNullable();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.N = s.N;
 			return result;
 		}
@@ -581,14 +611,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleObj Clone_YuzuTest__SampleObj(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleObj)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleObj))
 				return (global::YuzuTest.SampleObj)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleObj)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleObj)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleObj();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.F = cl.DeepObject(s.F);
 			return result;
 		}
@@ -596,14 +627,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SamplePerson Clone_YuzuTest__SamplePerson(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SamplePerson)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SamplePerson))
 				return (global::YuzuTest.SamplePerson)cl.DeepObject(src);
 			var s = (global::YuzuTest.SamplePerson)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SamplePerson)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SamplePerson();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.Name = s.Name;
 			result.Birth = s.Birth;
 			if (s.Children != null) {
@@ -622,14 +654,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SamplePrivateConstructor Clone_YuzuTest__SamplePrivateConstructor(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SamplePrivateConstructor)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SamplePrivateConstructor))
 				return (global::YuzuTest.SamplePrivateConstructor)cl.DeepObject(src);
 			var s = (global::YuzuTest.SamplePrivateConstructor)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SamplePrivateConstructor)cl.ReferenceResolver.GetObject(r);
 			var result = global::YuzuTest.SamplePrivateConstructor.Make();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.X = s.X;
 			return result;
 		}
@@ -637,14 +670,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleRect Clone_YuzuTest__SampleRect(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleRect)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleRect))
 				return (global::YuzuTest.SampleRect)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleRect)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleRect)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleRect();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.A = s.A;
 			result.B = s.B;
 			return result;
@@ -653,12 +687,13 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleSealed Clone_YuzuTest__SampleSealed(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleSealed)clone;
 			var s = (global::YuzuTest.SampleSealed)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleSealed)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleSealed();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.FB = s.FB;
 			return result;
 		}
@@ -666,14 +701,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleSerializeIf Clone_YuzuTest__SampleSerializeIf(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleSerializeIf)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleSerializeIf))
 				return (global::YuzuTest.SampleSerializeIf)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleSerializeIf)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleSerializeIf)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleSerializeIf();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.X = s.X;
 			if (s.SaveYIf()) {
 				result.Y = Clone_YuzuTest__Sample1(cl, s.Y);
@@ -738,9 +774,12 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleStructWithClass Clone_YuzuTest__SampleStructWithClass(Cloner cl, object src)
 		{
 			var s = (global::YuzuTest.SampleStructWithClass)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleStructWithClass)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleStructWithClass();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.A = Clone_YuzuTest__Sample1(cl, s.A);
 			return result;
 		}
@@ -751,8 +790,6 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleSurrogateColor Clone_YuzuTest__SampleSurrogateColor(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleSurrogateColor)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleSurrogateColor))
 				return (global::YuzuTest.SampleSurrogateColor)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleSurrogateColor)src;
@@ -764,14 +801,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleWithCollectionMerge Clone_YuzuTest__SampleWithCollectionMerge(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleWithCollectionMerge)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleWithCollectionMerge))
 				return (global::YuzuTest.SampleWithCollectionMerge)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleWithCollectionMerge)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleWithCollectionMerge)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleWithCollectionMerge();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			if (s.A != null && result.A != null) {
 				int tmp2 = 0;
 				foreach (var tmp1 in s.A) {
@@ -785,14 +823,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleWithCopyable Clone_YuzuTest__SampleWithCopyable(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleWithCopyable)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleWithCopyable))
 				return (global::YuzuTest.SampleWithCopyable)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleWithCopyable)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleWithCopyable)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleWithCopyable();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.P = s.P;
 			return result;
 		}
@@ -800,14 +839,15 @@ namespace YuzuGenClone
 		protected static global::YuzuTest.SampleWithCopyableItems Clone_YuzuTest__SampleWithCopyableItems(Cloner cl, object src)
 		{
 			if (src == null) return null;
-			if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))
-				return (global::YuzuTest.SampleWithCopyableItems)clone;
 			if (src.GetType() != typeof(global::YuzuTest.SampleWithCopyableItems))
 				return (global::YuzuTest.SampleWithCopyableItems)cl.DeepObject(src);
 			var s = (global::YuzuTest.SampleWithCopyableItems)src;
+			object r = null;
+			if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)
+				return (global::YuzuTest.SampleWithCopyableItems)cl.ReferenceResolver.GetObject(r);
 			var result = new global::YuzuTest.SampleWithCopyableItems();
-			if (cl.ClonedInstances != null)
-				cl.ClonedInstances.Add(src, result);
+			if (r != null)
+				cl.ReferenceResolver.AddObject(r, result);
 			result.L = s.L;
 			result.P = s.P;
 			return result;
