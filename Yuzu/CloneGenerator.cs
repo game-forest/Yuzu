@@ -297,8 +297,6 @@ namespace Yuzu.Clone
 			cw.Put("{\n");
 			if (!Utils.IsStruct(t)) {
 				cw.Put("if (src == null) return null;\n");
-				cw.Put("if (cl.ClonedInstances != null && cl.ClonedInstances.TryGetValue(src, out var clone))\n");
-				cw.PutInd("return ({0})clone;\n", Utils.GetTypeSpec(t));
 				if (!t.IsSealed) {
 					cw.Put("if (src.GetType() != typeof({0}))\n", Utils.GetTypeSpec(t));
 					cw.PutInd("return ({0})cl.DeepObject(src);\n", Utils.GetTypeSpec(t));
@@ -307,9 +305,12 @@ namespace Yuzu.Clone
 			cw.Put("var s = ({0})src;\n", Utils.GetTypeSpec(t));
 			cw.GenerateActionList(meta.BeforeSerialization, "s");
 			if (!GenerateSurrogateCloner(meta)) {
+				cw.Put("object r = null;\n");
+				cw.Put("if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)\n");
+				cw.PutInd("return ({0})cl.ReferenceResolver.GetObject(r);\n", Utils.GetTypeSpec(t));
 				cw.Put("var result = {0};\n", GenerateFactoryCall(meta));
-				cw.Put("if (cl.ClonedInstances != null)\n");
-				cw.PutInd("cl.ClonedInstances.Add(src, result);\n");
+				cw.Put("if (r != null)\n");
+				cw.PutInd("cl.ReferenceResolver.AddObject(r, result);\n");
 				cw.GenerateActionList(meta.BeforeDeserialization);
 				GenerateClonerBody(meta);
 			}

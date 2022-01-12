@@ -72,12 +72,12 @@ namespace Yuzu.Clone
 
 	internal class ObjectCloner : ObjectItemsWrapper
 	{
-		private readonly Dictionary<object, object> clonedInstances;
+		private readonly IClonerReferenceResolver referenceResolver;
 
-		public ObjectCloner(Cloner cl, Meta meta, Dictionary<object, object> clonedInstances)
+		public ObjectCloner(Cloner cl, Meta meta, IClonerReferenceResolver referenceResolver)
 			: base(cl, meta)
 		{
-			this.clonedInstances = clonedInstances;
+			this.referenceResolver = referenceResolver;
 		}
 
 		internal Func<object, object> Get()
@@ -94,14 +94,19 @@ namespace Yuzu.Clone
 		{
 			if (src == null)
 				return null;
-			if (clonedInstances != null && clonedInstances.TryGetValue(src, out var clone)) {
-				return clone;
-			}
 			if (src.GetType() != meta.Type)
 				return cl.DeepObject(src);
+			object reference = null;
+			if (
+				referenceResolver != null
+				&& referenceResolver.TryGetReference(src, out reference, out bool newReference)
+				&& !newReference
+			) {
+				return referenceResolver.GetObject(reference);
+			}
 			var result = meta.Factory();
-			if (clonedInstances != null) {
-				clonedInstances.Add(src, result);
+			if (reference != null) {
+				referenceResolver.AddObject(reference, result);
 			}
 			CopyCopyable(result, src);
 			return result;
@@ -111,14 +116,19 @@ namespace Yuzu.Clone
 		{
 			if (src == null)
 				return null;
-			if (clonedInstances != null && clonedInstances.TryGetValue(src, out var clone)) {
-				return clone;
-			}
 			if (src.GetType() != meta.Type)
 				return cl.DeepObject(src);
+			object reference = null;
+			if (
+				referenceResolver != null
+				&& referenceResolver.TryGetReference(src, out reference, out bool newReference)
+				&& !newReference
+			) {
+				return referenceResolver.GetObject(reference);
+			}
 			var result = meta.Factory();
-			if (clonedInstances != null) {
-				clonedInstances.Add(src, result);
+			if (reference != null) {
+				referenceResolver.AddObject(reference, result);
 			}
 			if (cloners[0] == null)
 				MakeFieldCloners();
@@ -132,15 +142,20 @@ namespace Yuzu.Clone
 		{
 			if (src == null)
 				return null;
-			if (clonedInstances != null && clonedInstances.TryGetValue(src, out var clone)) {
-				return clone;
-			}
 			if (src.GetType() != meta.Type)
 				return cl.DeepObject(src);
 			meta.BeforeSerialization.Run(src);
+			object reference = null;
+			if (
+				referenceResolver != null
+				&& referenceResolver.TryGetReference(src, out reference, out bool newReference)
+				&& !newReference
+			) {
+				return referenceResolver.GetObject(reference);
+			}
 			var result = meta.Factory();
-			if (clonedInstances != null) {
-				clonedInstances.Add(src, result);
+			if (reference != null) {
+				referenceResolver.AddObject(reference, result);
 			}
 			if (cloners.Length > 0 && cloners[0] == null)
 				MakeFieldCloners();
