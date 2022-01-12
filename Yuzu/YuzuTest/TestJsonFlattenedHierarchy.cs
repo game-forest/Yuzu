@@ -173,6 +173,13 @@ namespace YuzuTest
 				reference = default;
 				return false;
 			}
+
+			public void Clear()
+			{
+				referenceToObjects.Clear();
+			}
+
+			public bool IsEmpty() => referenceToObjects.Count == 0;
 		}
 	}
 }
