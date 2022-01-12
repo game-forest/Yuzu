@@ -789,33 +789,45 @@ namespace Yuzu.Binary
 
 		public override object FromReaderInt()
 		{
-			if (BinaryOptions.AutoSignature)
-				CheckSignature();
-			return ReadAny();
+			try {
+				if (BinaryOptions.AutoSignature)
+					CheckSignature();
+				return ReadAny();
+			} finally {
+				ReferenceResolver?.Clear();
+			}
 		}
 
 		public override object FromReaderInt(object obj)
 		{
-			var expectedType = obj.GetType();
-			if (expectedType == typeof(object))
-				throw Error("Unable to read into untyped object");
-			if (BinaryOptions.AutoSignature)
-				CheckSignature();
-			if (!ReadCompatibleType(expectedType))
-				throw Error("Incompatible type to read into {0}", expectedType.Name);
-			MergeValueFunc(expectedType)(obj);
-			return obj;
+			try {
+				var expectedType = obj.GetType();
+				if (expectedType == typeof(object))
+					throw Error("Unable to read into untyped object");
+				if (BinaryOptions.AutoSignature)
+					CheckSignature();
+				if (!ReadCompatibleType(expectedType))
+					throw Error("Incompatible type to read into {0}", expectedType.Name);
+				MergeValueFunc(expectedType)(obj);
+				return obj;
+			} finally {
+				ReferenceResolver?.Clear();
+			}
 		}
 
 		public override T FromReaderInt<T>()
 		{
-			if (BinaryOptions.AutoSignature)
-				CheckSignature();
-			if (typeof(T) == typeof(object))
-				return (T)ReadAny();
-			if (!ReadCompatibleType(typeof(T)))
-				throw Error("Incompatible type to read into {0}", typeof(T));
-			return (T)ReadValueFunc(typeof(T))();
+			try {
+				if (BinaryOptions.AutoSignature)
+					CheckSignature();
+				if (typeof(T) == typeof(object))
+					return (T)ReadAny();
+				if (!ReadCompatibleType(typeof(T)))
+					throw Error("Incompatible type to read into {0}", typeof(T));
+				return (T)ReadValueFunc(typeof(T))();
+			} finally {
+				ReferenceResolver?.Clear();
+			}
 		}
 
 		// If possible, preserves stream position if signature is absent.
