@@ -57,26 +57,21 @@ namespace Yuzu
 	public interface IClonerReferenceResolver
 	{
 		/// <summary>
-		/// Returns a reference instance type.
-		/// </summary>
-		Type ReferenceType();
-
-		/// <summary>
-		/// Returns a reference instance for the given object.
+		/// Returns a reference instance for the given source object.
 		/// newReference denotes that the reference has just been created.
 		/// </summary>
-		bool TryGetReference(object obj, out object reference, out bool newReference);
+		bool TryGetReference(object source, out object reference, out bool newReference);
 
 		/// <summary>
-		/// Returns an object for the given reference or throws an exception.
+		/// Returns an clone for the given reference or throws an exception.
 		/// </summary>
 		object GetObject(object reference);
 
 		// <summary>
-		/// Registers a newly deserialized object.
+		/// Registers a newly cloned object.
 		/// Called right after the object factory method.
 		/// </summary>
-		void AddObject(object reference, object obj);
+		void AddObject(object reference, object clone);
 
 		/// <summary>
 		/// Called when the clone is done.
