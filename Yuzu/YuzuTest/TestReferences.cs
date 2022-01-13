@@ -157,7 +157,18 @@ namespace YuzuTest
 				} finally {
 					Assert.IsTrue(((ReferenceResolver)c.ReferenceResolver).IsEmpty());
 				}
-			}
+			},
+			// Cloner with optimized reference resolver
+			i => {
+				var c = new Cloner {
+					ReferenceResolver = new ReferenceResolverOptimizedForCloner()
+				};
+				try {
+					return c.DeepObject(i);
+				} finally {
+					Assert.IsTrue(((ReferenceResolverOptimizedForCloner)c.ReferenceResolver).IsEmpty());
+				}
+			},
 		};
 
 		private class ReferenceResolver : IDeserializerReferenceResolver, ISerializerReferenceResolver, IClonerReferenceResolver
@@ -209,6 +220,26 @@ namespace YuzuTest
 			}
 
 			public bool IsEmpty() => referenceToObjects.Count == 0 && objectsToReferences.Count == 0;
+		}
+
+		private class ReferenceResolverOptimizedForCloner : IClonerReferenceResolver
+		{
+			private readonly Dictionary<object, object> sourceToClone = new Dictionary<object, object>();
+
+			public void AddObject(object reference, object clone) => sourceToClone.Add(reference, clone);
+
+			public void Clear() => sourceToClone.Clear();
+
+			public object GetObject(object reference) => sourceToClone[reference];
+
+			public bool TryGetReference(object source, out object reference, out bool newReference)
+			{
+				reference = source;
+				newReference = !sourceToClone.ContainsKey(source);
+				return true;
+			}
+
+			public bool IsEmpty() => sourceToClone.Count == 0;
 		}
 	}
 }
