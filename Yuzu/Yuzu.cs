@@ -327,6 +327,7 @@ namespace Yuzu
 		public bool AllowEmptyTypes;
 		public bool ReportErrorPosition;
 		public bool CheckForEmptyCollections;
+		public bool DeserializeAsUnknown;
 	}
 
 	public class YuzuPosition

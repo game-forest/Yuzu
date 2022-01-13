@@ -736,7 +736,7 @@ namespace Yuzu.Json
 						id = ReadValueFunc(ReferenceResolver.ReferenceType())();
 						name = GetNextName(first: false);
 					}
-					if (name != JsonOptions.ClassTag) {
+					if (Options.DeserializeAsUnknown || name != JsonOptions.ClassTag) {
 						var any = new Dictionary<string, object>();
 						if (id != null) {
 							ReferenceResolver.AddObject(id, any);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -376,10 +376,11 @@ namespace Yuzu.Metadata
 			}
 		}
 
-		private Meta(Type t)
+		private Meta(Type t, bool isCompact)
 		{
 			Type = t;
 			Options = MetaOptions.Default;
+			IsCompact = isCompact;
 		}
 
 		private static Func<CommonOptions, AliasCacheType> MakeReadAliases =
@@ -493,7 +494,8 @@ namespace Yuzu.Metadata
 			return readAliases.TryGetValue(alias, out Type result) ? result : null;
 		}
 
-		internal static Meta Unknown = new Meta(typeof(YuzuUnknown));
+		internal static Meta Unknown = new Meta(typeof(YuzuUnknown), isCompact: false);
+		internal static Meta UnknownCompact = new Meta(typeof(YuzuUnknown), isCompact: true);
 
 		private YuzuException Error(string format, params object[] args) =>
 			new YuzuException("In type '" + Type.FullName + "': " + String.Format(format, args));
