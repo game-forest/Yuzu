@@ -728,12 +728,14 @@ namespace Yuzu.Json
 					object id = null;
 					var name = GetNextName(first: true);
 					if (name == JsonOptions.ReferenceTag) {
+						EnsureReferenceResolver();
 						var r = ReadValueFunc(ReferenceResolver.ReferenceType())();
 						Require('}');
 						return ReferenceResolver.TryGetObject(r, out var o)
 							? o : new UnresolvedReference { Reference = r };
 					}
 					if (name == JsonOptions.IdTag) {
+						EnsureReferenceResolver();
 						id = ReadValueFunc(ReferenceResolver.ReferenceType())();
 						name = GetNextName(first: false);
 					}
@@ -778,6 +780,12 @@ namespace Yuzu.Json
 					return JsonOptions.UnknownNumberType == JsonUnknownNumberType.Double ?
 						RequireDouble() : RequireNumber();
 			}
+		}
+
+		private void EnsureReferenceResolver()
+		{
+			if (ReferenceResolver == null)
+				throw Error("Input stream contains references, but ReferenceResolver is not set");
 		}
 
 		// Optimization: Avoid creating trivial closures.
