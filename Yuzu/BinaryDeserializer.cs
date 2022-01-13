@@ -513,6 +513,7 @@ namespace Yuzu.Binary
 				throw Error("Unable to read null into object");
 			object reference = null;
 			if (classId == BinarySerializeOptions.IdTag) {
+				EnsureReferenceResolver();
 				reference = ReadValueFunc(ReferenceResolver.ReferenceType())();
 				classId = Reader.ReadInt16();
 			}
@@ -534,6 +535,7 @@ namespace Yuzu.Binary
 			var classId = Reader.ReadInt16();
 			object reference = null;
 			if (classId == BinarySerializeOptions.IdTag) {
+				EnsureReferenceResolver();
 				reference = ReadValueFunc(ReferenceResolver.ReferenceType())();
 				classId = Reader.ReadInt16();
 			}
@@ -563,10 +565,12 @@ namespace Yuzu.Binary
 				return null;
 			object objectId = null;
 			if (classId == BinarySerializeOptions.IdTag) {
+				EnsureReferenceResolver();
 				objectId = ReadValueFunc(ReferenceResolver.ReferenceType())();
 				classId = Reader.ReadInt16();
 			}
 			if (classId == BinarySerializeOptions.ReferenceTag) {
+				EnsureReferenceResolver();
 				var reference = ReadValueFunc(ReferenceResolver.ReferenceType())();
 				return ReferenceResolver.GetObject(reference);
 			}
@@ -589,10 +593,12 @@ namespace Yuzu.Binary
 				return null;
 			object objectId = null;
 			if (classId == BinarySerializeOptions.IdTag) {
+				EnsureReferenceResolver();
 				objectId = ReadValueFunc(ReferenceResolver.ReferenceType())();
 				classId = Reader.ReadInt16();
 			}
 			if (classId == BinarySerializeOptions.ReferenceTag) {
+				EnsureReferenceResolver();
 				var reference = ReadValueFunc(ReferenceResolver.ReferenceType())();
 				return ReferenceResolver.GetObject(reference);
 			}
@@ -602,6 +608,12 @@ namespace Yuzu.Binary
 			var result = def.Meta.Factory();
 			def.ReadFields(this, def, result);
 			return result;
+		}
+
+		private void EnsureReferenceResolver()
+		{
+			if (ReferenceResolver == null)
+				throw Error("Input stream contains references, but ReferenceResolver is not set");
 		}
 
 		protected void EnsureClassDef(Type t)
