@@ -318,10 +318,10 @@ namespace Yuzu.Binary
 
 		public void ClearClassIds() => classDefs = [new ReaderClassDef()];
 
-		private ReaderClassDef GetClassDefUnknown(string typeName)
+		private ReaderClassDef GetClassDefUnknown(string typeName, bool isCompact)
 		{
 			var result = new ReaderClassDef {
-				Meta = Meta.Unknown,
+				Meta = isCompact ? Meta.UnknownCompact : Meta.Unknown,
 				Make = (bd, def, objId) => {
 					var obj = new YuzuUnknownBinary { ClassTag = typeName, Def = def };
 					ReferenceResolver?.AddObject(objId, obj);
@@ -454,9 +454,11 @@ namespace Yuzu.Binary
 			if (classId > classDefs.Count)
 				throw Error("Bad classId: {0}", classId);
 			var typeName = Reader.ReadString();
-			var classType = Meta.GetTypeByReadAlias(typeName, Options) ?? TypeSerializer.Deserialize(typeName);
+			var isCompact = Reader.ReadBoolean();
+			var classType = Options.DeserializeAsUnknown ? null :
+				Meta.GetTypeByReadAlias(typeName, Options) ?? TypeSerializer.Deserialize(typeName);
 			if (classType == null)
-				return GetClassDefUnknown(typeName);
+				return GetClassDefUnknown(typeName, isCompact);
 			var result = new ReaderClassDef { Meta = Meta.Get(classType, Options) };
 			PrepareReaders(result);
 			if (BinaryOptions.Unordered)
