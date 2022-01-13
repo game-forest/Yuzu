@@ -391,10 +391,11 @@ namespace Yuzu.Metadata
 			}
 		}
 
-		private Meta(Type t)
+		private Meta(Type t, bool isCompact)
 		{
 			Type = t;
 			Options = MetaOptions.Default;
+			IsCompact = isCompact;
 		}
 
 		private static Func<CommonOptions, AliasCacheType> MakeReadAliases =
