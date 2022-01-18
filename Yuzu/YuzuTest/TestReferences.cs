@@ -15,6 +15,45 @@ namespace YuzuTest
 	public class TestReferences
 	{
 		[TestMethod]
+		public void TestJsonSerialization()
+		{
+			var js = new JsonSerializer {
+				JsonOptions = new JsonSerializeOptions {
+					SaveClass = JsonSaveClass.UnknownOrRoot,
+					Indent = ""
+				},
+				ReferenceResolver = new ReferenceResolver()
+			};
+			var tyler = new Employee { Name = "Tyler Stein" };
+			var adrian = new Employee { Name = "Adrian King" };
+			tyler.DirectReports = new List<IEmployee> { adrian };
+			adrian.Manager = tyler;
+			var s =
+				"{\n\"id\":1,\n\"class\":\"YuzuTest.TestReferences+Employee, YuzuTest\",\n" +
+				"\"DirectReports\":[\n{\n\"id\":2,\n\"class\":\"YuzuTest.TestReferences+Employee, YuzuTest\",\n" +
+				"\"Manager\":{\n\"ref\":1\n},\n\"Name\":\"Adrian King\"\n}\n],\n\"Name\":\"Tyler Stein\"\n}";
+			Assert.AreEqual(js.ToString(tyler), s);
+		}
+
+		[TestMethod]
+		public void TestBinarySerialization()
+		{
+			var bs = new BinarySerializer {
+				ReferenceResolver = new ReferenceResolver()
+			};
+			var tyler = new Employee { Name = "Tyler Stein" };
+			var adrian = new Employee { Name = "Adrian King" };
+			tyler.DirectReports = new List<IEmployee> { adrian };
+			adrian.Manager = tyler;
+			var s = 
+				"20-FF-FF-01-00-00-00-01-00-2A-59-75-7A-75-54-65-73-74-2E-54-65-73-74-52-65-66-65-72-65-6E-63-65-73-2B-45-6D-70-" +
+				"6C-6F-79-65-65-2C-20-59-75-7A-75-54-65-73-74-00-03-00-0D-44-69-72-65-63-74-52-65-70-6F-72-74-73-21-20-07-4D-61-" +
+				"6E-61-67-65-72-20-04-4E-61-6D-65-10-01-00-01-00-00-00-FF-FF-02-00-00-00-01-00-02-00-FE-FF-01-00-00-00-03-00-0B-" +
+				"41-64-72-69-61-6E-20-4B-69-6E-67-00-00-03-00-0B-54-79-6C-65-72-20-53-74-65-69-6E-00-00";
+			Assert.AreEqual(BitConverter.ToString(bs.ToBytes(tyler)), s);
+		}
+
+		[TestMethod]
 		public void TestObjectGraph()
 		{
 			foreach (var roundtrip in roundtrips) {
