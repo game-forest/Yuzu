@@ -1709,6 +1709,21 @@ namespace YuzuGen.YuzuTest
 				}
 				name = GetNextName(false);
 			}
+			if ("C" == name) {
+				result.C = RequireOrNull('[') ? null : new global::YuzuTest.SampleCollection<global::YuzuTest.SamplePoint>();
+				if (result.C != null) {
+					if (SkipSpacesCarefully() == ']') {
+						Require(']');
+					}
+					else {
+						do {
+							var tmp3 = YuzuGen.YuzuTest.SamplePoint_JsonDeserializer.Instance.FromReaderTyped<global::YuzuTest.SamplePoint>(Reader);
+							result.C.Add(tmp3);
+						} while (Require(']', ',') == ',');
+					}
+				}
+				name = GetNextName(false);
+			}
 			return result;
 		}
 	}
@@ -1736,8 +1751,8 @@ namespace YuzuGen.YuzuTest
 			}
 			else {
 				do {
-					var tmp3 = RequireInt();
-					result.Add(tmp3);
+					var tmp4 = RequireInt();
+					result.Add(tmp4);
 				} while (Require(']', ',') == ',');
 			}
 			return result;

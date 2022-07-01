@@ -661,6 +661,8 @@ namespace YuzuTest
 		public SampleCollection<ISample> A = new SampleCollection<ISample>();
 		[YuzuMember]
 		public SampleCollection<int> B = new SampleCollection<int>();
+		[YuzuMember]
+		public SampleCollection<SamplePoint> C = new SampleCollection<SamplePoint>();
 	}
 
 	public class SampleWithCollectionMerge

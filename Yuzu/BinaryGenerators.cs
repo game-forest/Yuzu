@@ -206,7 +206,15 @@ namespace Yuzu.Binary
 				return;
 			}
 			if (Utils.IsStruct(t)) {
-				cw.PutPart("({0})dg.ReadStruct{1}<{0}>();\n", Utils.GetTypeSpec(t), MaybeUnchecked());
+				var meta = Meta.Get(t, options);
+				if (meta.IsCompact) {
+					cw.PutPart("new {0}();\n", Utils.GetTypeSpec(t));
+					cw.Put("dg.EnsureClassDef(typeof({0}));\n", Utils.GetTypeSpec(t));
+					foreach (var yi in meta.Items)
+						GenerateSetValue(yi.Type, $"{name}." + yi.Name, yi);
+				} else {
+					cw.PutPart("({0})dg.ReadStruct{1}<{0}>();\n", Utils.GetTypeSpec(t), MaybeUnchecked());
+				}
 				return;
 			}
 			throw new NotImplementedException();
