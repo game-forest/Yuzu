@@ -595,17 +595,22 @@ namespace YuzuTest.Binary
 			v0.A.Add(new SampleInterfaced { X = 9 });
 			v0.B.Add(7);
 			v0.B.Add(6);
+			v0.C = new SampleCollection<SamplePoint>();
+			v0.C.Add(new SamplePoint { X = 3, Y = 4 });
 			var result0 = bs.ToBytes(v0);
 			Assert.AreEqual(
-				"20 01 00 " + XS(typeof(SampleWithCollection)) + " 02 00 " +
+				"20 01 00 " + XS(typeof(SampleWithCollection)) + " 03 00 " +
 				XS("A", RoughType.Sequence) + " " + XS(RoughType.Record) + " " +
-				XS("B", RoughType.Sequence) + " " + XS(RoughType.Int) +
+				XS("B", RoughType.Sequence) + " " + XS(RoughType.Int) + " " +
+				XS("C", RoughType.Sequence) + " " + XS(RoughType.Record) +
 				" 01 00 01 00 00 00 02 00 " + XS(typeof(SampleInterfaced)) +
 				" 01 00 " + XS("X", RoughType.Int) +
 				" 01 00 09 00 00 00 00 00" +
-				" 02 00 02 00 00 00 07 00 00 00 06 00 00 00 00 00",
+				" 02 00 02 00 00 00 07 00 00 00 06 00 00 00" +
+				" 03 00 01 00 00 00 03 00 " + XS(typeof(SamplePoint)) +
+				" 02 00 " + XS("X", RoughType.Int) + " " + XS("Y", RoughType.Int) +
+				" 03 00 00 00 04 00 00 00 00 00",
 				XS(result0));
-
 			var w0 = new SampleWithCollection();
 			bd.FromBytes(w0, result0);
 			Assert.AreEqual(1, w0.A.Count);
@@ -618,6 +623,9 @@ namespace YuzuTest.Binary
 			Assert.IsInstanceOfType(w1.A.First(), typeof(SampleInterfaced));
 			Assert.AreEqual(9, w1.A.First().X);
 			CollectionAssert.AreEqual(new int[] { 7, 6 }, w1.B.ToList());
+			CollectionAssert.AreEqual(new int[] { 7, 6 }, w1.B.ToList());
+			Assert.AreEqual(1, w1.C.Count);
+			Assert.AreEqual(new SamplePoint { X = 3, Y = 4 }, w1.C.First());
 
 			var v2 = new SampleConcreteCollection { 2, 5, 4 };
 			var result1 = bs.ToBytes(v2);
@@ -656,9 +664,10 @@ namespace YuzuTest.Binary
 			Assert.AreEqual("21 05 02 00 00 00 02 00 00 00 04 00 00 00", XS(bs.ToBytes(v1)));
 
 			var s1 =
-				"20 01 00 " + XS(typeof(SampleWithCollection)) + " 02 00 " +
+				"20 01 00 " + XS(typeof(SampleWithCollection)) + " 03 00 " +
 				XS("A", RoughType.Sequence) + " " + XS(RoughType.Record) + " " +
-				XS("B", RoughType.Sequence) + " " + XS(RoughType.Int);
+				XS("B", RoughType.Sequence) + " " + XS(RoughType.Int) + " " +
+				XS("C", RoughType.Sequence) + " " + XS(RoughType.Record);
 			var v2 = new SampleWithCollection();
 			v2.B.Add(5);
 			Assert.AreEqual(

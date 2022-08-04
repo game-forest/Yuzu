@@ -852,6 +852,21 @@ namespace YuzuGenBin
 				}
 				fd = def.Fields[d.Reader.ReadInt16()];
 			}
+			if (3 == fd.OurIndex) {
+				result.C = (global::YuzuTest.SampleCollection<global::YuzuTest.SamplePoint>)null;
+				var tmp5 = d.Reader.ReadInt32();
+				if (tmp5 >= 0) {
+					result.C = new global::YuzuTest.SampleCollection<global::YuzuTest.SamplePoint>();
+					while (--tmp5 >= 0) {
+						var tmp6 = new global::YuzuTest.SamplePoint();
+						dg.EnsureClassDef(typeof(global::YuzuTest.SamplePoint));
+						tmp6.X = d.Reader.ReadInt32();
+						tmp6.Y = d.Reader.ReadInt32();
+						result.C.Add(tmp6);
+					}
+				}
+				fd = def.Fields[d.Reader.ReadInt16()];
+			}
 			if (fd.OurIndex != ReaderClassDef.EOF) throw dg.Error("Unfinished object");
 		}
 
