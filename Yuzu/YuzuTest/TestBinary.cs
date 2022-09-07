@@ -760,15 +760,17 @@ namespace YuzuTest.Binary
 				Value = 3, Children = new Dictionary<string, SampleDict> {
 				{ "a", new SampleDict { Value = 5, Children = new Dictionary<string, SampleDict>() } },
 				{ "b", new SampleDict { Value = 7 } },
+				{ "c", null },
 			}
 			};
 			var result0 = bs.ToBytes(v0);
 			Assert.AreEqual(
 				"20 01 00 " + XS(typeof(SampleDict)) + " 02 00 " +
 				XS("Value", RoughType.Int, "Children", RoughType.Mapping) + " 10 20" +
-				" 01 00 03 00 00 00 02 00 02 00 00 00 " + XS("a") +
+				" 01 00 03 00 00 00 02 00 03 00 00 00 " + XS("a") +
 				" 01 00 01 00 05 00 00 00 02 00 00 00 00 00 00 00 " +
-				XS("b") + " 01 00 01 00 07 00 00 00 02 00 FF FF FF FF 00 00 00 00",
+				XS("b") + " 01 00 01 00 07 00 00 00 02 00 FF FF FF FF 00 00 " +
+				XS("c") + " 00 00 00 00",
 				XS(result0));
 
 			var w0 = new SampleDict();
@@ -776,6 +778,7 @@ namespace YuzuTest.Binary
 			Assert.AreEqual(v0.Value, w0.Value);
 			Assert.AreEqual(v0.Children.Count, w0.Children.Count);
 			Assert.AreEqual(v0.Children["a"].Value, w0.Children["a"].Value);
+			Assert.AreEqual(v0.Children["c"], null);
 
 			var w0g = (SampleDict)bdg.FromBytes(result0);
 			Assert.AreEqual(v0.Value, w0g.Value);
@@ -1833,7 +1836,7 @@ namespace YuzuTest.Binary
 				"\n22 10 11 02 00 00 00" +
 				" 01 33 20 01 00 01 00 00 00 00 00 02 00 0A 00 00 00 00 00" +
 				" 01 37 20 01 00 01 00 00 00 00 00 02 00 14 00 00 00 00 00",
-				"\n"+XS(result2));
+				"\n" + XS(result2));
 			var w2 = (Dictionary<string, object>)bd.FromBytes(result2);
 			foreach (var i in v2)
 				Assert.AreEqual((i.Value as SampleDerivedB).FB, (w2[i.Key] as SampleDerivedB).FB);
@@ -2230,7 +2233,7 @@ namespace YuzuTest.Binary
 			}
 			{
 				var result1 = bs.ToBytes(RenameCustomGenericTypeGenericArgumentType.Data);
-				var expected = 
+				var expected =
 					"20 0C 00 " + XS(typeof(RenameCustomGenericTypeGenericArgumentType)) + " 01 00 " +
 					XS(nameof(RenameCustomGenericTypeGenericArgumentType.Samples)) + " 20 01 00 0D 00 " +
 					XS("YuzuTest.RenameCustomGenericTypeGenericArgumentType+GenericSample`1[[YuzuTest.RenameCustomGenericTypeGenericArgumentType+Sample, YuzuTest]], YuzuTest") +
@@ -2344,7 +2347,7 @@ namespace YuzuTest.Binary
 				" 00 00 00 00 00 00"
 			)), "List");
 			XAssert.Throws<YuzuException>(() => bd.FromBytes<Sample1>(SX(
-				"20 03 00 " + XS(typeof(YuzuTest.Sample2)) + " 02 00 " + XS("X") + " 05 " + XS("Y") +  " 10"
+				"20 03 00 " + XS(typeof(YuzuTest.Sample2)) + " 02 00 " + XS("X") + " 05 " + XS("Y") + " 10"
 			)), "YuzuTest.Sample2");
 
 		}

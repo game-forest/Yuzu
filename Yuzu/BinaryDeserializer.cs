@@ -215,7 +215,7 @@ namespace Yuzu.Binary
 			for (int i = 0; i < count; ++i) {
 				var key = (K)rk();
 				var value = rv();
-				if (!(value is V))
+				if (value != null && !(value is V))
 					throw Error("Incompatible type for key {0}, expected: {1} but got {2}",
 						key.ToString(), typeof(V), value.GetType());
 				dict.Add(key, (V)value);
