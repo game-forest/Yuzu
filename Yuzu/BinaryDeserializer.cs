@@ -803,5 +803,25 @@ namespace Yuzu.Binary
 				throw Error("Signature not found");
 		}
 
+		public override object FromString(string source)
+		{
+			return FromReader(new System.IO.BinaryReader(
+				new System.IO.MemoryStream(Convert.FromBase64String(source), false))
+			);
+		}
+
+		public override T FromString<T>(string source)
+		{
+			return FromReader<T>(new System.IO.BinaryReader(
+				new System.IO.MemoryStream(Convert.FromBase64String(source), false))
+			);
+		}
+
+		public override object FromString(object obj, string source)
+		{
+			return FromReader(obj, new System.IO.BinaryReader(
+				new System.IO.MemoryStream(Convert.FromBase64String(source), false))
+			);
+		}
 	}
 }
