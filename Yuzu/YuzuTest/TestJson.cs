@@ -349,6 +349,19 @@ namespace YuzuTest.Json
 		}
 
 		[TestMethod]
+		public void TestBadDoubleJson()
+		{
+			var d = BitConverter.ToDouble(new byte[] { 48, 249, 184, 21, 152, 124, 220, 63 }, 0);
+			var l0 = new List<double> { d };
+			var js = new JsonSerializer();
+			js.JsonOptions.Indent = "";
+			js.JsonOptions.FieldSeparator = "";
+			var r = js.ToString(l0);
+			var l1 = (new JsonDeserializer()).FromString<List<double>>(r);
+			Assert.AreEqual(l0[0], l1[0]);
+		}
+
+		[TestMethod]
 		public void TestDecimal()
 		{
 			var js = new JsonSerializer();
