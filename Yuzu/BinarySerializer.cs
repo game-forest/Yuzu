@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -717,5 +717,12 @@ namespace Yuzu.Binary
 		}
 
 		public void WriteSignature() { writer.Write(BinaryOptions.Signature); }
+
+		public override string ToString(object obj)
+		{
+			var ms = new System.IO.MemoryStream();
+			ToStream(obj, ms);
+			return Convert.ToBase64String(ms.GetBuffer(), 0, (int)ms.Length);
+		}
 	}
 }
