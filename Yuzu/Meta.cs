@@ -13,8 +13,32 @@ namespace Yuzu.Metadata
 
 	public class Meta
 	{
-		private static ConcurrentDictionary<Tuple<Type, CommonOptions>, Meta> cache =
-			new ConcurrentDictionary<Tuple<Type, CommonOptions>, Meta>();
+		struct TypeOptions : IEquatable<TypeOptions>
+		{
+			public Type Type;
+			public CommonOptions Options;
+
+			public bool Equals(TypeOptions other)
+			{
+				return Type == other.Type && Options.Equals(other.Options);
+			}
+			
+			public override bool Equals(object obj)
+			{
+				return obj is TypeOptions other && Equals(other);
+			}
+			
+			public override int GetHashCode()
+			{
+				unchecked {
+					return (Type.GetHashCode() * 397) ^ Options.GetHashCode();
+				}
+			}
+		}
+		
+
+		private static ConcurrentDictionary<TypeOptions, Meta> cache =
+			new ConcurrentDictionary<TypeOptions, Meta>();
 		private static ConcurrentDictionary<CommonOptions, AliasCacheType> readAliasCache =
 			new ConcurrentDictionary<CommonOptions, AliasCacheType>();
 
@@ -482,9 +506,11 @@ namespace Yuzu.Metadata
 				IsCopyable = false;
 		}
 
-		private static Func<Tuple<Type, CommonOptions>, Meta> MakeMeta = key => new Meta(key.Item1, key.Item2);
+		private static Func<TypeOptions, Meta> MakeMeta = key => new Meta(key.Type, key.Options);
+		
+
 		public static Meta Get(Type t, CommonOptions options) =>
-			cache.GetOrAdd(Tuple.Create(t, options), MakeMeta);
+			cache.GetOrAdd(new TypeOptions { Type = t, Options = options }, MakeMeta);
 
 		public static Type GetTypeByReadAlias(string alias, CommonOptions options)
 		{
