@@ -341,7 +341,7 @@ namespace Yuzu
 			return new MetaItemOverride { Info = m };
 		}
 	}
-	public struct CommonOptions
+	public struct CommonOptions : IEquatable<CommonOptions>
 	{
 		public MetaOptions Meta;
 		public TagMode TagMode;
@@ -349,6 +349,43 @@ namespace Yuzu
 		public bool AllowEmptyTypes;
 		public bool ReportErrorPosition;
 		public bool CheckForEmptyCollections;
+
+		public bool Equals(CommonOptions other)
+		{
+			return Equals(Meta, other.Meta)
+				&& TagMode == other.TagMode
+				&& AllowUnknownFields == other.AllowUnknownFields
+				&& AllowEmptyTypes == other.AllowEmptyTypes
+				&& ReportErrorPosition == other.ReportErrorPosition
+				&& CheckForEmptyCollections == other.CheckForEmptyCollections;
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is CommonOptions other && Equals(other);
+		}
+
+		public override int GetHashCode()
+		{
+			return HashCode.Combine(
+				Meta,
+				(int)TagMode,
+				AllowUnknownFields,
+				AllowEmptyTypes,
+				ReportErrorPosition,
+				CheckForEmptyCollections
+			);
+		}
+
+		public static bool operator ==(CommonOptions left, CommonOptions right)
+		{
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(CommonOptions left, CommonOptions right)
+		{
+			return !(left == right);
+		}
 	}
 
 	public class YuzuPosition
