@@ -61,6 +61,7 @@ namespace Yuzu.Metadata
 			public bool IsCompact;
 			public bool IsCopyable;
 			public bool IsMember;
+			public bool IsInterfaceMember;
 			public object DefaultValue;
 			public Func<object, object, bool> SerializeCond;
 			public MethodInfo SerializeIfMethod;
@@ -258,13 +259,11 @@ namespace Yuzu.Metadata
 				IsOptional = ia.Required == null,
 				IsCompact = attrs.HasAttr(Options.CompactAttribute),
 				IsCopyable = attrs.HasAttr(Options.CopyableAttribute),
+				IsInterfaceMember = m.DeclaringType.IsInterface,
 				IsMember = ia.Member != null,
-				SerializeCond = serializeCond != null ?
-					Options.GetSerializeCondition(serializeCond, Type) : null,
-				SerializeIfMethod = serializeCond != null ?
-					Options.GetSerializeMethod(serializeCond, Type) : null,
-				DefaultValue = serializeCond != null ?
-					Options.GetDefault(serializeCond) : YuzuNoDefault.NoDefault,
+				SerializeCond = serializeCond != null ? Options.GetSerializeCondition(serializeCond, Type) : null,
+				SerializeIfMethod = serializeCond != null ? Options.GetSerializeMethod(serializeCond, Type) : null,
+				DefaultValue = serializeCond != null ? Options.GetDefault(serializeCond) : YuzuNoDefault.NoDefault,
 				Name = m.Name,
 			};
 			if (!item.IsOptional)
@@ -354,10 +353,29 @@ namespace Yuzu.Metadata
 
 		private void ExploreType(Type t, CommonOptions options)
 		{
-			const BindingFlags bindingFlags =
+			var bindingFlags =
 				BindingFlags.Static | BindingFlags.Instance |
 				BindingFlags.Public | BindingFlags.NonPublic |
 				BindingFlags.FlattenHierarchy;
+			if (
+				t.BaseType != null
+				&& t.BaseType != typeof(object)
+				&& t.BaseType != typeof(ValueType)
+				&& !t.BaseType.IsAbstract
+				&& t.BaseType.GetConstructor(Type.EmptyTypes) != null
+			) {
+				bindingFlags |= BindingFlags.DeclaredOnly;
+				var baseMeta = Get(t.BaseType, options);
+				foreach (var i in baseMeta.Items) {
+					if (!i.IsInterfaceMember) {
+						Items.Add(i);
+					}
+				}
+				BeforeSerialization.Actions.AddRange(baseMeta.BeforeSerialization.Actions);
+				AfterSerialization.Actions.AddRange(baseMeta.AfterSerialization.Actions);
+				BeforeDeserialization.Actions.AddRange(baseMeta.BeforeDeserialization.Actions);
+				AfterDeserialization.Actions.AddRange(baseMeta.AfterDeserialization.Actions);
+			}
 			foreach (var m in t.GetMembers(bindingFlags)) {
 				var attrs = Options.GetItem(m);
 				if (attrs.HasAttr(Options.ExcludeAttribute))
@@ -446,18 +464,28 @@ namespace Yuzu.Metadata
 			}
 
 			Surrogate = new Surrogate(Type, Options);
-			foreach (var i in t.GetInterfaces())
+			foreach (var i in t.GetInterfaces()) {
 				ExploreType(i, options);
+			}
 			ExploreType(t, options);
 			Surrogate.Complete();
 			CheckForNoFields(options);
 
 			Items.Sort();
 			Item prev = null;
+			List<Item> duplicates = null;
 			foreach (var i in Items) {
-				if (prev != null && prev.CompareTo(i) == 0)
-					throw Error("Duplicate item {0} / {1}", i.Name, i.Alias);
+				if (prev != null && prev.CompareTo(i) == 0) {
+					duplicates ??= new List<Item>();
+					duplicates.Add(i);
+					// throw Error("Duplicate item {0} / {1}", i.Name, i.Alias);
+				}
 				prev = i;
+			}
+			if (duplicates != null) {
+				foreach (var i in duplicates) {
+					Items.Remove(i);
+				}
 			}
 			var prevTag = "";
 			foreach (var i in Items) {
