@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Yuzu.Binary;
 
 namespace Yuzu
 {
@@ -437,6 +438,31 @@ namespace Yuzu
 			(Action<object, TParam1, TParam2>)
 				Delegate.CreateDelegate(typeof(Action<object, TParam1, TParam2>), this, m);
 
+		protected Action<object, TParam1, TParam2, TParam3> MakeDelegateParam3<TParam1, TParam2, TParam3>(MethodInfo m) =>
+			(Action<object, TParam1, TParam2, TParam3>)
+				Delegate.CreateDelegate(typeof(Action<object, TParam1, TParam2, TParam3>), this, m);
+
+		protected static Action<BinarySerializer, object> MakeDelegateActionStatic(MethodInfo m)
+		{
+			return (Action<BinarySerializer, object>)Delegate.CreateDelegate(typeof(Action<BinarySerializer, object>), m);
+		}
+
+		protected static Action<BinarySerializer, object, TParam> MakeDelegateParamStatic<TParam>(MethodInfo m)
+		{
+			return (Action<BinarySerializer, object, TParam>)Delegate.CreateDelegate(typeof(Action<BinarySerializer, object, TParam>), m);
+		}
+
+		protected static Action<BinarySerializer, object, TParam1, TParam2> MakeDelegateParam2Static<TParam1, TParam2>(MethodInfo m)
+		{
+			return (Action<BinarySerializer, object, TParam1, TParam2>)
+				Delegate.CreateDelegate(typeof(Action<BinarySerializer, object, TParam1, TParam2>), m);
+		}
+
+		protected static Action<BinarySerializer, object, TParam1, TParam2, TParam3> MakeDelegateParam3Static<TParam1, TParam2, TParam3>(MethodInfo m)
+		{
+			return (Action<BinarySerializer, object, TParam1, TParam2, TParam3>)
+				Delegate.CreateDelegate(typeof(Action<BinarySerializer, object, TParam1, TParam2, TParam3>), m);
+		}
 	}
 
 	public abstract class AbstractWriterSerializer: AbstractSerializer

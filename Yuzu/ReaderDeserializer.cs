@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -6,6 +6,7 @@ using System.Text;
 
 using Yuzu.Util;
 using Yuzu.Metadata;
+using Yuzu.Binary;
 
 namespace Yuzu.Deserializer
 {
@@ -125,11 +126,36 @@ namespace Yuzu.Deserializer
 			return (Action<T>)Delegate.CreateDelegate(typeof(Action<T>), obj, m);
 		}
 
-		protected Func<object> MakeDelegate(MethodInfo m) =>
-			(Func<object>)Delegate.CreateDelegate(typeof(Func<object>), this, m);
+		protected static Action<T> GetActionStatic<T>(BinaryDeserializer d, string name)
+		{
+			if (String.IsNullOrEmpty(name))
+				return null;
+			var obj = d.objStack.Peek();
+			var m = obj.GetType().GetMethod(name, BindingFlags.Instance | BindingFlags.Public);
+			if (m == null)
+				throw d.Error("Unknown action '{0}'", name);
+			return (Action<T>)Delegate.CreateDelegate(typeof(Action<T>), obj, m);
+		}
 
-		protected Action<object> MakeDelegateAction(MethodInfo m) =>
-			(Action<object>)Delegate.CreateDelegate(typeof(Action<object>), this, m);
 
+		protected Func<object> MakeDelegate(MethodInfo m)
+		{
+			return (Func<object>)Delegate.CreateDelegate(typeof(Func<object>), this, m);
+		}
+
+		protected Action<object> MakeDelegateAction(MethodInfo m)
+		{
+			return (Action<object>)Delegate.CreateDelegate(typeof(Action<object>), this, m);
+		}
+
+		protected static Func<BinaryDeserializer, object> MakeDelegateStatic(MethodInfo m)
+		{
+			return (Func<BinaryDeserializer, object>)Delegate.CreateDelegate(typeof(Func<BinaryDeserializer, object>), m);
+		}
+
+		protected static Action<BinaryDeserializer, object> MakeDelegateActionStatic(MethodInfo m)
+		{
+			return (Action<BinaryDeserializer, object>)Delegate.CreateDelegate(typeof(Action<BinaryDeserializer, object>), m);
+		}
 	}
 }
