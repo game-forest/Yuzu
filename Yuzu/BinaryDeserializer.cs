@@ -121,6 +121,7 @@ namespace Yuzu.Binary
 
 		private void InitReaders()
 		{
+			if (readerCache != null) return;
 			readerCache = new Dictionary<Type, Func<BinaryDeserializer, object>>() {
 				{ typeof(sbyte), ReadSByte },
 				{ typeof(byte), ReadByte },
@@ -469,8 +470,13 @@ namespace Yuzu.Binary
 
 		private static ReaderClassDef GetClassDef(BinaryDeserializer d, short classId)
 		{
-			if (classId < d.classDefs.Count)
-				return d.classDefs[classId];
+			if (classId < d.classDefs.Count) {
+				var r = d.classDefs[classId];
+				if (r.Incomplete) {
+					CompleteClassDef(d, r);
+				}
+				return r;
+			}
 			if (classId - short.MaxValue / 2 >= 0 && classId - short.MaxValue/2 < d.internalClassDefs.Count) {
 				return d.internalClassDefs[classId - short.MaxValue/2];
 			}
@@ -487,6 +493,61 @@ namespace Yuzu.Binary
 			else
 				InitClassDef(d, result, typeName);
 			d.internalClassDefs.Add(result);
+			return result;
+		}
+
+		private static void CompleteClassDef(BinaryDeserializer d, ReaderClassDef classDef)
+		{
+			var previousReader = d.Reader;
+			((System.IO.MemoryStream)classDef.BufferStream).Position = classDef.StreamPosition;
+			/*using */var reader = new System.IO.BinaryReader(classDef.BufferStream);
+			d.Reader = reader;
+			try {
+				var typeName = d.Reader.ReadString();
+				var classType = Meta.GetTypeByReadAlias(typeName, d.Options) ?? TypeSerializer.Deserialize(typeName);
+				if (classType == null)
+					// return GetClassDefUnknown(d, typeName);
+					throw d.Error("Zalupa");
+				classDef.Meta = Meta.Get(classType, d.Options);
+				d.PrepareReaders(classDef);
+				if (d.BinaryOptions.Unordered)
+					InitClassDefUnordered(d, classDef, typeName);
+				else
+					InitClassDef(d, classDef, typeName);
+			} finally {
+				d.Reader = previousReader;
+			}
+			classDef.Incomplete = false;
+			classDef.BufferStream = null;
+			classDef.StreamPosition = -1;
+		}
+
+		private static ReaderClassDef GetClassDefIncomplete(BinaryDeserializer d, short classId)
+		{
+			if (classId < d.classDefs.Count)
+				throw d.Error("Unexpected class def.");
+			if (classId - short.MaxValue / 2 >= 0 && classId - short.MaxValue / 2 < d.internalClassDefs.Count) {
+				// return d.internalClassDefs[classId - short.MaxValue / 2];
+				throw d.Error("Unexpected class def.");
+			}
+			if (classId - short.MaxValue / 2 > d.internalClassDefs.Count)
+				throw d.Error("Bad classId: {0}", classId);
+			var result = new ReaderClassDef {
+				Incomplete = true,
+				BufferStream = d.Reader.BaseStream,
+				StreamPosition = ((System.IO.MemoryStream)d.Reader.BaseStream).Position,
+			};
+			////var typeName = d.Reader.ReadString();
+			////var classType = Meta.GetTypeByReadAlias(typeName, d.Options) ?? TypeSerializer.Deserialize(typeName);
+			////if (classType == null)
+			////	return GetClassDefUnknown(d, typeName);
+			////var result = new ReaderClassDef { Meta = Meta.Get(classType, d.Options) };
+			////d.PrepareReaders(result);
+			////if (d.BinaryOptions.Unordered)
+			////	InitClassDefUnordered(d, result, typeName);
+			////else
+			////	InitClassDef(d, result, typeName);
+			////d.internalClassDefs.Add(result);
 			return result;
 		}
 
@@ -636,21 +697,27 @@ namespace Yuzu.Binary
 			return result;
 		}
 
-		private Dictionary<Type, Func<BinaryDeserializer, object>> readerCache;
-		private Dictionary<Type, Action<BinaryDeserializer, object>> mergerCache = new Dictionary<Type, Action<BinaryDeserializer, object>>();
+		private static Dictionary<Type, Func<BinaryDeserializer, object>> readerCache;
+		private static Dictionary<Type, Action<BinaryDeserializer, object>> mergerCache = new Dictionary<Type, Action<BinaryDeserializer, object>>();
 
 		private Func<BinaryDeserializer, object> ReadValueFunc(Type t)
 		{
-			if (readerCache.TryGetValue(t, out Func<BinaryDeserializer, object> f))
-				return f;
-			return readerCache[t] = MakeReaderFunc(this, t);
+			lock (readerCache) {
+				if (readerCache.TryGetValue(t, out Func<BinaryDeserializer, object> f))
+					return f;
+				System.Diagnostics.Trace.WriteLine($"NICEDOG reader cache: new count = {readerCache.Count}; added: '{t.FullName}'");
+				return readerCache[t] = MakeReaderFunc(this, t);
+			}
 		}
 
 		private Action<BinaryDeserializer, object> MergeValueFunc(Type t)
 		{
-			if (mergerCache.TryGetValue(t, out Action<BinaryDeserializer, object> f))
-				return f;
-			return mergerCache[t] = MakeMergerFunc(this, t);
+			lock (mergerCache) {
+				if (mergerCache.TryGetValue(t, out Action<BinaryDeserializer, object> f))
+					return f;
+				System.Diagnostics.Trace.WriteLine($"NICEDOG merger cache: new count = {mergerCache.Count}; added: '{t.FullName}'");
+				return mergerCache[t] = MakeMergerFunc(this, t);
+			}
 		}
 
 		private static Func<BinaryDeserializer, object> MakeEnumReaderFunc(Type t)
@@ -829,18 +896,31 @@ namespace Yuzu.Binary
 				throw Error("Signature not found");
 		}
 
-		public ReaderClassDef ReadClassDef(System.IO.BinaryReader reader)
+		public ReaderClassDef ReadClassDef(System.IO.BinaryReader reader, int expectedIndex, System.IO.MemoryStream ms)
 		{
 			var previousReader = this.Reader;
 			this.Reader = reader;
 			try {
 				var classId = Reader.ReadInt16();
+				if (classId != expectedIndex + 1) {
+					throw Error("Invalid class id.");
+				}
 				if (classId == 0)
 					throw Error("Unable to read null into object");
-				var def = GetClassDef(this, classId);
+				var def = GetClassDefIncomplete(this, classId);
+				def.BufferStream = ms;
+				// ==
+				reader.ReadString();
+				var theirCount = reader.ReadInt16();
+				while (theirCount-- > 0) {
+					var theirName = reader.ReadString();
+					var rt = ReadType(this);
+				}
+				// ==
+
 				return def;
 			} finally {
-				this.Reader = reader;
+				this.Reader = previousReader;
 			}
 		}
 

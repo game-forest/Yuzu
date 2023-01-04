@@ -80,6 +80,9 @@ namespace Yuzu.Binary
 		public Action<BinaryDeserializer, ReaderClassDef, object> ReadFields;
 		public Func<BinaryDeserializer, ReaderClassDef, object> Make;
 		public List<FieldDef> Fields = new List<FieldDef> { new FieldDef { OurIndex = EOF } };
+		internal bool Incomplete;
+		internal System.IO.Stream BufferStream = null;
+		internal long StreamPosition;
 	}
 
 	internal class Record { }
