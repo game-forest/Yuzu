@@ -6,6 +6,7 @@ using System.Text;
 
 using Yuzu.Util;
 using Yuzu.Metadata;
+using Yuzu.Binary;
 
 namespace Yuzu.Deserializer
 {
@@ -84,17 +85,22 @@ namespace Yuzu.Deserializer
 			return FromStream<T>(new MemoryStream(bytes, false));
 		}
 
-		protected YuzuException Error(string message, params object[] args)
+		protected static YuzuException Error(YuzuPosition position, string message, params object[] args)
 		{
 			for (int i = 0; i < args.Length; ++i) {
 				if (args[i] is Type type) {
 					args[i] = TypeSerializer.Serialize(type);
 				}
 			}
+			return new YuzuException(string.Format(message, args), position);
+		}
 
-			return new YuzuException(
-				string.Format(message, args),
-				Options.ReportErrorPosition ? new YuzuPosition(Reader.BaseStream.Position) : null
+		protected YuzuException Error(string message, params object[] args)
+		{
+			return Error(
+				Options.ReportErrorPosition ? new YuzuPosition(Reader.BaseStream.Position) : null,
+				message,
+				args
 			);
 		}
 
@@ -104,7 +110,6 @@ namespace Yuzu.Deserializer
 			if (t == null) {
 				throw Error("Unknown type '{0}'", typeName);
 			}
-
 			return t;
 		}
 
@@ -138,6 +143,21 @@ namespace Yuzu.Deserializer
 			return (Action<T>)Delegate.CreateDelegate(typeof(Action<T>), obj, m);
 		}
 
+		protected static Action<T> GetActionStatic<T>(BinaryDeserializer d, string name)
+		{
+			if (string.IsNullOrEmpty(name)) {
+				return null;
+			}
+
+			var obj = d.objStack.Peek();
+			var m = obj.GetType().GetMethod(name, BindingFlags.Instance | BindingFlags.Public);
+			if (m == null) {
+				throw d.Error("Unknown action '{0}'", name);
+			}
+
+			return (Action<T>)Delegate.CreateDelegate(typeof(Action<T>), obj, m);
+		}
+
 		protected Func<object> MakeDelegate(MethodInfo m)
 		{
 			return (Func<object>)Delegate.CreateDelegate(typeof(Func<object>), this, m);
@@ -146,6 +166,20 @@ namespace Yuzu.Deserializer
 		protected Action<object> MakeDelegateAction(MethodInfo m)
 		{
 			return (Action<object>)Delegate.CreateDelegate(typeof(Action<object>), this, m);
+		}
+
+		protected static Func<BinaryDeserializer, object> MakeDelegateStatic(MethodInfo m)
+		{
+			return (Func<BinaryDeserializer, object>)Delegate.CreateDelegate(
+				typeof(Func<BinaryDeserializer, object>), m
+			);
+		}
+
+		protected static Action<BinaryDeserializer, object> MakeDelegateActionStatic(MethodInfo m)
+		{
+			return (Action<BinaryDeserializer, object>)Delegate.CreateDelegate(
+				typeof(Action<BinaryDeserializer, object>), m
+			);
 		}
 	}
 }

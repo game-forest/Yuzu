@@ -22,7 +22,7 @@ namespace YuzuGenBin
 			if (tmp1 >= 0) {
 				while (--tmp1 >= 0) {
 					var tmp2 = d.Reader.ReadInt32();
-					var tmp3 = (global::YuzuTest.Sample1)dg.ReadObject<global::YuzuTest.Sample1>();
+					var tmp3 = (global::YuzuTest.Sample1)BinaryDeserializer.ReadObject<global::YuzuTest.Sample1>(dg);
 					result.DI.Add(tmp2, tmp3);
 				}
 			}
@@ -31,13 +31,13 @@ namespace YuzuGenBin
 			var tmp4 = d.Reader.ReadInt32();
 			if (tmp4 >= 0) {
 				while (--tmp4 >= 0) {
-					var tmp5 = (global::YuzuTest.Sample1)dg.ReadObject<global::YuzuTest.Sample1>();
+					var tmp5 = (global::YuzuTest.Sample1)BinaryDeserializer.ReadObject<global::YuzuTest.Sample1>(dg);
 					result.LI.Add(tmp5);
 				}
 			}
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (3 == fd.OurIndex) {
-				dg.ReadIntoObject<global::YuzuTest.Sample1>(result.M);
+				BinaryDeserializer.ReadIntoObject<global::YuzuTest.Sample1>(dg, result.M);
 				fd = def.Fields[d.Reader.ReadInt16()];
 			}
 			if (fd.OurIndex != ReaderClassDef.EOF) throw dg.Error("Unfinished object");
