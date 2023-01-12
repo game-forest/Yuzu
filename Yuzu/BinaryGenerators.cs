@@ -115,7 +115,7 @@ namespace Yuzu.Binary
 			{ typeof(DateTimeOffset), "dg.ReadDateTimeOffset()" },
 			{ typeof(TimeSpan), "new TimeSpan(d.Reader.ReadInt64())" },
 			{ typeof(Guid), "new Guid(d.Reader.ReadBytes(16))" },
-			{ typeof(object), "dg.ReadAny()" },
+			{ typeof(object), "BinaryDeserializer.ReadAny(dg)" },
 		};
 
 		private string PutCount()
@@ -182,7 +182,7 @@ namespace Yuzu.Binary
 				var r = t.GetArrayRank();
 				if (r > 1) {
 					cw.PutPart(
-						"({0})dg.ReadArrayNDim(typeof({1}), {2});\n",
+						"({0})BinaryDeserializer.ReadArrayNDim(dg, typeof({1}), {2});\n",
 						Utils.GetTypeSpec(t),
 						Utils.GetTypeSpec(t.GetElementType()),
 						r
@@ -216,19 +216,23 @@ namespace Yuzu.Binary
 				return;
 			}
 			if (t.IsClass || t.IsInterface) {
-				cw.PutPart("({0})dg.ReadObject{1}<{0}>();\n", Utils.GetTypeSpec(t), MaybeUnchecked());
+				cw.PutPart("({0})BinaryDeserializer.ReadObject{1}<{0}>(dg);\n", Utils.GetTypeSpec(t), MaybeUnchecked());
 				return;
 			}
 			if (Utils.IsStruct(t)) {
 				var meta = Meta.Get(t, options);
 				if (meta.IsCompact) {
 					cw.PutPart("new {0}();\n", Utils.GetTypeSpec(t));
-					cw.Put("dg.EnsureClassDef(typeof({0}));\n", Utils.GetTypeSpec(t));
+					cw.Put("BinaryDeserializer.EnsureClassDef(dg, typeof({0}));\n", Utils.GetTypeSpec(t));
 					foreach (var yi in meta.Items) {
 						GenerateSetValue(yi.Type, $"{name}." + yi.Name, yi);
 					}
 				} else {
-					cw.PutPart("({0})dg.ReadStruct{1}<{0}>();\n", Utils.GetTypeSpec(t), MaybeUnchecked());
+					cw.PutPart(
+						"({0})BinaryDeserializer.ReadStruct{1}<{0}>(dg);\n",
+						Utils.GetTypeSpec(t),
+						MaybeUnchecked()
+					);
 				}
 				return;
 			}
@@ -257,7 +261,7 @@ namespace Yuzu.Binary
 
 			var meta = Meta.Get(t, options);
 			if (CanInline(meta)) {
-				cw.Put("dg.EnsureClassDef(typeof({0}));\n", Utils.GetTypeSpec(t));
+				cw.Put("BinaryDeserializer.EnsureClassDef(dg, typeof({0}));\n", Utils.GetTypeSpec(t));
 				if (item.PropInfo == null) {
 					foreach (var yi in meta.Items) {
 						GenerateSetValue(yi.Type, name + "." + yi.Name, yi);
@@ -302,7 +306,12 @@ namespace Yuzu.Binary
 				return;
 			}
 			if ((t.IsClass || t.IsInterface) && t != typeof(object)) {
-				cw.Put("dg.ReadIntoObject{0}<{1}>({2});\n", MaybeUnchecked(), Utils.GetTypeSpec(t), name);
+				cw.Put(
+					"BinaryDeserializer.ReadIntoObject{0}<{1}>(dg, {2});\n",
+					MaybeUnchecked(),
+					Utils.GetTypeSpec(t),
+					name
+				);
 				return;
 			}
 			throw new YuzuException(string.Format("Unable to merge field {1} of type {0}", name, t.Name));
