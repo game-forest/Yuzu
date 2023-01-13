@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,7 +19,7 @@ namespace YuzuTest.Json
 	public class TestJson
 	{
 		private string MultiLine(string s) =>
-			s.Replace("\r", "").Replace("\t", "");
+			s.Replace("\r", string.Empty).Replace("\t", string.Empty);
 
 		[TestMethod]
 		public void TestSimple()
@@ -29,7 +29,7 @@ namespace YuzuTest.Json
 			Assert.AreEqual("{\n}", js.ToString(new Empty()));
 
 			var v1 = new Sample1 { X = 345, Y = "test" };
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 
 			var result = js.ToString(v1);
 			Assert.AreEqual("{\n\"X\":345,\n\"Y\":\"test\"\n}", result);
@@ -59,7 +59,7 @@ namespace YuzuTest.Json
 			var js = new JsonSerializer();
 
 			var v1 = new Sample2 { X = 345, Y = "test" };
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 
 			var result = js.ToString(v1);
 			Assert.AreEqual("{\n\"X\":345,\n\"Y\":\"test\"\n}", result);
@@ -81,7 +81,7 @@ namespace YuzuTest.Json
 			var js = new JsonSerializer();
 			var v1 = new SampleLong { S = -1L << 33, U = 1UL << 33 };
 
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			var result = js.ToString(v1);
 			Assert.AreEqual("{\n\"S\":-8589934592,\n\"U\":8589934592\n}", result);
 
@@ -114,7 +114,7 @@ namespace YuzuTest.Json
 			var js = new JsonSerializer();
 			var v1 = new SampleSmallTypes { Ch = 'A', Sh = -2000, USh = 2001, B = 198, Sb = -109 };
 
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			var result = js.ToString(v1);
 			Assert.AreEqual("{\n\"B\":198,\n\"Ch\":\"A\",\n\"Sb\":-109,\n\"Sh\":-2000,\n\"USh\":2001\n}", result);
 
@@ -159,7 +159,7 @@ namespace YuzuTest.Json
 				F = 222,
 				S2 = new Sample2 { X = -346, Y = "test1" },
 			};
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 
 			var result = js.ToString(v);
 			Assert.AreEqual(
@@ -222,7 +222,7 @@ namespace YuzuTest.Json
 		public void TestEnum()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			var jd = new JsonDeserializer();
 
 			{
@@ -248,8 +248,7 @@ namespace YuzuTest.Json
 				Assert.AreEqual(vb.Eb, wb.Eb);
 				Assert.AreEqual(vb.El, wb.El);
 
-				wb = (SampleEnumMemberTyped)
-					SampleEnumMemberTyped_JsonDeserializer.Instance.FromString(result1b);
+				wb = (SampleEnumMemberTyped)SampleEnumMemberTyped_JsonDeserializer.Instance.FromString(result1b);
 				Assert.AreEqual(vb.Eb, wb.Eb);
 				Assert.AreEqual(vb.El, wb.El);
 
@@ -279,7 +278,7 @@ namespace YuzuTest.Json
 			var js = new JsonSerializer();
 
 			var v = new SampleBool { B = true };
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 
 			var result1 = js.ToString(v);
 			Assert.AreEqual("{\n\"B\":true\n}", result1);
@@ -300,7 +299,7 @@ namespace YuzuTest.Json
 			js.Options.TagMode = TagMode.Names;
 
 			var v = new SampleFloat { F = 1e-20f, D = -3.1415e100d };
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 
 			var result1 = js.ToString(v);
 			Assert.AreEqual("{\n\"F\":1E-20,\n\"D\":-3.1415E100\n}", result1);
@@ -325,7 +324,7 @@ namespace YuzuTest.Json
 		{
 			var js = new JsonSerializer();
 			js.Options.TagMode = TagMode.Names;
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			var jd = new JsonDeserializer();
 			jd.Options.TagMode = TagMode.Names;
 
@@ -345,14 +344,14 @@ namespace YuzuTest.Json
 			Assert.IsTrue(float.IsPositiveInfinity(w2.F));
 			Assert.IsTrue(double.IsNegativeInfinity(w2.D));
 
-			Assert.AreEqual("Infinity", js.ToString(Double.PositiveInfinity));
+			Assert.AreEqual("Infinity", js.ToString(double.PositiveInfinity));
 		}
 
 		[TestMethod]
 		public void TestDecimal()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 
 			var v = new SampleDecimal { N = -12.34m };
 
@@ -411,8 +410,8 @@ namespace YuzuTest.Json
 		public void TestNullable()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			var jd = new JsonDeserializer();
 
 			var v1 = new SampleNullable { N = null };
@@ -446,7 +445,7 @@ namespace YuzuTest.Json
 		{
 			var js = new JsonSerializer();
 			js.Options.TagMode = TagMode.Names;
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			var result = js.ToString(new SampleMethodOrder());
 			Assert.AreEqual("{\n\"F1\":0,\n\"P1\":0,\n\"F2\":0,\n\"P2\":0\n}", result);
 
@@ -480,7 +479,7 @@ namespace YuzuTest.Json
 		{
 			{
 				var js = new JsonSerializer();
-				js.JsonOptions.Indent = "";
+				js.JsonOptions.Indent = string.Empty;
 				js.JsonOptions.SaveClass = JsonSaveClass.UnknownOrRoot;
 				js.Options.TagMode = TagMode.Names;
 				Assert.AreEqual(
@@ -493,19 +492,21 @@ namespace YuzuTest.Json
 
 			{
 				var js = new JsonSerializer();
-				js.JsonOptions.Indent = "";
+				js.JsonOptions.Indent = string.Empty;
 				js.JsonOptions.SaveClass = JsonSaveClass.UnknownOrRoot | JsonSaveClass.KnownNonRoot;
-				Assert.AreEqual(MultiLine(@"{
-					""class"":""YuzuTest.Sample3, YuzuTest"",
-					""S1"":{
-					""class"":""YuzuTest.Sample1, YuzuTest"",
-					""X"":31,
-					""Y"":""a""
-					},
-					""S11"":0,
-					""S2"":null
+				Assert.AreEqual(
+					MultiLine(@"{
+						""class"":""YuzuTest.Sample3, YuzuTest"",
+						""S1"":{
+							""class"":""YuzuTest.Sample1, YuzuTest"",
+								""X"":31,
+								""Y"":""a""
+						},
+						""S11"":0,
+						""S2"":null
 					}"),
-					js.ToString(new Sample3 { S1 = new Sample1 { X = 31, Y = "a" } }));
+					js.ToString(new Sample3 { S1 = new Sample1 { X = 31, Y = "a" } })
+				);
 			}
 
 			var jd = new JsonDeserializer();
@@ -565,7 +566,7 @@ namespace YuzuTest.Json
 			var s1 = js.ToString(v1);
 			Assert.AreEqual(
 				"{\n\t\"Child\":{" +
-				"\n\t\t\"Child\":null,\n\t\t\"S\":\"x\"\n\t},"+
+				"\n\t\t\"Child\":null,\n\t\t\"S\":\"x\"\n\t}," +
 				"\n\t\"S\":\"a\"\n}", s1);
 			var w1 = jd.FromString<SampleRec>(s1);
 			Assert.AreEqual("a", w1.S);
@@ -577,7 +578,7 @@ namespace YuzuTest.Json
 		public void TestList()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			js.Options.TagMode = TagMode.Names;
 			var jd = new JsonDeserializer();
 			jd.Options.TagMode = TagMode.Names;
@@ -604,8 +605,8 @@ namespace YuzuTest.Json
 					},
 					new SampleTree {
 						Value = 13,
-					}
-				}
+					},
+				},
 			};
 			var result2 = js.ToString(v2);
 			Assert.AreEqual(
@@ -629,7 +630,7 @@ namespace YuzuTest.Json
 		public void TestCollection()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			var jd = new JsonDeserializer();
 
 			var v0 = new SampleWithCollection();
@@ -662,8 +663,8 @@ namespace YuzuTest.Json
 			Assert.AreEqual("[\n2,\n5,\n4\n]", result1);
 			var w2 = (SampleCollection<int>)SampleCollection_Int32_JsonDeserializer.Instance.FromString(result1);
 			CollectionAssert.AreEqual(v2.ToList(), w2.ToList());
-			var w2g = (SampleExplicitCollection<int>)
-				SampleExplicitCollection_Int32_JsonDeserializer.Instance.FromString(result1);
+			var w2g = (SampleExplicitCollection<int>)SampleExplicitCollection_Int32_JsonDeserializer.Instance
+				.FromString(result1);
 			CollectionAssert.AreEqual(v2.ToList(), w2g.ToList());
 
 			var v3 = new SampleConcreteCollection { 8, 3, 1 };
@@ -672,8 +673,7 @@ namespace YuzuTest.Json
 			var w3 = new SampleConcreteCollection();
 			jd.FromString(w3, result3);
 			CollectionAssert.AreEqual(v3.ToList(), w3.ToList());
-			var w3g = (SampleConcreteCollection)
-				SampleConcreteCollection_JsonDeserializer.Instance.FromString(result3);
+			var w3g = (SampleConcreteCollection)SampleConcreteCollection_JsonDeserializer.Instance.FromString(result3);
 			CollectionAssert.AreEqual(v3.ToList(), w3g.ToList());
 		}
 
@@ -682,7 +682,7 @@ namespace YuzuTest.Json
 		{
 			var js = new JsonSerializer();
 			var jd = new JsonDeserializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			var v1 = new SampleWithCollectionDefault();
 			var result1 = js.ToString(v1);
 			Assert.AreEqual("{\n}", result1);
@@ -713,7 +713,7 @@ namespace YuzuTest.Json
 
 			var js1 = new JsonSerializer();
 			js1.Options.CheckForEmptyCollections = true;
-			js1.JsonOptions.Indent = "";
+			js1.JsonOptions.Indent = string.Empty;
 			Assert.AreEqual("{\n\"A\":[]\n}", js1.ToString(v2));
 			var v3 = new SampleWithCollectionDefaultNonSerializable();
 			v3.B.Add(2);
@@ -724,7 +724,7 @@ namespace YuzuTest.Json
 		public void TestIEnumerable()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			var jd = new JsonDeserializer();
 
 			var v0 = new SampleIEnumerable();
@@ -740,7 +740,7 @@ namespace YuzuTest.Json
 		public void TestTopLevelList()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			var jd = new JsonDeserializer();
 
 			var v0 = new List<string> { "a", "b", "c" };
@@ -769,7 +769,7 @@ namespace YuzuTest.Json
 		public void TestTopLevelDict()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			var jd = new JsonDeserializer();
 
 			var v0 = new Dictionary<string, int> { { "a", 1 }, { "b", 2 } };
@@ -790,16 +790,17 @@ namespace YuzuTest.Json
 		public void TestDictionary()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			js.Options.TagMode = TagMode.Names;
 			var jd = new JsonDeserializer();
 			jd.Options.TagMode = TagMode.Names;
 
 			var v0 = new SampleDict {
-				Value = 3, Children = new Dictionary<string, SampleDict> {
+				Value = 3,
+				Children = new Dictionary<string, SampleDict> {
 				{ "a", new SampleDict { Value = 5, Children = new Dictionary<string, SampleDict>() } },
 				{ "b", new SampleDict { Value = 7 } },
-			}
+			},
 			};
 			var result0 = js.ToString(v0);
 			Assert.AreEqual(
@@ -819,23 +820,23 @@ namespace YuzuTest.Json
 			Assert.AreEqual(v0.Children.Count, w0g.Children.Count);
 			Assert.AreEqual(v0.Children["a"].Value, w0g.Children["a"].Value);
 
-			var v1 = new Dictionary<string, int> { { "", 0 } };
+			var v1 = new Dictionary<string, int> { { string.Empty, 0 } };
 			var result1 = js.ToString(v1);
 			Assert.AreEqual("{\n\"\":0\n}", result1);
 			var w1 = jd.FromString<Dictionary<string, int>>(result1);
 			Assert.AreEqual(1, w1.Count);
-			Assert.AreEqual(0, w1[""]);
+			Assert.AreEqual(0, w1[string.Empty]);
 			var w1a = (Dictionary<string, object>)jd.FromString(result1);
 			Assert.AreEqual(1, w1.Count);
-			Assert.AreEqual(0, w1[""]);
+			Assert.AreEqual(0, w1[string.Empty]);
 		}
 
 		[TestMethod]
 		public void TestSortedDictionary()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 
 			var v0 = new SampleSortedDict { d = new SortedDictionary<string, int> { { "a", 3 }, { "b", 4 } } };
 			var result0 = js.ToString(v0);
@@ -859,13 +860,13 @@ namespace YuzuTest.Json
 		public void TestDictionaryKeys()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 
 			var v0 = new SampleDictKeys {
-				I =  new Dictionary<int, int> { { 5, 7 } },
-				E =  new Dictionary<SampleEnum, int> { { SampleEnum.E2, 8 } },
-				K =  new Dictionary<SampleKey, int> { { new SampleKey { V = 3 }, 9 } },
+				I = new Dictionary<int, int> { { 5, 7 } },
+				E = new Dictionary<SampleEnum, int> { { SampleEnum.E2, 8 } },
+				K = new Dictionary<SampleKey, int> { { new SampleKey { V = 3 }, 9 } },
 			};
 			var result0 = js.ToString(v0);
 			Assert.AreEqual(
@@ -906,7 +907,7 @@ namespace YuzuTest.Json
 		public void TestArray()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			var jd = new JsonDeserializer();
 
 			var v0 = new SampleArray { A = new string[] { "a", "b", "c" } };
@@ -934,8 +935,8 @@ namespace YuzuTest.Json
 		public void TestArrayOfArray()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			var jd = new JsonDeserializer();
 
 			var v0 = new SampleArrayOfArray { A = new int[][] { new int[] { 1, 2, 3 }, new int[] { 4, 5 } } };
@@ -957,13 +958,13 @@ namespace YuzuTest.Json
 		public void TestArrayNDim()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			var jd = new JsonDeserializer();
 
 			var v0 = new SampleArrayNDim {
 				A = new int[2, 3] { { 1, 2, 3 }, { 4, 5, 6 } },
-				B = new string [1,1,1] { { { "x" } } },
+				B = new string[1, 1, 1] { { { "x" } } },
 			};
 			var result0 = js.ToString(v0);
 			Assert.AreEqual("{\"A\":[[1,2,3],[4,5,6]],\"B\":[[[\"x\"]]]}", result0);
@@ -1008,7 +1009,7 @@ namespace YuzuTest.Json
 					new SampleDerivedA(),
 					new SampleDerivedB { FB = 9 },
 					new SampleDerivedB { FB = 8 },
-				}
+				},
 			};
 
 			var result = js.ToString(v);
@@ -1035,7 +1036,7 @@ namespace YuzuTest.Json
 		{
 			var src = "{\"M\":[[1,2,3],[4,5],[6],[]]}";
 			var v = new SampleMatrix();
-			(new JsonDeserializer()).FromString(v, src);
+			new JsonDeserializer().FromString(v, src);
 			Assert.AreEqual(4, v.M.Count);
 			CollectionAssert.AreEqual(new int[] { 1, 2, 3 }, v.M[0]);
 			CollectionAssert.AreEqual(new int[] { 4, 5 }, v.M[1]);
@@ -1050,8 +1051,8 @@ namespace YuzuTest.Json
 			Assert.AreEqual(0, v.M[3].Count);
 
 			var js = new JsonSerializer();
-			js.JsonOptions.FieldSeparator = "";
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.FieldSeparator = string.Empty;
+			js.JsonOptions.Indent = string.Empty;
 			Assert.AreEqual(src, js.ToString(v));
 		}
 
@@ -1071,7 +1072,7 @@ namespace YuzuTest.Json
 				B = new SamplePoint { X = 55, Y = 66 },
 			};
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			js.JsonOptions.FieldSeparator = " ";
 			js.JsonOptions.IgnoreCompact = true;
 			var result = js.ToString(v);
@@ -1105,8 +1106,8 @@ namespace YuzuTest.Json
 		public void TestInterface()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			var v1 = new SampleInterfaceField { I = new SampleInterfaced { X = 34 } };
 			var result1 = js.ToString(v1);
 			Assert.AreEqual("{\"I\":{\"class\":\"YuzuTest.SampleInterfaced, YuzuTest\",\"X\":34}}", result1);
@@ -1146,8 +1147,8 @@ namespace YuzuTest.Json
 		public void TestAbstract()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			js.JsonOptions.SaveClass = JsonSaveClass.UnknownOrRoot;
 			var jd = new JsonDeserializer();
 
@@ -1172,14 +1173,14 @@ namespace YuzuTest.Json
 		public void TestGeneric()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			var v1 = new SampleInterfaceField { I = new SampleInterfacedGeneric<string> { X = 35, G = "qq" } };
 			var n = "YuzuTest.SampleInterfacedGeneric`1[[System.String]], YuzuTest";
 			var result1 = js.ToString(v1);
 			Assert.AreEqual(
-				String.Format("{{\"I\":{{\"class\":\"{0}\",\"G\":\"qq\",\"X\":35}}}}", n), result1);
-			var w1 = (SampleInterfaceField)(new JsonDeserializer()).FromString(new SampleInterfaceField(), result1);
+				string.Format("{{\"I\":{{\"class\":\"{0}\",\"G\":\"qq\",\"X\":35}}}}", n), result1);
+			var w1 = (SampleInterfaceField)new JsonDeserializer().FromString(new SampleInterfaceField(), result1);
 			Assert.AreEqual(w1.I.X, 35);
 			Assert.AreEqual((w1.I as SampleInterfacedGeneric<string>).G, "qq");
 			var w1g = (SampleInterfaceField)SampleInterfaceField_JsonDeserializer.Instance.FromString(result1);
@@ -1195,7 +1196,7 @@ namespace YuzuTest.Json
 				B = new SamplePoint { X = 55, Y = 66 },
 			};
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			js.JsonOptions.FieldSeparator = " ";
 			var result = js.ToString(v);
 			Assert.AreEqual("{ \"A\":[ 33, 44 ], \"B\":[ 55, 66 ] }", result);
@@ -1213,7 +1214,7 @@ namespace YuzuTest.Json
 		public void TestDefault()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			js.JsonOptions.FieldSeparator = " ";
 
 			var v1 = new Sample1 { X = 6, Y = "ttt" };
@@ -1233,7 +1234,7 @@ namespace YuzuTest.Json
 			var result3 = js.ToString(v3);
 			Assert.AreEqual("{ \"B\":\"z\" }", result3);
 			var w3 = new SampleDefault();
-			(new JsonDeserializer()).FromString(w3, result3);
+			new JsonDeserializer().FromString(w3, result3);
 			Assert.AreEqual(3, w3.A);
 			Assert.AreEqual("z", w3.B);
 			Assert.AreEqual(new SamplePoint { X = 7, Y = 2 }, w3.P);
@@ -1243,8 +1244,8 @@ namespace YuzuTest.Json
 		public void TestAlias()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			js.Options.TagMode = TagMode.Aliases;
 
 			var v = new SampleTree { Value = 9 };
@@ -1262,7 +1263,7 @@ namespace YuzuTest.Json
 			var prev = IdGenerator.GetNextId();
 			for (int i = 0; i < 2 * 52 - 5; ++i) {
 				var next = IdGenerator.GetNextId();
-				Assert.IsTrue(String.CompareOrdinal(prev, next) < 0);
+				Assert.IsTrue(string.CompareOrdinal(prev, next) < 0);
 				prev = next;
 			}
 			Assert.AreEqual("AABz", IdGenerator.GetNextId());
@@ -1301,7 +1302,7 @@ namespace YuzuTest.Json
 			Assert.AreEqual(typeof(Dictionary<string, object>), d.GetType());
 			CollectionAssert.AreEqual(
 				new object[] { 1.0, 2.0, 3.0 },
-				(List<object>)((Dictionary<string,object>)d)["F"]);
+				(List<object>)((Dictionary<string, object>)d)["F"]);
 			dynamic d1 = YuzuUnknown.Dyn(d);
 			CollectionAssert.AreEqual(new object[] { 1.0, 2.0, 3.0 }, (List<object>)d1.F);
 
@@ -1314,8 +1315,8 @@ namespace YuzuTest.Json
 			Assert.AreEqual(null, d1.F.F);
 
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			Assert.AreEqual("[\"q\",[1]]", js.ToString(new List<object> { "q", new List<int> { 1 } }));
 		}
 
@@ -1348,8 +1349,8 @@ namespace YuzuTest.Json
 		{
 			var js = new JsonSerializer();
 			js.Options.AllowUnknownFields = true;
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 
 			var jd = new JsonDeserializer();
 			jd.Options.AllowUnknownFields = true;
@@ -1382,8 +1383,8 @@ namespace YuzuTest.Json
 		public void TestUnknownStorageDict()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			js.JsonOptions.SaveClass = JsonSaveClass.UnknownOrRoot;
 			var jd = new JsonDeserializer();
 			jd.Options.AllowUnknownFields = true;
@@ -1417,8 +1418,8 @@ namespace YuzuTest.Json
 		public void TestEscape()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			var jd = new JsonDeserializer();
 			{
 				var s = "\"/{\u0001}\n\t\"\"";
@@ -1458,7 +1459,7 @@ namespace YuzuTest.Json
 		public void TestDate()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			js.JsonOptions.FieldSeparator = " ";
 			var jd = new JsonDeserializer();
 
@@ -1470,8 +1471,10 @@ namespace YuzuTest.Json
 
 			var d = new DateTime(2011, 3, 25);
 			var v1 = new SampleDate {
-				D = d, DOfs = new DateTimeOffset(d, TimeSpan.FromHours(1)),
-				T = TimeSpan.FromMinutes(5) };
+				D = d,
+				DOfs = new DateTimeOffset(d, TimeSpan.FromHours(1)),
+				T = TimeSpan.FromMinutes(5),
+			};
 			var result1 = js.ToString(v1);
 			Assert.AreEqual(
 				"{ \"D\":\"2011-03-25T00:00:00.0000000\", " +
@@ -1485,7 +1488,7 @@ namespace YuzuTest.Json
 				"{ \"D\":\"2011\", \"DOfs\":\"2011-00\", \"T\":\"00#05#00\" }", js.ToString(v1));
 
 			var w1 = new SampleDate();
-			(new JsonDeserializer()).FromString(w1, result1);
+			new JsonDeserializer().FromString(w1, result1);
 			Assert.AreEqual(v1.D, w1.D);
 			Assert.AreEqual(v1.DOfs, w1.DOfs);
 			Assert.AreEqual(v1.T, w1.T);
@@ -1521,8 +1524,8 @@ namespace YuzuTest.Json
 		public void TestGuid()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			var jd = new JsonDeserializer();
 
 			var v = new SampleGuid { G = new Guid("5727b607-dcee-445f-856c-fd8ebb4b4573") };
@@ -1555,8 +1558,8 @@ namespace YuzuTest.Json
 		public void TestDelegate()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 
 			var v1 = new SampleSelfDelegate { x = 77 };
 			v1.OnSomething = v1.Handler1;
@@ -1587,8 +1590,8 @@ namespace YuzuTest.Json
 			jd.FromString(w, s);
 			Assert.AreEqual(sample.About, w.About);
 
-			var wg = (SampleWithNullFieldCompact)
-				SampleWithNullFieldCompact_JsonDeserializer.Instance.FromString("[null]");
+			var wg = (SampleWithNullFieldCompact)SampleWithNullFieldCompact_JsonDeserializer.Instance
+				.FromString("[null]");
 			Assert.AreEqual(null, wg.N);
 
 			var v2 = new SampleObj();
@@ -1636,8 +1639,8 @@ namespace YuzuTest.Json
 			var w1 = new SampleBeforeDeserialization();
 			jd.FromString(w1, result0);
 			Assert.AreEqual("2X", w1.X);
-			var w2 = (SampleBeforeDeserialization)
-				SampleBeforeDeserialization_JsonDeserializer.Instance.FromString(result0);
+			var w2 = (SampleBeforeDeserialization)SampleBeforeDeserialization_JsonDeserializer.Instance
+				.FromString(result0);
 			Assert.AreEqual("2X", w2.X);
 		}
 
@@ -1666,8 +1669,8 @@ namespace YuzuTest.Json
 		public void TestMerge()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 
 			var v1 = new SampleMerge();
 			v1.DI.Add(3, 4);
@@ -1703,16 +1706,16 @@ namespace YuzuTest.Json
 		public void TestNamespaces()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			js.Options.TagMode = TagMode.Names;
 
 			var v1 = new YuzuTest2.SampleNamespace { B = new SampleBase { FBase = 3 } };
 			var result1 = js.ToString(v1);
 			Assert.AreEqual("{\"B\":{\"FBase\":3}}", result1);
 
-			var w1 = (YuzuTest2.SampleNamespace)
-				YuzuGen.YuzuTest2.SampleNamespace_JsonDeserializer.Instance.FromString(result1);
+			var w1 = (YuzuTest2.SampleNamespace)YuzuGen.YuzuTest2.SampleNamespace_JsonDeserializer.Instance
+				.FromString(result1);
 			Assert.AreEqual(3, w1.B.FBase);
 		}
 
@@ -1720,8 +1723,8 @@ namespace YuzuTest.Json
 		public void TestNestedTypes()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			js.JsonOptions.EnumAsString = true;
 
 			var v1 = new SampleNested { E = SampleNested.NestedEnum.One, C = new SampleNested.NestedClass() };
@@ -1737,8 +1740,8 @@ namespace YuzuTest.Json
 		public void TestMemberOfInterface()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 
 			var v1 = new List<ISampleMember>();
 			var result1 = js.ToString(v1);
@@ -1776,8 +1779,8 @@ namespace YuzuTest.Json
 		public void TestTopLevelContainerOfNonPrimitiveTypes()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			js.Options.TagMode = TagMode.Names;
 			var jd = new JsonDeserializer();
 			jd.Options.TagMode = TagMode.Names;
@@ -1790,12 +1793,13 @@ namespace YuzuTest.Json
 				"{\"class\":\"YuzuTest.SampleDerivedB, YuzuTest\",\"FBase\":0,\"FB\":20}]",
 				result1);
 			var w1 = (List<object>)jd.FromString(result1);
-			for (int i = 0; i < v1.Count; i++)
+			for (int i = 0; i < v1.Count; i++) {
 				Assert.AreEqual((v1[i] as SampleDerivedB).FB, (w1[i] as SampleDerivedB).FB);
+			}
 
 			var v2 = new Dictionary<string, object> {
 				{ "3", new SampleDerivedB { FB = 10 } },
-				{ "7", new SampleDerivedB { FB = 20 } } };
+				{ "7", new SampleDerivedB { FB = 20 } }, };
 
 			var result2 = js.ToString(v2);
 			Assert.AreEqual(
@@ -1803,21 +1807,22 @@ namespace YuzuTest.Json
 				"\"7\":{\"class\":\"YuzuTest.SampleDerivedB, YuzuTest\",\"FBase\":0,\"FB\":20}}",
 				result2);
 			var w2 = (Dictionary<string, object>)jd.FromString(result2);
-			foreach (var i in v2)
+			foreach (var i in v2) {
 				Assert.AreEqual((i.Value as SampleDerivedB).FB, (w2[i.Key] as SampleDerivedB).FB);
+			}
 		}
 
 		[TestMethod]
 		public void TestAssemblies()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			var jd = new JsonDeserializer();
 
 			var v1 = new List<SampleAssemblyBase> {
 				new SampleAssemblyDerivedQ { Q = 10 },
-				new SampleAssemblyDerivedR { R = "R1" } };
+				new SampleAssemblyDerivedR { R = "R1" }, };
 			var result1 = js.ToString(v1);
 			Assert.AreEqual(
 				"[{\"class\":\"YuzuTestAssembly.SampleAssemblyDerivedQ, AssemblyTest\",\"Q\":10}," +
@@ -1829,8 +1834,8 @@ namespace YuzuTest.Json
 			Assert.AreEqual((v1[0] as SampleAssemblyDerivedQ).Q, (w1[0] as SampleAssemblyDerivedQ).Q);
 			Assert.AreEqual((v1[1] as SampleAssemblyDerivedR).R, (w1[1] as SampleAssemblyDerivedR).R);
 
-			var w1g = (List<SampleAssemblyBase>)
-				YuzuGen.System.Collections.Generic.List_SampleAssemblyBase_JsonDeserializer.Instance.FromString(result1);
+			var w1g = (List<SampleAssemblyBase>)YuzuGen.System.Collections.Generic
+				.List_SampleAssemblyBase_JsonDeserializer.Instance.FromString(result1);
 			Assert.AreEqual((v1[0] as SampleAssemblyDerivedQ).Q, (w1g[0] as SampleAssemblyDerivedQ).Q);
 			Assert.AreEqual((v1[1] as SampleAssemblyDerivedR).R, (w1g[1] as SampleAssemblyDerivedR).R);
 		}
@@ -1839,8 +1844,8 @@ namespace YuzuTest.Json
 		public void TestUnknown()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			var jd = new JsonDeserializer();
 			jd.JsonOptions.Unordered = true;
 
@@ -1885,7 +1890,7 @@ namespace YuzuTest.Json
 			var js = new JsonSerializer();
 			var jd = new JsonDeserializer();
 			{
-				js.JsonOptions.Indent = js.JsonOptions.FieldSeparator = "";
+				js.JsonOptions.Indent = js.JsonOptions.FieldSeparator = string.Empty;
 				js.JsonOptions.SaveClass = JsonSaveClass.UnknownOrRoot;
 				js.Options.AllowEmptyTypes = true;
 				js.Options.Meta = SampleUnknownDictOfLists.Override();
@@ -1904,7 +1909,7 @@ namespace YuzuTest.Json
 		public void TestAllowReadingFromAncestor()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			js.JsonOptions.SaveClass = JsonSaveClass.UnknownOrRoot;
 			var v1 = new Sample2 { X = 83, Y = "83" };
 			var result1 = js.ToString(v1);
@@ -1934,8 +1939,10 @@ namespace YuzuTest.Json
 				});
 				threads[i].Start();
 			}
-			foreach (var t in threads)
+			foreach (var t in threads) {
 				t.Wait(1000);
+			}
+
 			for (int i = 0; i < threads.Length; ++i) {
 				var j = i;
 				threads[i] = new Task(() => {
@@ -1945,15 +1952,16 @@ namespace YuzuTest.Json
 				});
 				threads[i].Start();
 			}
-			foreach (var t in threads)
+			foreach (var t in threads) {
 				t.Wait(1000);
+			}
 		}
 
 		[TestMethod]
 		public void TestSurrogateStr()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			var jd = new JsonDeserializer();
 
 			var v1 = new SampleSurrogateColor { R = 255, G = 0, B = 161 };
@@ -1983,8 +1991,8 @@ namespace YuzuTest.Json
 		public void TestSurrogateClass()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			var jd = new JsonDeserializer();
 
 			var v1 = new SampleSurrogateClass { FB = true };
@@ -2026,21 +2034,22 @@ namespace YuzuTest.Json
 			js.JsonOptions.SaveClass = JsonSaveClass.UnknownOrRoot;
 
 			var v1 = new SampleTree {
-				Value = 1, Children = new List<SampleTree> {
+				Value = 1,
+				Children = new List<SampleTree> {
 					new SampleTree {
 						Value = 11,
-						Children = null
+						Children = null,
 					},
 					new SampleTree {
 						Value = 12,
 						Children = new List<SampleTree> {
 							new SampleTree {
 								Value = 121,
-								Children = null
+								Children = null,
 							},
 						},
 					},
-				}
+				},
 			};
 			Assert.AreEqual(
 				"{\n" +
@@ -2065,7 +2074,7 @@ namespace YuzuTest.Json
 				js.ToString(v1));
 
 			var v2 = new Dictionary<string, SamplePoint> {
-				{ "a", new SamplePoint { X = 4, Y = 3 } }
+				{ "a", new SamplePoint { X = 4, Y = 3 } },
 			};
 			Assert.AreEqual(
 				"{\n" +
@@ -2082,7 +2091,7 @@ namespace YuzuTest.Json
 		{
 			var js = new JsonSerializer();
 			js.JsonOptions.MaxOnelineFields = 2;
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			js.JsonOptions.FieldSeparator = " ";
 			Assert.AreEqual("[5,6]", js.ToString(new SamplePoint { X = 5, Y = 6 }));
 			var c = new Color { B = 1, G = 2, R = 3 };
@@ -2096,7 +2105,7 @@ namespace YuzuTest.Json
 		{
 			var js = new JsonSerializer();
 			js.JsonOptions.MaxOnelineFields = 2;
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			js.JsonOptions.FieldSeparator = " ";
 			var v1 = new SampleOneline {
 				Name = "Foo",
@@ -2106,7 +2115,7 @@ namespace YuzuTest.Json
 					A = new SamplePoint() { X = 10, Y = 12 },
 					B = new SamplePoint() { X = 15, Y = 75 },
 				},
-				Type = SampleEnum.E2
+				Type = SampleEnum.E2,
 			};
 			Assert.AreEqual("[ \"Foo\", [2,5], [666,999], [ [10,12], [15,75] ], 1 ]", js.ToString(v1));
 			js.JsonOptions.MaxOnelineFields = 10;
@@ -2119,7 +2128,7 @@ namespace YuzuTest.Json
 		public void TestClassAlias()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			js.JsonOptions.FieldSeparator = " ";
 			var jd = new JsonDeserializer();
 
@@ -2144,7 +2153,7 @@ namespace YuzuTest.Json
 		public void TestClassAliasNested()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			js.JsonOptions.FieldSeparator = " ";
 			var jd = new JsonDeserializer();
 
@@ -2159,7 +2168,7 @@ namespace YuzuTest.Json
 		public void TestAliasForNestedClassWhenEnclosingClassRenamed()
 		{
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
+			js.JsonOptions.Indent = string.Empty;
 			js.JsonOptions.FieldSeparator = " ";
 			js.JsonOptions.SaveClass = JsonSaveClass.UnknownOrRoot;
 			var jd = new JsonDeserializer();
@@ -2187,8 +2196,8 @@ namespace YuzuTest.Json
 				Assert.AreEqual(71, w1.X);
 			}
 			{
-				var w1 = (SamplePrivateConstructor)
-					SamplePrivateConstructor_JsonDeserializer.Instance.FromString("{\"X\":73}");
+				var w1 = (SamplePrivateConstructor)SamplePrivateConstructor_JsonDeserializer.Instance
+					.FromString("{\"X\":73}");
 				Assert.AreEqual(73, w1.X);
 			}
 			{
@@ -2269,32 +2278,49 @@ namespace YuzuTest.Json
 			XAssert.Throws<YuzuException>(() => jd.FromString<SampleMemberI>("{ \"Z\": 1 }"), "'Z'");
 			XAssert.Throws<YuzuException>(() => jd.FromString(w, "[]"), ".Sample1");
 			XAssert.Throws<YuzuException>(() => jd.FromString(w, "{ \"class\": \"Q\" }"), "'Q'");
-			XAssert.Throws<YuzuException>(() => jd.FromString(w, "{ \"class\": \"YuzuTest.Sample2, YuzuTest\" }"), ".Sample2");
-			XAssert.Throws<YuzuException>(() => jd.FromString(
-				new Sample2Allow(), "{ \"class\": \"YuzuTest.Sample1, YuzuTest\" }"), ".Sample1");
-			XAssert.Throws<YuzuException>(() => jd.FromString(new SamplePoint(), "[ \"QQ\" ]"), "");
+			XAssert.Throws<YuzuException>(
+				() => jd.FromString(w, "{ \"class\": \"YuzuTest.Sample2, YuzuTest\" }"), ".Sample2"
+			);
+			XAssert.Throws<YuzuException>(
+				() => jd.FromString(
+					new Sample2Allow(),
+					"{ \"class\": \"YuzuTest.Sample1, YuzuTest\" }"
+				),
+				".Sample1"
+			);
+			XAssert.Throws<YuzuException>(() => jd.FromString(new SamplePoint(), "[ \"QQ\" ]"), string.Empty);
 			XAssert.Throws<YuzuException>(() => jd.FromString(new object(), "{}"), "object");
-			XAssert.Throws<EndOfStreamException>(() => jd.FromString(""), "");
+			XAssert.Throws<EndOfStreamException>(() => jd.FromString(string.Empty), string.Empty);
 			XAssert.Throws<EndOfStreamException>(() => jd.FromString(w, "{ \"X\": 1"));
-			XAssert.Throws<YuzuException>(() => jd.FromString(
-				"{\"class\":\"YuzuTest.SampleInterfaceField, YuzuTest\",\"I\":{}}"), "class");
-			XAssert.Throws<YuzuException>(() => jd.FromString(
-				"{\"class\":\"YuzuTest.SampleInterfaceField, YuzuTest\",\"I\":{\"class\":\"YuzuTest.Sample1, YuzuTest\"}}"),
-				"ISample");
-			XAssert.Throws<YuzuException>(() =>
-				jd.FromString<Dictionary<Sample2, int>>("{\"a\":1}"), "Sample2");
-			XAssert.Throws<YuzuException>(() => jd.FromString(
-				"{\"class\":\"System.Int32\",\"a\":1}"), "Primitive");
-			XAssert.Throws<YuzuException>(() => jd.FromString(
-				"{\"class\":\"YuzuTest.Sample1, YuzuTest\", \"X\": 3, \"\": 4}"), "''");
+			XAssert.Throws<YuzuException>(
+				() => jd.FromString("{\"class\":\"YuzuTest.SampleInterfaceField, YuzuTest\",\"I\":{}}"), "class"
+			);
+			XAssert.Throws<YuzuException>(
+				() => jd.FromString(
+					"{\"class\":\"YuzuTest.SampleInterfaceField, YuzuTest\"," +
+					"\"I\":{\"class\":\"YuzuTest.Sample1, YuzuTest\"}}"
+				),
+				"ISample"
+			);
+			XAssert.Throws<YuzuException>(() => jd.FromString<Dictionary<Sample2, int>>("{\"a\":1}"), "Sample2");
+			XAssert.Throws<YuzuException>(() => jd.FromString("{\"class\":\"System.Int32\",\"a\":1}"), "Primitive");
+			XAssert.Throws<YuzuException>(
+				() => jd.FromString(
+					"{\"class\":\"YuzuTest.Sample1, YuzuTest\", \"X\": 3, \"\": 4}"
+				),
+				"''"
+			);
 
-			XAssert.Throws<YuzuException>(() => jd.FromString(
-				"{\"class\":\"YuzuTest.SampleList, YuzuTest\",\"E\":[5, 4, 3]}"), "5");
-			XAssert.Throws<YuzuException>(() => jd.FromString(
-				"{\"class\":\"YuzuTest.SampleDict, YuzuTest\",\"a\":1,\"b\":7}"), "7");
+			XAssert.Throws<YuzuException>(
+				() => jd.FromString("{\"class\":\"YuzuTest.SampleList, YuzuTest\",\"E\":[5, 4, 3]}"), "5"
+			);
+			XAssert.Throws<YuzuException>(
+				() => jd.FromString("{\"class\":\"YuzuTest.SampleDict, YuzuTest\",\"a\":1,\"b\":7}"), "7"
+			);
 
-			XAssert.Throws<YuzuException>(() => jd.FromString<SampleArrayNDim>(
-				"{\"A\":[[1,2],[3]],\"B\":[]}"), "expected 2, found 1");
+			XAssert.Throws<YuzuException>(
+				() => jd.FromString<SampleArrayNDim>("{\"A\":[[1,2],[3]],\"B\":[]}"), "expected 2, found 1"
+			);
 
 			{
 				List<int> list = new List<int>();
@@ -2309,15 +2335,16 @@ namespace YuzuTest.Json
 			jd.JsonOptions.Unordered = true;
 			XAssert.Throws<YuzuException>(() => jd.FromString("{\"class\": \"YuzuTest.SampleBase, YuzuTest\"}"), "1");
 			jd.JsonOptions.Unordered = false;
-			XAssert.Throws<YuzuException>(() => jd.FromString("{\"class\": \"YuzuTest.SampleBase, YuzuTest\"}"), "FBase");
+			XAssert.Throws<YuzuException>(
+				() => jd.FromString("{\"class\": \"YuzuTest.SampleBase, YuzuTest\"}"), "FBase"
+			);
 
 			jd.Options.ReportErrorPosition = true;
 			XAssert.Throws<YuzuException>(() => jd.FromString(w, "      z"), "7");
 			jd.Options.ReportErrorPosition = false;
 			try {
 				jd.FromString(w, "      z");
-			}
-			catch (YuzuException e) {
+			} catch (YuzuException e) {
 				Assert.IsFalse(e.Message.Contains("7"));
 			}
 		}
@@ -2330,7 +2357,7 @@ namespace YuzuTest.Json
 			XAssert.Throws<YuzuException>(() => js.ToString(new Bad1()), "F");
 			XAssert.Throws<YuzuException>(() => js.ToString(new Bad2()), "F");
 			XAssert.Throws<YuzuException>(() => js.ToString(new Bad3()), "G");
-			XAssert.Throws<YuzuException>(() => js.ToString(new BadPrivate()), "'F'");
+			XAssert.Throws<YuzuException>(() => js.ToString(new BadPrivate()), "'f'");
 			XAssert.Throws<YuzuException>(() => js.ToString(new BadPrivateGetter()), "'F'");
 			XAssert.Throws<YuzuException>(() => js.ToString(new SampleMultiCollection()), "SampleMultiCollection");
 		}

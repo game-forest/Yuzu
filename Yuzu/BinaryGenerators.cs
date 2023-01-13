@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -10,36 +10,40 @@ namespace Yuzu.Binary
 	using ReadCacheAction = Action<BinaryDeserializer, ReaderClassDef, object>;
 	using MakeCacheAction = Func<BinaryDeserializer, ReaderClassDef, object>;
 
-	public class BinaryDeserializerGenBase: BinaryDeserializer
+	public class BinaryDeserializerGenBase : BinaryDeserializer
 	{
-		protected static Dictionary<Type, ReadCacheAction> readCache =
-			new Dictionary<Type, ReadCacheAction>();
-		protected static Dictionary<Type, MakeCacheAction> makeCache =
-			new Dictionary<Type, MakeCacheAction>();
+		protected static Dictionary<Type, ReadCacheAction> readCache = new Dictionary<Type, ReadCacheAction>();
+		protected static Dictionary<Type, MakeCacheAction> makeCache = new Dictionary<Type, MakeCacheAction>();
 
 		protected override void PrepareReaders(ReaderClassDef def)
 		{
 			base.PrepareReaders(def);
-			if (readCache.TryGetValue(def.Meta.Type, out ReadCacheAction r))
+			if (readCache.TryGetValue(def.Meta.Type, out ReadCacheAction r)) {
 				def.ReadFields = r;
-			if (makeCache.TryGetValue(def.Meta.Type, out MakeCacheAction m))
-				def.Make = m;
-		}
+			}
 
+			if (makeCache.TryGetValue(def.Meta.Type, out MakeCacheAction m)) {
+				def.Make = m;
+			}
+		}
 	}
 
 	public class BinaryDeserializerGenerator : IGenerator
 	{
-		private CodeWriter cw = new CodeWriter();
-		private string wrapperNameSpace;
+		private readonly CodeWriter cw = new CodeWriter();
+		private readonly string wrapperNameSpace;
 		private CommonOptions options;
-		private string className;
-		private string baseClassName;
-		private Dictionary<Type, string> generatedReaders = new Dictionary<Type, string>();
-		private Dictionary<Type, string> generatedMakers = new Dictionary<Type, string>();
-		private string classDefName = typeof(ReaderClassDef).Name;
+		private readonly string className;
+		private readonly string baseClassName;
+		private readonly Dictionary<Type, string> generatedReaders = new Dictionary<Type, string>();
+		private readonly Dictionary<Type, string> generatedMakers = new Dictionary<Type, string>();
+		private readonly string classDefName = typeof(ReaderClassDef).Name;
 
-		public string LineSeparator { get { return cw.LineSeparator; } set { cw.LineSeparator = value; } }
+		public string LineSeparator
+		{
+			get { return cw.LineSeparator; }
+			set { cw.LineSeparator = value; }
+		}
 
 		public StreamWriter GenWriter
 		{
@@ -78,16 +82,22 @@ namespace Yuzu.Binary
 		{
 			cw.Put("static {0}()\n", className);
 			cw.Put("{\n");
-			foreach (var r in generatedReaders)
+			foreach (var r in generatedReaders) {
 				cw.Put("readCache[typeof({0})] = {1};\n", Utils.GetTypeSpec(r.Key), r.Value);
-			foreach (var r in generatedMakers)
+			}
+
+			foreach (var r in generatedMakers) {
 				cw.Put("makeCache[typeof({0})] = {1};\n", Utils.GetTypeSpec(r.Key), r.Value);
+			}
+
 			cw.PutEndBlock();
-			cw.PutEndBlock(); // Close class.
-			cw.PutEndBlock(); // Close namespace.
+			// Close class.
+			cw.PutEndBlock();
+			// Close namespace.
+			cw.PutEndBlock();
 		}
 
-		private static Dictionary<Type, string> simpleValueReader = new Dictionary<Type, string>() {
+		private static readonly Dictionary<Type, string> simpleValueReader = new Dictionary<Type, string>() {
 			{ typeof(sbyte), "d.Reader.ReadSByte()" },
 			{ typeof(byte), "d.Reader.ReadByte()" },
 			{ typeof(short), "d.Reader.ReadInt16()" },
@@ -145,7 +155,7 @@ namespace Yuzu.Binary
 			cw.PutEndBlock(); // while
 		}
 
-		private string MaybeUnchecked() { return SafetyChecks ? "" : "Unchecked"; }
+		private string MaybeUnchecked() => SafetyChecks ? string.Empty : "Unchecked";
 
 		private void GenerateValue(Type t, string name)
 		{
@@ -171,15 +181,19 @@ namespace Yuzu.Binary
 			if (t.IsArray) {
 				var r = t.GetArrayRank();
 				if (r > 1) {
-					cw.PutPart("({0})dg.ReadArrayNDim(typeof({1}), {2});\n",
-						Utils.GetTypeSpec(t), Utils.GetTypeSpec(t.GetElementType()), r);
+					cw.PutPart(
+						"({0})dg.ReadArrayNDim(typeof({1}), {2});\n",
+						Utils.GetTypeSpec(t),
+						Utils.GetTypeSpec(t.GetElementType()),
+						r
+					);
 					return;
 				}
 				var tempIndexName = PutNullOrCount(t);
 				var tempArrayName = cw.GetTempName();
 				cw.Put("var {0} = new {1};\n", tempArrayName, Utils.GetTypeSpec(t, arraySize: tempIndexName));
 				cw.Put("for({0} = 0; {0} < {1}.Length; ++{0}) {{\n", tempIndexName, tempArrayName);
-				GenerateSetValue(t.GetElementType(), String.Format("{0}[{1}]", tempArrayName, tempIndexName), null);
+				GenerateSetValue(t.GetElementType(), string.Format("{0}[{1}]", tempArrayName, tempIndexName), null);
 				cw.PutEndBlock();
 				cw.Put("{0} = {1};\n", name, tempArrayName);
 				cw.PutEndBlock(); // if >= 0
@@ -210,8 +224,9 @@ namespace Yuzu.Binary
 				if (meta.IsCompact) {
 					cw.PutPart("new {0}();\n", Utils.GetTypeSpec(t));
 					cw.Put("dg.EnsureClassDef(typeof({0}));\n", Utils.GetTypeSpec(t));
-					foreach (var yi in meta.Items)
+					foreach (var yi in meta.Items) {
 						GenerateSetValue(yi.Type, $"{name}." + yi.Name, yi);
+					}
 				} else {
 					cw.PutPart("({0})dg.ReadStruct{1}<{0}>();\n", Utils.GetTypeSpec(t), MaybeUnchecked());
 				}
@@ -220,37 +235,44 @@ namespace Yuzu.Binary
 			throw new NotImplementedException();
 		}
 
-		private string GenerateFactoryCall(Meta meta) =>
-			meta.FactoryMethod == null ?
-				String.Format("new {0}()", Utils.GetTypeSpec(meta.Type)) :
-				String.Format("{0}.{1}()", Utils.GetTypeSpec(meta.Type), meta.FactoryMethod.Name);
+		private static string GenerateFactoryCall(Meta meta)
+		{
+			return meta.FactoryMethod == null
+				? string.Format("new {0}()", Utils.GetTypeSpec(meta.Type))
+				: string.Format("{0}.{1}()", Utils.GetTypeSpec(meta.Type), meta.FactoryMethod.Name);
+		}
 
-		private bool CanInline(Meta meta) =>
-			meta.IsCompact && meta.Surrogate.FuncFrom == null &&
-			meta.BeforeDeserialization.Actions.Count == 0 &&
-			meta.AfterDeserialization.Actions.Count == 0;
+		private static bool CanInline(Meta meta)
+		{
+			return meta.IsCompact && meta.Surrogate.FuncFrom == null
+				&& meta.BeforeDeserialization.Actions.Count == 0
+				&& meta.AfterDeserialization.Actions.Count == 0;
+		}
 
 		private bool GenerateSetValueInline(Type t, string name, Meta.Item item)
 		{
-			if (t.IsGenericType || !Utils.IsStruct(t) || item == null || simpleValueReader.ContainsKey(t))
+			if (t.IsGenericType || !Utils.IsStruct(t) || item == null || simpleValueReader.ContainsKey(t)) {
 				return false;
+			}
+
 			var meta = Meta.Get(t, options);
 			if (CanInline(meta)) {
 				cw.Put("dg.EnsureClassDef(typeof({0}));\n", Utils.GetTypeSpec(t));
 				if (item.PropInfo == null) {
-					foreach (var yi in meta.Items)
+					foreach (var yi in meta.Items) {
 						GenerateSetValue(yi.Type, name + "." + yi.Name, yi);
-				}
-				else {
+					}
+				} else {
 					var tempStructName = cw.GetTempName();
 					cw.Put("var {0} = {1};\n", tempStructName, GenerateFactoryCall(meta));
-					foreach (var yi in meta.Items)
+					foreach (var yi in meta.Items) {
 						GenerateSetValue(yi.Type, tempStructName + "." + yi.Name, yi);
+					}
+
 					cw.Put("{0} = {1};\n", name, tempStructName);
 				}
 				return true;
-			}
-			else if (item.PropInfo == null) {
+			} else if (item.PropInfo == null) {
 				cw.Put("dg.ReadIntoStruct(ref {0});\n", name);
 				return true;
 			}
@@ -283,17 +305,23 @@ namespace Yuzu.Binary
 				cw.Put("dg.ReadIntoObject{0}<{1}>({2});\n", MaybeUnchecked(), Utils.GetTypeSpec(t), name);
 				return;
 			}
-			throw new YuzuException(String.Format("Unable to merge field {1} of type {0}", name, t.Name));
+			throw new YuzuException(string.Format("Unable to merge field {1} of type {0}", name, t.Name));
 		}
 
-		private bool IsDeserializerGenRequired(Meta meta)
+		private static bool IsDeserializerGenRequired(Meta meta)
 		{
-			if (!meta.IsCompact) return true;
-			foreach (var yi in meta.Items)
-			{
-				if (yi.Type == typeof(object)) return true;
-				if (simpleValueReader.ContainsKey(yi.Type) || yi.Type.IsEnum || yi.Type == typeof(string))
+			if (!meta.IsCompact) {
+				return true;
+			}
+
+			foreach (var yi in meta.Items) {
+				if (yi.Type == typeof(object)) {
+					return true;
+				}
+
+				if (simpleValueReader.ContainsKey(yi.Type) || yi.Type.IsEnum || yi.Type == typeof(string)) {
 					continue;
+				}
 				// TODO: Containers.
 				return true;
 			}
@@ -304,50 +332,63 @@ namespace Yuzu.Binary
 		{
 			cw.GenerateActionList(meta.BeforeDeserialization);
 			cw.ResetTempNames();
-			if (IsDeserializerGenRequired(meta))
+			if (IsDeserializerGenRequired(meta)) {
 				cw.Put("var dg = ({0})d;\n", className);
-			if (meta.IsCompact) {
-				foreach (var yi in meta.Items)
-					GenerateSetValue(yi.Type, "result." + yi.Name, yi);
 			}
-			else {
+
+			if (meta.IsCompact) {
+				foreach (var yi in meta.Items) {
+					GenerateSetValue(yi.Type, "result." + yi.Name, yi);
+				}
+			} else {
 				cw.Put("{0}.FieldDef fd;\n", classDefName);
 				var ourIndex = 0;
 				cw.Put("fd = def.Fields[d.Reader.ReadInt16()];\n");
 				foreach (var yi in meta.Items) {
 					ourIndex += 1;
-					if (yi.IsOptional)
+					if (yi.IsOptional) {
 						cw.Put("if ({0} == fd.OurIndex) {{\n", ourIndex);
-					else if (SafetyChecks)
+					} else if (SafetyChecks) {
 						cw.Put("if ({0} != fd.OurIndex) throw dg.Error(\"{0}!=\" + fd.OurIndex);\n", ourIndex);
-					if (yi.SetValue != null)
+					}
+
+					if (yi.SetValue != null) {
 						GenerateSetValue(yi.Type, "result." + yi.Name, yi);
-					else
+					} else {
 						GenerateMerge(yi.Type, "result." + yi.Name);
+					}
+
 					cw.Put("fd = def.Fields[d.Reader.ReadInt16()];\n");
-					if (yi.IsOptional)
+					if (yi.IsOptional) {
 						cw.PutEndBlock();
+					}
 				}
-				if (SafetyChecks)
+				if (SafetyChecks) {
 					cw.Put("if (fd.OurIndex != {0}.EOF) throw dg.Error(\"Unfinished object\");\n", classDefName);
+				}
 			}
 			cw.GenerateActionList(meta.AfterDeserialization);
 		}
 
-		public void Generate<T>() { Generate(typeof(T)); }
+		public void Generate<T>() => Generate(typeof(T));
 
 		public void Generate(Type t)
 		{
-			if (t.IsInterface)
+			if (t.IsInterface) {
 				throw new YuzuException("Useless BinaryGenerator for interface " + t.FullName);
-			if (t.IsAbstract)
+			}
+
+			if (t.IsAbstract) {
 				throw new YuzuException("Useless BinaryGenerator for abstract class " + t.FullName);
+			}
 
 			var meta = Meta.Get(t, options);
 
 			var readerName = "Read_" + Utils.GetMangledTypeNameNS(t);
 			if (!Utils.IsStruct(t)) {
-				cw.Put("private static void {0}(BinaryDeserializer d, {1} def, object obj)\n", readerName, classDefName);
+				cw.Put(
+					"private static void {0}(BinaryDeserializer d, {1} def, object obj)\n", readerName, classDefName
+				);
 				cw.Put("{\n");
 				cw.Put("var result = ({0})obj;\n", Utils.GetTypeSpec(t));
 				GenerateReaderBody(meta);
@@ -360,15 +401,16 @@ namespace Yuzu.Binary
 			cw.Put("private static object {0}(BinaryDeserializer d, {1} def)\n", makerName, classDefName);
 			cw.Put("{\n");
 			cw.Put("var result = {0};\n", GenerateFactoryCall(meta));
-			if (Utils.IsStruct(t))
+			if (Utils.IsStruct(t)) {
 				GenerateReaderBody(meta);
-			else
+			} else {
 				cw.Put("{0}(d, def, result);\n", readerName);
+			}
+
 			cw.Put("return result;\n");
 			cw.PutEndBlock();
 			cw.Put("\n");
 			generatedMakers[t] = makerName;
 		}
-
 	}
 }

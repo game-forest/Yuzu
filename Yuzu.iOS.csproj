@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -138,18 +138,17 @@
     <Compile Include="Yuzu\Grisu\Grisu.cs" />
     <Compile Include="Yuzu\Grisu\GrisuDouble.cs" />
     <Compile Include="Yuzu\Grisu\PowersOfTenCache.cs" />
-    <Compile Include="Yuzu\JsonHelpers.cs" />
-    <Compile Include="Yuzu\ReaderDeserializer.cs" />
-    <Compile Include="Yuzu\Surrogates.cs" />
-    <Compile Include="Yuzu\UnsafeReader.cs" />
     <Compile Include="Yuzu\JsonDeserializer.cs" />
     <Compile Include="Yuzu\JsonGenerators.cs" />
+    <Compile Include="Yuzu\JsonHelpers.cs" />
     <Compile Include="Yuzu\JsonSerializer.cs" />
     <Compile Include="Yuzu\Meta.cs" />
     <Compile Include="Yuzu\ProtoBuf.cs" />
+    <Compile Include="Yuzu\ReaderDeserializer.cs" />
+    <Compile Include="Yuzu\Surrogates.cs" />
+    <Compile Include="Yuzu\UnsafeReader.cs" />
     <Compile Include="Yuzu\Utils.cs" />
     <Compile Include="Yuzu\Yuzu.cs" />
-    <Compile Include="Yuzu\Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Grisu\LICENSE" />

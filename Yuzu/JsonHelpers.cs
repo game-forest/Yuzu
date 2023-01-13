@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 
@@ -14,8 +14,10 @@ namespace Yuzu.Json
 		// Optimization: array access is slightly faster than two or more sequential comparisons.
 		static JsonEscapeData()
 		{
-			for (int i = 0; i < hexDigits.Length; ++i)
+			for (int i = 0; i < hexDigits.Length; ++i) {
 				hexDigits[i] = -1;
+			}
+
 			for (int i = 0; i < 10; ++i) {
 				hexDigits[i + '0'] = i;
 				digitHex[i] = (char)(i + '0');
@@ -35,7 +37,8 @@ namespace Yuzu.Json
 
 			escapeChars['"'] = '"';
 			escapeChars['\\'] = '\\';
-			// Do not escape forward slash, see http://stackoverflow.com/questions/1580647/json-why-are-forward-slashes-escaped
+			// Do not escape forward slash, see
+			// http://stackoverflow.com/questions/1580647/json-why-are-forward-slashes-escaped
 			// escapeChars['/'] = '/';
 			escapeChars['\b'] = 'b';
 			escapeChars['\f'] = 'f';
@@ -47,21 +50,28 @@ namespace Yuzu.Json
 
 	internal static class JsonIntWriter
 	{
-		private static byte[][] digitPairsZero = new byte[100][];
-		private static byte[][] digitPairsNoZero = new byte[100][];
-		private static byte[] minIntValueBytes = Encoding.ASCII.GetBytes(int.MinValue.ToString());
-		private static byte[] minLongValueBytes = Encoding.ASCII.GetBytes(long.MinValue.ToString());
+		private static readonly byte[][] digitPairsZero = new byte[100][];
+		private static readonly byte[][] digitPairsNoZero = new byte[100][];
+		private static readonly byte[] minIntValueBytes = Encoding.ASCII.GetBytes(int.MinValue.ToString());
+		private static readonly byte[] minLongValueBytes = Encoding.ASCII.GetBytes(long.MinValue.ToString());
 
 		static JsonIntWriter()
 		{
-			for (int i = 0; i < 10; ++i)
-				for (int j = 0; j < 10; ++j)
+			for (int i = 0; i < 10; ++i) {
+				for (int j = 0; j < 10; ++j) {
 					digitPairsZero[i * 10 + j] = new byte[] { (byte)((int)'0' + i), (byte)((int)'0' + j) };
-			for (int j = 0; j < 10; ++j)
+				}
+			}
+
+			for (int j = 0; j < 10; ++j) {
 				digitPairsNoZero[j] = new byte[] { (byte)((int)'0' + j) };
-			for (int i = 1; i < 10; ++i)
-				for (int j = 0; j < 10; ++j)
+			}
+
+			for (int i = 1; i < 10; ++i) {
+				for (int j = 0; j < 10; ++j) {
 					digitPairsNoZero[i * 10 + j] = new byte[] { (byte)((int)'0' + i), (byte)((int)'0' + j) };
+				}
+			}
 		}
 
 		private static void WriteUIntInternal(BinaryWriter writer, uint x)
@@ -122,7 +132,9 @@ namespace Yuzu.Json
 				writer.Write(digitPairsNoZero[x]);
 				return;
 			}
-			unchecked { WriteUIntInternal(writer, (uint)x); }
+			unchecked {
+				WriteUIntInternal(writer, (uint)x);
+			}
 		}
 
 		public static void WriteUInt(BinaryWriter writer, uint x)
@@ -149,7 +161,9 @@ namespace Yuzu.Json
 				return;
 			}
 			if (x < int.MaxValue) {
-				unchecked { WriteUIntInternal(writer, (uint)x); }
+				unchecked {
+					WriteUIntInternal(writer, (uint)x);
+				}
 				return;
 			}
 			// TODO: Optimize long case.
@@ -163,7 +177,9 @@ namespace Yuzu.Json
 				return;
 			}
 			if (x < int.MaxValue) {
-				unchecked { WriteUIntInternal(writer, (uint)x); }
+				unchecked {
+					WriteUIntInternal(writer, (uint)x);
+				}
 				return;
 			}
 			// TODO: Optimize long case.
@@ -207,21 +223,20 @@ namespace Yuzu.Json
 				if (escape > 0) {
 					writer.Write((byte)'\\');
 					writer.Write(escape);
-				}
-				else if (ch < ' ') {
+				} else if (ch < ' ') {
 					writer.Write((byte)'\\');
 					writer.Write((byte)'u');
-					for (int i = 3 * 4; i >= 0; i -= 4)
+					for (int i = 3 * 4; i >= 0; i -= 4) {
 						writer.Write(JsonEscapeData.digitHex[ch >> i & 0xf]);
-				}
-				else if (char.IsHighSurrogate(ch))
+					}
+				} else if (char.IsHighSurrogate(ch)) {
 					surrogatePair[0] = ch;
-				else if (char.IsLowSurrogate(ch)) {
+				} else if (char.IsLowSurrogate(ch)) {
 					surrogatePair[1] = ch;
 					writer.Write(surrogatePair);
-				}
-				else
+				} else {
 					writer.Write(ch);
+				}
 			}
 			writer.Write((byte)'"');
 		}
@@ -260,11 +275,10 @@ namespace Yuzu.Json
 
 	internal static class SystemForcedPrimitiveTypes
 	{
-		private static Type[] systemTypes = {
+		private static readonly Type[] systemTypes = {
 			typeof(string), typeof(DateTime), typeof(DateTimeOffset), typeof(TimeSpan), typeof(Guid),
 		};
 
 		public static bool Contains(Type t) => Array.IndexOf(systemTypes, t) != -1;
 	}
-
 }

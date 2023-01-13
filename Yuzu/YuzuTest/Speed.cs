@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -16,7 +16,6 @@ using YuzuGen.YuzuTest;
 
 namespace YuzuTest
 {
-
 	[TestClass]
 	public class TestSpeed
 	{
@@ -34,22 +33,24 @@ namespace YuzuTest
 			var bs = new BinarySerializer();
 			bs.ToStream(a, bsStructProp);
 
-			for (int i = 0; i < 200000; ++i)
+			for (int i = 0; i < 200000; ++i) {
 				listSample1.Add(new Sample1 { X = 5, Y = i % 2 == 0 ? "zzz" : "ttt" });
-			for (int i = 0; i < 200000; ++i)
+			}
+			for (int i = 0; i < 200000; ++i) {
 				listSample2.Add(new Sample2 { X = 5, Y = i % 2 == 0 ? "5" : "6" });
+			}
 		}
 
 		[TestMethod]
 		public void TestJsonLongListStr()
 		{
 			var list1 = new SampleList { E = new List<string>() };
-			for (int i = 0; i < 100000; ++i)
+			for (int i = 0; i < 100000; ++i) {
 				list1.E.Add(i.ToString());
-
+			}
 			var js = new JsonSerializer();
 			var result1 = js.ToString(list1);
-			Assert.IsTrue(result1 != "");
+			Assert.IsTrue(result1 != string.Empty);
 
 			var list2 = new SampleList();
 			var jd = new JsonDeserializer();
@@ -65,8 +66,9 @@ namespace YuzuTest
 		public void TestProtobufNetLongListStr()
 		{
 			var list1 = new SampleList { E = new List<string>() };
-			for (int i = 0; i < 100000; ++i)
+			for (int i = 0; i < 100000; ++i) {
 				list1.E.Add(i.ToString());
+			}
 
 			var ms = new MemoryStream();
 			ProtoBuf.Serializer.Serialize(ms, list1);
@@ -81,13 +83,14 @@ namespace YuzuTest
 		public void TestJsonLongArrayStr()
 		{
 			var list1 = new SampleArray { A = new string[100000] };
-			for (int i = 0; i < list1.A.Length; ++i)
+			for (int i = 0; i < list1.A.Length; ++i) {
 				list1.A[i] = i.ToString();
+			}
 
 			var js = new JsonSerializer();
 			js.JsonOptions.ArrayLengthPrefix = true;
 			var result1 = js.ToString(list1);
-			Assert.IsTrue(result1 != "");
+			Assert.IsTrue(result1 != string.Empty);
 
 			var list2 = new SampleArray();
 			var jd = new JsonDeserializer();
@@ -106,21 +109,23 @@ namespace YuzuTest
 			var list1 = new SampleMatrix { M = new List<List<int>>() };
 			for (int i = 0; i < 300; ++i) {
 				list1.M.Add(new List<int>());
-				for (int j = 0; j < 400; ++j)
+				for (int j = 0; j < 400; ++j) {
 					list1.M[i].Add(i * j * 97);
+				}
 			}
 
 			var js = new JsonSerializer();
 			var result1 = js.ToString(list1);
-			Assert.IsTrue(result1 != "");
+			Assert.IsTrue(result1 != string.Empty);
 
 			var list2 = new SampleMatrix();
 			var jd = new JsonDeserializer();
 			jd.FromString(list2, result1);
 			Assert.AreEqual(list1.M.Count, list2.M.Count);
 			for (int i = 0; i < list1.M.Count; ++i) {
-				for (int j = 0; j < list1.M[i].Count; ++j)
+				for (int j = 0; j < list1.M[i].Count; ++j) {
 					Assert.AreEqual(list1.M[i][j], list2.M[i][j]);
+				}
 			}
 
 			var jdg = new SampleMatrix_JsonDeserializer();
@@ -134,8 +139,9 @@ namespace YuzuTest
 			var list1 = new SampleMatrix { M = new List<List<int>>() };
 			for (int i = 0; i < 1000; ++i) {
 				list1.M.Add(new List<int>());
-				for (int j = 0; j < 400; ++j)
+				for (int j = 0; j < 400; ++j) {
 					list1.M[i].Add(i * j * 97);
+				}
 			}
 			var list2 = new ClonerGen().Deep(list1);
 			Assert.AreEqual(list1.M.Count, list2.M.Count);
@@ -150,7 +156,7 @@ namespace YuzuTest
 			}
 			var js = new JsonSerializer();
 			var result1 = js.ToString(list1);
-			Assert.IsTrue(result1 != "");
+			Assert.IsTrue(result1 != string.Empty);
 		}
 
 		[TestMethod]
@@ -158,24 +164,32 @@ namespace YuzuTest
 		{
 			var list1 = new List<double>();
 			var rnd = new Random();
-			for (int i = 0; i < 50000; ++i)
+			for (int i = 0; i < 50000; ++i) {
 				list1.Add(i * 19234.73457);
-			for (int i = 0; i < 50000; ++i)
+			}
+
+			for (int i = 0; i < 50000; ++i) {
 				list1.Add(rnd.NextDouble());
-			for (int i = 0; i < 10000; ++i)
+			}
+
+			for (int i = 0; i < 10000; ++i) {
 				list1.Add(rnd.NextDouble() * 1e27);
-			for (int i = 0; i < 10000; ++i)
+			}
+
+			for (int i = 0; i < 10000; ++i) {
 				list1.Add(rnd.NextDouble() * 1e-27);
+			}
 
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			var result1 = js.ToString(list1);
-			Assert.IsTrue(result1 != "");
+			Assert.IsTrue(result1 != string.Empty);
 
-			var list2 = (new JsonDeserializer()).FromString<List<double>>(result1);
-			for (int i = 0; i < list1.Count; ++i)
+			var list2 = new JsonDeserializer().FromString<List<double>>(result1);
+			for (int i = 0; i < list1.Count; ++i) {
 				Assert.AreEqual(list1[i], list2[i]);
+			}
 		}
 
 		[TestMethod]
@@ -183,24 +197,32 @@ namespace YuzuTest
 		{
 			var list1 = new List<float>();
 			var rnd = new Random();
-			for (int i = 0; i < 50000; ++i)
+			for (int i = 0; i < 50000; ++i) {
 				list1.Add(i * 19234.734f);
-			for (int i = 0; i < 50000; ++i)
+			}
+
+			for (int i = 0; i < 50000; ++i) {
 				list1.Add((float)rnd.NextDouble());
-			for (int i = 0; i < 10000; ++i)
+			}
+
+			for (int i = 0; i < 10000; ++i) {
 				list1.Add((float)(rnd.NextDouble() * 1e7));
-			for (int i = 0; i < 10000; ++i)
+			}
+
+			for (int i = 0; i < 10000; ++i) {
 				list1.Add((float)(rnd.NextDouble() * 1e-7));
+			}
 
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			var result1 = js.ToString(list1);
-			Assert.IsTrue(result1 != "");
+			Assert.IsTrue(result1 != string.Empty);
 
-			var list2 = (new JsonDeserializer()).FromString<List<float>>(result1);
-			for (int i = 0; i < list1.Count; ++i)
+			var list2 = new JsonDeserializer().FromString<List<float>>(result1);
+			for (int i = 0; i < list1.Count; ++i) {
 				Assert.AreEqual(list1[i], list2[i]);
+			}
 		}
 
 		[TestMethod]
@@ -212,9 +234,9 @@ namespace YuzuTest
 			}
 			var js = new JsonSerializer();
 			var result1 = js.ToString(list1);
-			Assert.IsTrue(result1 != "");
+			Assert.IsTrue(result1 != string.Empty);
 
-			var list2 = (new JsonDeserializer()).FromString<List<TimeSpan>>(result1);
+			var list2 = new JsonDeserializer().FromString<List<TimeSpan>>(result1);
 			CollectionAssert.AreEqual(list1, list2);
 		}
 
@@ -222,11 +244,12 @@ namespace YuzuTest
 		public void TestProtobufNetAoS()
 		{
 			var list1 = new SampleAoS();
-			for (int i = 0; i < 100000; ++i)
+			for (int i = 0; i < 100000; ++i) {
 				list1.A.Add(new SampleAoS.S {
 					V = new SampleAoS.Vertex { X = i, Y = i * 1.1f, Z = i * 0.9f },
 					C = new SampleAoS.Color { R = (byte)(i % 200), G = (byte)(i % 100), B = (byte)(i % 117) },
 				});
+			}
 
 			var ms = new MemoryStream();
 			ProtoBuf.Serializer.Serialize(ms, list1);
@@ -241,18 +264,19 @@ namespace YuzuTest
 		public void TestBinaryAoS()
 		{
 			var list1 = new SampleAoS();
-			for (int i = 0; i < 100000; ++i)
+			for (int i = 0; i < 100000; ++i) {
 				list1.A.Add(new SampleAoS.S {
 					V = new SampleAoS.Vertex { X = i, Y = i * 1.1f, Z = i * 0.9f },
 					C = new SampleAoS.Color { R = (byte)(i % 200), G = (byte)(i % 100), B = (byte)(i % 117) },
 				});
+			}
 
 			var ms = new MemoryStream();
-			(new BinarySerializer()).ToStream(list1, ms);
+			new BinarySerializer().ToStream(list1, ms);
 			Assert.IsTrue(ms.Length > 0);
 
 			ms.Position = 0;
-			var list2 = (new BinaryDeserializerGen()).FromStream<SampleAoS>(ms);
+			var list2 = new BinaryDeserializerGen().FromStream<SampleAoS>(ms);
 			Assert.AreEqual(list1.A.Count, list2.A.Count);
 		}
 
@@ -280,7 +304,6 @@ namespace YuzuTest
 			var p = bs.ToBytes(listSample1);
 			Assert.AreEqual(41 + (16 / 2 + 10 / 2) * listSample1.Count, p.Length);
 		}
-
 	}
 
 	[TestClass]
@@ -292,13 +315,14 @@ namespace YuzuTest
 		private static MemoryStream protobufStream = new MemoryStream();
 
 		[ClassInitialize]
-		public static void Init(TestContext context) {
+		public static void Init(TestContext context)
+		{
 			SamplePerson.Counter = 0;
 			Random rnd = new Random(20151125);
 			person = new SamplePerson(rnd, 1);
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			js.Options.TagMode = TagMode.Aliases;
 			js.ToStream(person, jsonStream);
 			var bs = new BinarySerializer();
@@ -327,8 +351,8 @@ namespace YuzuTest
 		{
 			Assert.AreEqual(28076, SamplePerson.Counter);
 			var js = new JsonSerializer();
-			js.JsonOptions.Indent = "";
-			js.JsonOptions.FieldSeparator = "";
+			js.JsonOptions.Indent = string.Empty;
+			js.JsonOptions.FieldSeparator = string.Empty;
 			js.Options.TagMode = TagMode.Aliases;
 			var ms = new MemoryStream();
 			js.ToStream(person, ms);
@@ -445,5 +469,4 @@ namespace YuzuTest
 			Assert.AreEqual(person.Children.Count, dst.Children.Count);
 		}
 	}
-
 }
