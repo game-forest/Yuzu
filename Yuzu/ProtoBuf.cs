@@ -6,7 +6,8 @@ using Yuzu.Metadata;
 
 namespace Yuzu.Protobuf
 {
-	internal enum WireType {
+	internal enum WireType
+	{
 		Varint = 0,
 		Double = 1,
 		LengthDelimited = 2,
@@ -42,22 +43,18 @@ namespace Yuzu.Protobuf
 				if (yi.Type == typeof(int) || yi.Type == typeof(uint)) {
 					WriteVarint((count << 3) + (int)WireType.Varint);
 					WriteVarint((int)yi.GetValue(obj));
-				}
-				else if (yi.Type == typeof(string)) {
+				} else if (yi.Type == typeof(string)) {
 					var s = yi.GetValue(obj).ToString();
 					WriteVarint((count << 3) + (int)WireType.LengthDelimited);
 					WriteVarint(Encoding.UTF8.GetByteCount(s));
 					writer.Write(Encoding.UTF8.GetBytes(s));
-				}
-				else if (yi.Type == typeof(float)) {
+				} else if (yi.Type == typeof(float)) {
 					WriteVarint((count << 3) + (int)WireType.Double);
 					writer.Write((double)(float)yi.GetValue(obj));
-				}
-				else if (yi.Type == typeof(double)) {
+				} else if (yi.Type == typeof(double)) {
 					WriteVarint((count << 3) + (int)WireType.Double);
 					writer.Write((double)yi.GetValue(obj));
-				}
-				else {
+				} else {
 					throw new NotImplementedException(yi.Type.Name);
 				}
 				++count;
@@ -101,26 +98,30 @@ namespace Yuzu.Protobuf
 			int count = 1;
 			foreach (var yi in Meta.Get(obj.GetType(), Options).Items) {
 				if (yi.Type == typeof(int) || yi.Type == typeof(uint)) {
-					if (ReadVarint() != (count << 3) + (int)WireType.Varint)
+					if (ReadVarint() != (count << 3) + (int)WireType.Varint) {
 						throw new YuzuException();
+					}
+
 					yi.SetValue(obj, (int)ReadVarint());
-				}
-				else if (yi.Type == typeof(string)) {
-					if (ReadVarint() != (count << 3) + (int)WireType.LengthDelimited)
+				} else if (yi.Type == typeof(string)) {
+					if (ReadVarint() != (count << 3) + (int)WireType.LengthDelimited) {
 						throw new YuzuException();
+					}
+
 					yi.SetValue(obj, Encoding.UTF8.GetString(Reader.ReadBytes((int)ReadVarint())));
-				}
-				else if (yi.Type == typeof(float)) {
-					if (ReadVarint() != (count << 3) + (int)WireType.Double)
+				} else if (yi.Type == typeof(float)) {
+					if (ReadVarint() != (count << 3) + (int)WireType.Double) {
 						throw new YuzuException();
+					}
+
 					yi.SetValue(obj, (float)Reader.ReadDouble());
-				}
-				else if (yi.Type == typeof(double)) {
-					if (ReadVarint() != (count << 3) + (int)WireType.Double)
+				} else if (yi.Type == typeof(double)) {
+					if (ReadVarint() != (count << 3) + (int)WireType.Double) {
 						throw new YuzuException();
+					}
+
 					yi.SetValue(obj, Reader.ReadDouble());
-				}
-				else {
+				} else {
 					throw new NotImplementedException(yi.Type.Name);
 				}
 				++count;

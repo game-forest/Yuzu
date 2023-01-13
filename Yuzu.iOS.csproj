@@ -149,7 +149,6 @@
     <Compile Include="Yuzu\ProtoBuf.cs" />
     <Compile Include="Yuzu\Utils.cs" />
     <Compile Include="Yuzu\Yuzu.cs" />
-    <Compile Include="Yuzu\Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Grisu\LICENSE" />

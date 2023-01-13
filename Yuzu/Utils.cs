@@ -19,18 +19,28 @@ namespace Yuzu.Util
 
 		public static string CodeValueFormat(object value)
 		{
-			if (value == null)
-				return "";
+			if (value == null) {
+				return string.Empty;
+			}
+
 			var t = value.GetType();
-			if (t == typeof(int) || t == typeof(uint) || t == typeof(float) || t == typeof(double))
+			if (t == typeof(int) || t == typeof(uint) || t == typeof(float) || t == typeof(double)) {
 				return value.ToString();
-			if (t == typeof(bool))
+			}
+
+			if (t == typeof(bool)) {
 				return value.ToString().ToLower();
-			if (t == typeof(string))
+			}
+
+			if (t == typeof(string)) {
 				return '"' + QuoteCSharpStringLiteral(value.ToString()) + '"';
-			if (t.IsEnum)
+			}
+
+			if (t.IsEnum) {
 				return t.Name + "." + value.ToString();
-			return "";
+			}
+
+			return string.Empty;
 			//throw new NotImplementedException();
 		}
 
@@ -39,14 +49,23 @@ namespace Yuzu.Util
 			return t.IsValueType && !t.IsPrimitive && !t.IsEnum && !t.IsPointer;
 		}
 
-		public static bool? IsCopyable(Type t) =>
-			t.IsPrimitive || t.IsEnum || t == typeof(string) ? true :
-			t.Namespace == "System" ? t.IsValueType :
-			t.IsClass || t.IsValueType ? null : (bool?)false;
+		public static bool? IsCopyable(Type t)
+		{
+			return t.IsPrimitive || t.IsEnum || t == typeof(string)
+				? true
+				: t.Namespace == "System"
+					? t.IsValueType
+					: t.IsClass || t.IsValueType
+						? null
+						: (bool?)false;
+		}
 
 		public static Type GetICollection(Type t)
 		{
-			if (t.Name == "ICollection`1") return t;
+			if (t.Name == "ICollection`1") {
+				return t;
+			}
+
 			try {
 				return t.GetInterface("ICollection`1");
 			} catch (AmbiguousMatchException) {
@@ -56,11 +75,13 @@ namespace Yuzu.Util
 
 		public static Type GetIEnumerable(Type t)
 		{
-			if (t.Name == "IEnumerable`1") return t;
+			if (t.Name == "IEnumerable`1") {
+				return t;
+			}
+
 			try {
 				return t.GetInterface("IEnumerable`1");
-			}
-			catch (AmbiguousMatchException) {
+			} catch (AmbiguousMatchException) {
 				throw new YuzuException("Multiple IEnumerable interfaces for type " + t.Name);
 			}
 		}
@@ -69,28 +90,31 @@ namespace Yuzu.Util
 		{
 			try {
 				return t.GetInterface("ICollection");
-			}
-			catch (AmbiguousMatchException) {
+			} catch (AmbiguousMatchException) {
 				throw new YuzuException("Multiple ICollection interfaces for type " + t.Name);
 			}
 		}
 
 		public static Type GetIDictionary(Type t)
 		{
-			if (t.Name == "IDictionary`2") return t;
+			if (t.Name == "IDictionary`2") {
+				return t;
+			}
+
 			try {
 				return t.GetInterface("IDictionary`2");
-			}
-			catch (AmbiguousMatchException) {
+			} catch (AmbiguousMatchException) {
 				throw new YuzuException("Multiple IDictionary interfaces for type " + t.Name);
 			}
 		}
 
 		public static MethodInfo GetPrivateGeneric(
 			Type callerType, string name, params Type[] parameters
-		) =>
-			callerType.GetMethod(name, BindingFlags.Instance | BindingFlags.NonPublic).
-				MakeGenericMethod(parameters);
+		) {
+			return callerType
+				.GetMethod(name, BindingFlags.Instance | BindingFlags.NonPublic)
+				.MakeGenericMethod(parameters);
+		}
 
 		public static MethodInfo GetPrivateCovariantGeneric(Type callerType, string name, Type container)
 		{
@@ -100,18 +124,19 @@ namespace Yuzu.Util
 
 		public static MethodInfo GetPrivateCovariantGenericAll(Type callerType, string name, Type container)
 		{
-			return
-				callerType.GetMethod(name, BindingFlags.Instance | BindingFlags.NonPublic).
-					MakeGenericMethod(container.GetGenericArguments());
+			return callerType
+				.GetMethod(name, BindingFlags.Instance | BindingFlags.NonPublic)
+				.MakeGenericMethod(container.GetGenericArguments());
 		}
 
 		private static string DeclaringTypes(Type t, string separator)
 		{
-			return t.DeclaringType == null ? "" :
-				DeclaringTypes(t.DeclaringType, separator) + t.DeclaringType.Name + separator;
+			return t.DeclaringType == null
+				? string.Empty
+				: DeclaringTypes(t.DeclaringType, separator) + t.DeclaringType.Name + separator;
 		}
 
-		private static Dictionary<Type, string> knownTypes = new Dictionary<Type, string> {
+		private static readonly Dictionary<Type, string> knownTypes = new Dictionary<Type, string> {
 			{ typeof(byte),  "byte" },
 			{ typeof(sbyte), "sbyte" },
 			{ typeof(short), "short" },
@@ -131,47 +156,53 @@ namespace Yuzu.Util
 		};
 		public static string GetTypeSpec(Type t, string arraySize = "")
 		{
-			if (knownTypes.TryGetValue(t, out string result))
+			if (knownTypes.TryGetValue(t, out string result)) {
 				return result;
+			}
 			if (t.IsArray) {
-				var suffix = String.Format("[{0}{1}]", arraySize, new string(',', t.GetArrayRank() - 1));
+				var suffix = string.Format("[{0}{1}]", arraySize, new string(',', t.GetArrayRank() - 1));
 				t = t.GetElementType();
-				for (; t.IsArray; t = t.GetElementType())
+				for (; t.IsArray; t = t.GetElementType()) {
 					suffix += "[" + new string(',', t.GetArrayRank() - 1) + "]";
+				}
 				return GetTypeSpec(t) + suffix;
 			}
 			var p = "global::" + t.Namespace + ".";
 			var n = DeclaringTypes(t, ".") + t.Name;
-			if (!t.IsGenericType)
+			if (!t.IsGenericType) {
 				return p + n;
-			var args = String.Join(", ", t.GetGenericArguments().Select(a => GetTypeSpec(a)));
-			return p + String.Format("{0}<{1}>", n.Remove(n.IndexOf('`')), args);
+			}
+			var args = string.Join(", ", t.GetGenericArguments().Select(a => GetTypeSpec(a)));
+			return p + string.Format("{0}<{1}>", n.Remove(n.IndexOf('`')), args);
 		}
 
 		public static string GetMangledTypeName(Type t)
 		{
 			var n = DeclaringTypes(t, "__") + t.Name;
-			if (!t.IsGenericType)
+			if (!t.IsGenericType) {
 				return n;
-			var args = String.Join("__", t.GetGenericArguments().Select(a => GetMangledTypeName(a)));
+			}
+			var args = string.Join("__", t.GetGenericArguments().Select(a => GetMangledTypeName(a)));
 			return n.Remove(n.IndexOf('`')) + "_" + args;
 		}
 
-		public static string GetMangledTypeNameNS(Type t) =>
-			t.Namespace.Replace('.', '_') + "__" + GetMangledTypeName(t);
-
+		public static string GetMangledTypeNameNS(Type t)
+		{
+			return t.Namespace.Replace('.', '_') + "__" + GetMangledTypeName(t);
+		}
 	}
 
 	public static class TypeSerializer
 	{
-		private static LinkedList<Assembly> assembliesLru = new LinkedList<Assembly>();
-		private static ConcurrentDictionary<string, Type> cache = new ConcurrentDictionary<string, Type>();
+		private static readonly LinkedList<Assembly> assembliesLru = new LinkedList<Assembly>();
+		private static readonly ConcurrentDictionary<string, Type> cache = new ConcurrentDictionary<string, Type>();
 
 		static TypeSerializer()
 		{
 			// TODO: Remove when/if compatibility not needed.
-			if (!Compatibility)
+			if (!Compatibility) {
 				return;
+			}
 
 			var visited = new HashSet<Assembly>();
 			var queue = new Queue<Assembly>();
@@ -191,39 +222,42 @@ namespace Yuzu.Util
 				}
 			}
 
-			foreach (var a in visited)
+			foreach (var a in visited) {
 				assembliesLru.AddLast(a);
+			}
 		}
 
+		private static readonly Regex extendedAssemblyInfo = new Regex(
+			@", Version=\d+.\d+.\d+.\d+, Culture=neutral, PublicKeyToken=[a-z0-9]+", RegexOptions.Compiled
+		);
 
-		private static Regex extendedAssemblyInfo = new Regex(
-			@", Version=\d+.\d+.\d+.\d+, Culture=neutral, PublicKeyToken=[a-z0-9]+", RegexOptions.Compiled);
-
-		public static bool Compatibility = false;
+		public static bool Compatibility;
 
 		public static string Serialize(Type t)
 		{
-			return extendedAssemblyInfo.Replace(t.AssemblyQualifiedName, "")
+			return extendedAssemblyInfo.Replace(t.AssemblyQualifiedName, string.Empty)
 				// Tries to replace multiple system type assembly names
 				// because they differ across platforms and frameworks.
 				// .NET Framework, Xamarin.Mac
-				.Replace(", mscorlib", "")
+				.Replace(", mscorlib", string.Empty)
 				// .NET Core, .NET 5.0+
-				.Replace(", System.Private.CoreLib", "");
+				.Replace(", System.Private.CoreLib", string.Empty);
 		}
 
 		public static Type Deserialize(string typeName)
 		{
-			if (cache.TryGetValue(typeName, out Type t))
+			if (cache.TryGetValue(typeName, out Type t)) {
 				return t;
+			}
 			t = Type.GetType(typeName);
 			if (t != null) {
 				cache[typeName] = t;
 				return t;
 			}
 			// TODO: Remove when/if compatibility not needed.
-			if (!Compatibility)
+			if (!Compatibility) {
 				return null;
+			}
 			for (var i = assembliesLru.First; i != null; i = i.Next) {
 				t = i.Value.GetType(typeName);
 				if (t != null) {
@@ -247,21 +281,26 @@ namespace Yuzu.Util
 
 		public void PutPart(string format, params object[] p)
 		{
-			var s = p.Length > 0 ? String.Format(format, p) : format;
+			var s = p.Length > 0 ? string.Format(format, p) : format;
 			Output.Write(LineSeparator == "\n" ? s : s.Replace("\n", LineSeparator));
 		}
 
 		public void Put(string format, params object[] p)
 		{
-			var s = p.Length > 0 ? String.Format(format, p) : format;
-			if (s.StartsWith("}")) // "}\n" or "} while"
+			var s = p.Length > 0 ? string.Format(format, p) : format;
+			// "}\n" or "} while"
+			if (s.StartsWith("}")) {
 				indentLevel -= 1;
-			if (s != "\n")
-				for (int i = 0; i < indentLevel; ++i)
+			}
+			if (s != "\n") {
+				for (int i = 0; i < indentLevel; ++i) {
 					PutPart(IndentString);
+				}
+			}
 			PutPart(s);
-			if (s.EndsWith("{\n"))
+			if (s.EndsWith("{\n")) {
 				indentLevel += 1;
+			}
 		}
 
 		public void PutInd(string format, params object[] p)
@@ -274,19 +313,24 @@ namespace Yuzu.Util
 		public void PutEndBlock() => Put("}\n");
 
 		// Check for explicit vs implicit interface implementation.
-		public string GenAddToCollection(Type t, Type icoll, string collName, string elementName)
+		public static string GenAddToCollection(Type t, Type icoll, string collName, string elementName)
 		{
 			var imap = t.GetInterfaceMap(icoll);
 			var addIndex = Array.FindIndex(imap.InterfaceMethods, m => m.Name == "Add");
 			return string.Format(
 				imap.TargetMethods[addIndex].Name == "Add" ? "{0}.Add({1});\n" : "(({2}){0}).Add({1});\n",
-				collName, elementName, Utils.GetTypeSpec(icoll));
+				collName,
+				elementName,
+				Utils.GetTypeSpec(icoll)
+			);
 		}
 
-		public void PutAddToCollection(Type t, Type icoll, string collName, string elementName) =>
+		public void PutAddToCollection(Type t, Type icoll, string collName, string elementName)
+		{
 			Put(GenAddToCollection(t, icoll, collName, elementName));
+		}
 
-		public void ResetTempNames() { tempCount = 0; }
+		public void ResetTempNames() => tempCount = 0;
 
 		public string GetTempName()
 		{
@@ -296,10 +340,10 @@ namespace Yuzu.Util
 
 		public void GenerateActionList(ActionList actions, string name = "result")
 		{
-			foreach (var a in actions.Actions)
+			foreach (var a in actions.Actions) {
 				Put("{0}.{1}();\n", name, a.Info.Name);
+			}
 		}
-
 	}
 
 	internal class NullYuzuUnknownStorage : YuzuUnknownStorage
@@ -325,20 +369,22 @@ namespace Yuzu.Util
 
 		public void MaybeAdd(MethodInfo m, Type attr)
 		{
-			if (m.IsDefined(attr, false))
+			if (m.IsDefined(attr, false)) {
 				Actions.Add(new MethodAction { Info = m, Run = obj => m.Invoke(obj, null) });
+			}
 		}
 
 		public void Run(object obj)
 		{
-			foreach (var a in Actions)
+			foreach (var a in Actions) {
 				a.Run(obj);
+			}
 		}
 	}
 
 	public static class IdGenerator
 	{
-		static char[] lastId = new char[] { 'A', 'A', 'A', 'A' };
+		private static readonly char[] lastId = new char[] { 'A', 'A', 'A', 'A' };
 
 		private static void NextId()
 		{
@@ -365,7 +411,5 @@ namespace Yuzu.Util
 			NextId();
 			return new string(lastId);
 		}
-
 	}
-
 }

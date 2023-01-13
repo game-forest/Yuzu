@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -44,14 +44,21 @@ namespace YuzuTest
 	{
 		private void TestGen(
 			Action<AbstractCloner> test,
-			bool useCloner = true, bool useGen = true, bool useBinary = true)
-		{
-			if (useCloner)
+			bool useCloner = true,
+			bool useGen = true,
+			bool useBinary = true
+		) {
+			if (useCloner) {
 				test(new Cloner());
-			if (useGen)
+			}
+
+			if (useGen) {
 				test(new ClonerGen());
-			if (useBinary)
+			}
+
+			if (useBinary) {
 				test(new BinaryCloner());
+			}
 		}
 
 		[TestMethod]
@@ -74,8 +81,8 @@ namespace YuzuTest
 				var src = new SampleDict {
 					Value = 1,
 					Children = new Dictionary<string, SampleDict> {
-						{ "a", new SampleDict { Value = 2 } }
-					}
+						{ "a", new SampleDict { Value = 2 } },
+					},
 				};
 				var dst = cl.Shallow(src);
 				Assert.AreEqual(src.Value, dst.Value);
@@ -167,7 +174,7 @@ namespace YuzuTest
 			TestGen(cl => {
 				var src = new SampleArrayNDim {
 					A = new int[2, 2] { { 1, 2 }, { 3, 4 } },
-					B = new string[1, 1, 1] { { { "x" } } }
+					B = new string[1, 1, 1] { { { "x" } } },
 				};
 				var dst = cl.Deep(src);
 				Assert.AreNotEqual(src, dst);
@@ -177,7 +184,7 @@ namespace YuzuTest
 			});
 			TestGen(cl => {
 				var src = new List<int>[2, 1] {
-					{ new List<int> { 1, 2 } }, { new List<int> { 3 } } };
+					{ new List<int> { 1, 2 } }, { new List<int> { 3 } }, };
 				var dst = cl.Deep(src);
 				Assert.AreNotEqual(src, dst);
 				Assert.AreNotEqual(src[0, 0], dst[0, 0]);
@@ -224,9 +231,9 @@ namespace YuzuTest
 			TestGen(cl => {
 				var src = new SampleMatrix {
 					M = new List<List<int>> {
-						new List<int>{ 1, 2, 3 },
-						new List<int>{ 4 },
-					}
+						new List<int> { 1, 2, 3 },
+						new List<int> { 4 },
+					},
 				};
 				var dst = cl.Deep(src);
 				Assert.AreNotEqual(src, dst);
@@ -269,8 +276,8 @@ namespace YuzuTest
 				var src = new SampleDict {
 					Value = 1,
 					Children = new Dictionary<string, SampleDict> {
-						{ "a", new SampleDict { Value = 2 } }
-					}
+						{ "a", new SampleDict { Value = 2 } },
+					},
 				};
 				var dst = cl.Deep(src);
 				Assert.AreEqual(src.Value, dst.Value);
@@ -281,7 +288,7 @@ namespace YuzuTest
 				var src = new SampleDictKeys {
 					E = new Dictionary<SampleEnum, int> { { SampleEnum.E2, 6 } },
 					I = null,
-					K = new Dictionary<SampleKey, int> { { new SampleKey { V = 7 }, 8 } }
+					K = new Dictionary<SampleKey, int> { { new SampleKey { V = 7 }, 8 } },
 				};
 				var dst = cl.Deep(src);
 				Assert.AreNotEqual(src.E, dst.E);
@@ -306,26 +313,32 @@ namespace YuzuTest
 		[TestMethod]
 		public void TestObject()
 		{
-			TestGen(cl => {
-				var src = new SampleObj { F = new int[] { 1 } };
-				var dst = cl.Deep(src);
-				Assert.AreNotEqual(src, dst);
-				Assert.AreNotEqual(src.F, dst.F);
-				CollectionAssert.AreEqual((int[])src.F, (int[])dst.F);
-			}, useBinary: false);
-			TestGen(cl => {
-				var src = new SampleItemObj {
-					L = new List<object> { new int[] { 1 }, 2, new Sample1() },
-					D = new Dictionary<string, object> { { "abc", 5 } },
-				};
-				var dst = cl.Deep(src);
-				Assert.AreNotEqual(src, dst);
-				Assert.AreNotEqual(src.L, dst.L);
-				CollectionAssert.AreEqual((int[])src.L[0], (int[])dst.L[0]);
-				Assert.AreEqual((int)src.L[1], (int)dst.L[1]);
-				Assert.AreEqual(((Sample1)src.L[2]).X, ((Sample1)dst.L[2]).X);
-				Assert.AreEqual((int)src.D["abc"], (int)dst.D["abc"]);
-			}, useBinary: false);
+			TestGen(
+				cl => {
+					var src = new SampleObj { F = new int[] { 1 } };
+					var dst = cl.Deep(src);
+					Assert.AreNotEqual(src, dst);
+					Assert.AreNotEqual(src.F, dst.F);
+					CollectionAssert.AreEqual((int[])src.F, (int[])dst.F);
+				},
+				useBinary: false
+			);
+			TestGen(
+				cl => {
+					var src = new SampleItemObj {
+						L = new List<object> { new int[] { 1 }, 2, new Sample1() },
+						D = new Dictionary<string, object> { { "abc", 5 } },
+					};
+					var dst = cl.Deep(src);
+					Assert.AreNotEqual(src, dst);
+					Assert.AreNotEqual(src.L, dst.L);
+					CollectionAssert.AreEqual((int[])src.L[0], (int[])dst.L[0]);
+					Assert.AreEqual((int)src.L[1], (int)dst.L[1]);
+					Assert.AreEqual(((Sample1)src.L[2]).X, ((Sample1)dst.L[2]).X);
+					Assert.AreEqual((int)src.D["abc"], (int)dst.D["abc"]);
+				},
+				useBinary: false
+			);
 		}
 
 		[TestMethod]
@@ -431,49 +444,61 @@ namespace YuzuTest
 		[TestMethod]
 		public void TestCopyable()
 		{
-			TestGen(cl => {
-				var src = new SampleWithCopyable { P = new SampleCopyable { X = 43 } };
-				var dst = cl.Deep(src);
-				Assert.AreNotEqual(src, dst);
-				Assert.AreEqual(src.P, dst.P);
-			}, useBinary: false);
-			TestGen(cl => {
-				cl.Options.Meta = new MetaOptions().AddOverride(typeof(SampleCopyable), o =>
-					o.NegateAttr(typeof(YuzuCopyable))
-				);
-				var src = new SampleWithCopyable { P = new SampleCopyable { X = 43 } };
-				var dst = cl.Deep(src);
-				Assert.AreNotEqual(src, dst);
-				Assert.AreNotEqual(src.P, dst.P);
-				Assert.AreEqual(src.P.X, dst.P.X);
-			}, useGen: false);
-			TestGen(cl => {
-				var src = new SampleWithCopyableItems {
-					P = new Sample1 { X = 43 },
-					L = new List<int> { 7, 8 }
-				};
-				var dst = cl.Deep(src);
-				Assert.AreNotEqual(src, dst);
-				Assert.AreEqual(src.P, dst.P);
-				Assert.AreEqual(src.L, dst.L);
-			}, useBinary: false);
+			TestGen(
+				cl => {
+					var src = new SampleWithCopyable { P = new SampleCopyable { X = 43 } };
+					var dst = cl.Deep(src);
+					Assert.AreNotEqual(src, dst);
+					Assert.AreEqual(src.P, dst.P);
+				},
+				useBinary: false
+			);
+			TestGen(
+				cl => {
+					cl.Options.Meta = new MetaOptions().AddOverride(typeof(SampleCopyable), o =>
+						o.NegateAttr(typeof(YuzuCopyable))
+					);
+					var src = new SampleWithCopyable { P = new SampleCopyable { X = 43 } };
+					var dst = cl.Deep(src);
+					Assert.AreNotEqual(src, dst);
+					Assert.AreNotEqual(src.P, dst.P);
+					Assert.AreEqual(src.P.X, dst.P.X);
+				},
+				useGen: false
+			);
+			TestGen(
+				cl => {
+					var src = new SampleWithCopyableItems {
+						P = new Sample1 { X = 43 },
+						L = new List<int> { 7, 8 },
+					};
+					var dst = cl.Deep(src);
+					Assert.AreNotEqual(src, dst);
+					Assert.AreEqual(src.P, dst.P);
+					Assert.AreEqual(src.L, dst.L);
+				},
+				useBinary: false
+			);
 		}
 
 		[TestMethod]
 		public void TestMerge()
 		{
-			TestGen(cl => {
-				var src = new SampleMerge();
-				src.DI.Add(3, 4);
-				src.LI.Add(33);
-				src.M = new Sample1 { X = 768, Y = "ttt" };
-				var dst = cl.Deep(src);
-				Assert.AreNotEqual(src, dst);
-				CollectionAssert.AreEqual(src.DI, dst.DI);
-				CollectionAssert.AreEqual(src.LI, dst.LI);
-				Assert.AreNotEqual(src.M, dst.M);
-				Assert.IsNull(dst.M);
-			}, useBinary: false);
+			TestGen(
+				cl => {
+					var src = new SampleMerge();
+					src.DI.Add(3, 4);
+					src.LI.Add(33);
+					src.M = new Sample1 { X = 768, Y = "ttt" };
+					var dst = cl.Deep(src);
+					Assert.AreNotEqual(src, dst);
+					CollectionAssert.AreEqual(src.DI, dst.DI);
+					CollectionAssert.AreEqual(src.LI, dst.LI);
+					Assert.AreNotEqual(src.M, dst.M);
+					Assert.IsNull(dst.M);
+				},
+				useBinary: false
+			);
 			TestGen(cl => {
 				cl.Options.Meta = new MetaOptions().AddOverride(typeof(SampleMerge), o =>
 					o.AddItem(nameof(SampleMerge.Make), i => i.AddAttr(new YuzuFactory()))
@@ -488,10 +513,11 @@ namespace YuzuTest
 				CollectionAssert.AreEqual(src.LI, dst.LI);
 				Assert.AreNotEqual(src.M, dst.M);
 				// Generated cloner is not affected by meta override.
-				if (cl is ClonerGenBase)
+				if (cl is ClonerGenBase) {
 					Assert.IsNull(dst.M);
-				else
+				} else {
 					Assert.AreEqual(src.M.X, dst.M.X);
+				}
 			});
 			TestGen(cl => {
 				var src = new SampleMergeNonPrimitive();
@@ -516,7 +542,7 @@ namespace YuzuTest
 				dst.Add(5);
 				cl.Merge(dst, src);
 				Assert.AreNotEqual(src, dst);
-				CollectionAssert.AreEqual(new List<int>{ 5, 3 }, dst.ToList());
+				CollectionAssert.AreEqual(new List<int> { 5, 3 }, dst.ToList());
 			});
 		}
 
@@ -548,14 +574,16 @@ namespace YuzuTest
 						new SampleDerivedA(),
 						new SampleDerivedB { FB = 9 },
 						new SampleDerivedB { FB = 8 },
-					}
+					},
 				};
 				var dst = cl.Deep(src);
 				Assert.AreNotEqual(src, dst);
 				Assert.AreNotEqual(src.E, dst.E);
 				Assert.AreEqual(src.E.Count, dst.E.Count);
-				for (int i = 0; i < src.E.Count; ++i)
+				for (int i = 0; i < src.E.Count; ++i) {
 					Assert.AreNotEqual(src.E[i], dst.E[i]);
+				}
+
 				Assert.IsInstanceOfType(dst.E[0], typeof(SampleDerivedA));
 			});
 		}
@@ -618,14 +646,16 @@ namespace YuzuTest
 			});
 			TestGen(cl => {
 				var src = new SampleCollection<Sample1>();
-				foreach (var i in new List<int> { 5, 2, 4, 1 })
+				foreach (var i in new List<int> { 5, 2, 4, 1 }) {
 					src.Add(new Sample1 { X = i });
+				}
 
 				var dst1 = cl.Deep(src);
 				Assert.AreNotEqual(src, dst1);
 				Assert.AreEqual(src.Count, dst1.Count);
-				foreach (var t in src.Zip(dst1, Tuple.Create))
+				foreach (var t in src.Zip(dst1, Tuple.Create)) {
 					Assert.AreEqual(t.Item1.X, t.Item2.X);
+				}
 
 				src.Filter = 1;
 				var dst2 = cl.Deep(src);
@@ -639,8 +669,9 @@ namespace YuzuTest
 			});
 			TestGen(cl => {
 				var src = new SampleWithCollectionMerge();
-				foreach (var i in new List<int> { 5, 2, 4, 1 })
+				foreach (var i in new List<int> { 5, 2, 4, 1 }) {
 					src.A.Add(i);
+				}
 
 				var dst1 = cl.Deep(src);
 				Assert.AreNotEqual(src, dst1);

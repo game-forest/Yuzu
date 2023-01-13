@@ -77,7 +77,6 @@
     <Compile Include="Yuzu\ProtoBuf.cs" />
     <Compile Include="Yuzu\Utils.cs" />
     <Compile Include="Yuzu\Yuzu.cs" />
-    <Compile Include="Yuzu\Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <ItemGroup>

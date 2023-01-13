@@ -16,7 +16,7 @@ namespace Yuzu.Binary
 
 		public BinaryDeserializer() { InitReaders(); }
 
-		public override void Initialize() {}
+		public override void Initialize() { }
 
 		private object ReadSByte() => Reader.ReadSByte();
 		private object ReadByte() => Reader.ReadByte();
@@ -46,15 +46,17 @@ namespace Yuzu.Binary
 		private object ReadString()
 		{
 			var s = Reader.ReadString();
-			return s != "" ? s : Reader.ReadBoolean() ? null : "";
+			return s != string.Empty ? s : Reader.ReadBoolean() ? null : string.Empty;
 		}
 
 		private Type ReadType()
 		{
 			var rt = (RoughType)Reader.ReadByte();
 			if (RoughType.FirstAtom <= rt && rt <= RoughType.LastAtom) {
-				var t = RT.roughTypeToType[(int)rt];
-				if (t != null) return t;
+				var t = RT.RoughTypeToType[(int)rt];
+				if (t != null) {
+					return t;
+				}
 			}
 			switch (rt) {
 				case RoughType.Sequence:
@@ -74,41 +76,59 @@ namespace Yuzu.Binary
 
 		private bool ReadCompatibleType(Type expectedType)
 		{
-			if (expectedType.IsEnum)
+			if (expectedType.IsEnum) {
 				return ReadCompatibleType(Enum.GetUnderlyingType(expectedType));
-			if (!expectedType.IsArray && expectedType.IsRecord() && (!expectedType.Namespace?.StartsWith("System") ?? true)) {
+			}
+
+			if (
+				!expectedType.IsArray
+				&& expectedType.IsRecord()
+				&& (!expectedType.Namespace?.StartsWith("System") ?? true)
+			) {
 				var sg = Meta.Get(expectedType, Options).Surrogate;
-				if (sg.SurrogateType != null && sg.FuncFrom != null)
+				if (sg.SurrogateType != null && sg.FuncFrom != null) {
 					return ReadCompatibleType(sg.SurrogateType);
+				}
 			}
 
 			var rt = (RoughType)Reader.ReadByte();
 			if (RoughType.FirstAtom <= rt && rt <= RoughType.LastAtom) {
-				var t = RT.roughTypeToType[(int)rt];
-				if (t != null) return t == expectedType;
+				var t = RT.RoughTypeToType[(int)rt];
+				if (t != null) {
+					return t == expectedType;
+				}
 			}
 			if (expectedType.IsArray) {
 				var r = expectedType.GetArrayRank();
-				return
-					(r == 1 ? rt == RoughType.Sequence :
-						rt == RoughType.NDimArray && Reader.ReadByte() == r) &&
-					ReadCompatibleType(expectedType.GetElementType());
+				return (
+					r == 1
+						? rt == RoughType.Sequence
+						: rt == RoughType.NDimArray && Reader.ReadByte() == r
+				) && ReadCompatibleType(expectedType.GetElementType());
 			}
 
 			var idict = Utils.GetIDictionary(expectedType);
 			if (idict != null) {
-				if (rt != RoughType.Mapping)
+				if (rt != RoughType.Mapping) {
 					return false;
+				}
+
 				var g = expectedType.GetGenericArguments();
 				return ReadCompatibleType(g[0]) && ReadCompatibleType(g[1]);
 			}
-			if (expectedType.IsGenericType && expectedType.GetGenericTypeDefinition() == typeof(Nullable<>))
+			if (expectedType.IsGenericType && expectedType.GetGenericTypeDefinition() == typeof(Nullable<>)) {
 				return rt == RoughType.Nullable && ReadCompatibleType(expectedType.GetGenericArguments()[0]);
+			}
+
 			var icoll = Utils.GetICollection(expectedType);
-			if (icoll != null)
+			if (icoll != null) {
 				return rt == RoughType.Sequence && ReadCompatibleType(icoll.GetGenericArguments()[0]);
-			if (rt == RoughType.Record)
+			}
+
+			if (rt == RoughType.Record) {
 				return expectedType.IsRecord();
+			}
+
 			throw Error("Unknown rough type {0}", rt);
 		}
 
@@ -153,43 +173,58 @@ namespace Yuzu.Binary
 		{
 			var rf = ReadValueFunc(typeof(T));
 			var count = Reader.ReadInt32();
-			for (int i = 0; i < count; ++i)
+			for (int i = 0; i < count; ++i) {
 				list.Add((T)rf());
+			}
 		}
 
 		protected void ReadIntoCollectionNG<T>(object list) => ReadIntoCollection((ICollection<T>)list);
 
-		protected I ReadCollection<I, E>() where I : class, ICollection<E>, new()
+		protected I ReadCollection<I, E>()
+			where I : class, ICollection<E>, new()
 		{
 			var count = Reader.ReadInt32();
-			if (count == -1)
+			if (count == -1) {
 				return null;
+			}
+
 			var list = new I();
 			var rf = ReadValueFunc(typeof(E));
-			for (int i = 0; i < count; ++i)
+			for (int i = 0; i < count; ++i) {
 				list.Add((E)rf());
+			}
+
 			return list;
 		}
 
 		protected List<T> ReadList<T>()
 		{
 			var count = Reader.ReadInt32();
-			if (count == -1) return null;
+			if (count == -1) {
+				return null;
+			}
+
 			var list = new List<T>();
 			var rf = ReadValueFunc(typeof(T));
-			for (int i = 0; i < count; ++i)
+			for (int i = 0; i < count; ++i) {
 				list.Add((T)rf());
+			}
+
 			return list;
 		}
 
 		protected List<object> ReadListRecord(Func<object> readValue)
 		{
 			var count = Reader.ReadInt32();
-			if (count == -1)
+			if (count == -1) {
 				return null;
+			}
+
 			var list = new List<object>();
-			for (int i = 0; i < count; ++i)
+			for (int i = 0; i < count; ++i) {
 				list.Add(readValue());
+			}
+
 			return list;
 		}
 
@@ -198,8 +233,9 @@ namespace Yuzu.Binary
 			var rk = ReadValueFunc(typeof(K));
 			var rv = ReadValueFunc(typeof(V));
 			var count = Reader.ReadInt32();
-			for (int i = 0; i < count; ++i)
+			for (int i = 0; i < count; ++i) {
 				dict.Add((K)rk(), (V)rv());
+			}
 		}
 
 		protected void ReadIntoDictionaryNG<K, V>(object dict) => ReadIntoDictionary((IDictionary<K, V>)dict);
@@ -207,36 +243,53 @@ namespace Yuzu.Binary
 		protected Dictionary<K, V> ReadDictionary<K, V>()
 		{
 			var count = Reader.ReadInt32();
-			if (count == -1)
+			if (count == -1) {
 				return null;
+			}
+
 			var dict = new Dictionary<K, V>();
 			var rk = ReadValueFunc(typeof(K));
 			var rv = ReadValueFunc(typeof(V));
 			for (int i = 0; i < count; ++i) {
 				var key = (K)rk();
 				var value = rv();
-				if (value != null && !(value is V))
-					throw Error("Incompatible type for key {0}, expected: {1} but got {2}",
-						key.ToString(), typeof(V), value.GetType());
+				if (value != null && !(value is V)) {
+					throw Error(
+						"Incompatible type for key {0}, expected: {1} but got {2}",
+						key.ToString(),
+						typeof(V),
+						value.GetType()
+					);
+				}
+
 				dict.Add(key, (V)value);
 			}
 			return dict;
 		}
 
-		protected I ReadIDictionary<I, K, V>() where I : class, IDictionary<K, V>, new()
+		protected I ReadIDictionary<I, K, V>()
+			where I : class, IDictionary<K, V>, new()
 		{
 			var count = Reader.ReadInt32();
-			if (count == -1)
+			if (count == -1) {
 				return null;
+			}
+
 			var dict = new I();
 			var rk = ReadValueFunc(typeof(K));
 			var rv = ReadValueFunc(typeof(V));
 			for (int i = 0; i < count; ++i) {
 				var key = (K)rk();
 				var value = rv();
-				if (!(value is V))
-					throw Error("Incompatible type for key {0}, expected: {1} but got {2}",
-						key.ToString(), typeof(V), value.GetType());
+				if (!(value is V)) {
+					throw Error(
+						"Incompatible type for key {0}, expected: {1} but got {2}",
+						key.ToString(),
+						typeof(V),
+						value.GetType()
+					);
+				}
+
 				dict.Add(key, (V)value);
 			}
 			return dict;
@@ -245,64 +298,86 @@ namespace Yuzu.Binary
 		protected Dictionary<K, object> ReadDictionaryRecord<K>(Func<object> readValue)
 		{
 			var count = Reader.ReadInt32();
-			if (count == -1)
+			if (count == -1) {
 				return null;
+			}
+
 			var dict = new Dictionary<K, object>();
 			var rk = ReadValueFunc(typeof(K));
-			for (int i = 0; i < count; ++i)
+			for (int i = 0; i < count; ++i) {
 				dict.Add((K)rk(), readValue());
+			}
+
 			return dict;
 		}
 
 		protected T[] ReadArray<T>()
 		{
 			var count = Reader.ReadInt32();
-			if (count == -1)
+			if (count == -1) {
 				return null;
+			}
+
 			var rf = ReadValueFunc(typeof(T));
 			var array = new T[count];
-			for (int i = 0; i < count; ++i)
+			for (int i = 0; i < count; ++i) {
 				array[i] = (T)rf();
+			}
+
 			return array;
 		}
 
-		protected Array ReadArrayNDim(Type elementType, int rank) =>
-			ReadArrayNDim(elementType, rank, ReadValueFunc(elementType));
+		protected Array ReadArrayNDim(Type elementType, int rank)
+		{
+			return ReadArrayNDim(elementType, rank, ReadValueFunc(elementType));
+		}
 
 		protected Array ReadArrayNDim(Type elementType, int rank, Func<object> readElemFunc)
 		{
 			int lengthOrNull = Reader.ReadInt32();
-			if (lengthOrNull == -1)
+			if (lengthOrNull == -1) {
 				return null;
+			}
+
 			var lbs = new int[rank];
 			var ubs = new int[rank];
 			var lengths = new int[rank];
 			lengths[0] = lengthOrNull;
-			for (int dim = 1; dim < rank; ++dim)
+			for (int dim = 1; dim < rank; ++dim) {
 				lengths[dim] = Reader.ReadInt32();
-			if (Reader.ReadBoolean()) {
-				for (int dim = 0; dim < rank; ++dim)
-					lbs[dim] = Reader.ReadInt32();
 			}
-			for (int dim = 0; dim < rank; ++dim)
+
+			if (Reader.ReadBoolean()) {
+				for (int dim = 0; dim < rank; ++dim) {
+					lbs[dim] = Reader.ReadInt32();
+				}
+			}
+			for (int dim = 0; dim < rank; ++dim) {
 				ubs[dim] = lengths[dim] + lbs[dim] - 1;
+			}
+
 			var array = Array.CreateInstance(elementType, lengths, lbs);
-			if (array.Length == 0)
+			if (array.Length == 0) {
 				return array;
+			}
 
 			var indices = (int[])lbs.Clone();
 			for (int dim = rank - 1; ;) {
 				array.SetValue(readElemFunc(), indices);
 				if (indices[dim] == ubs[dim]) {
-					for (; dim >= 0 && indices[dim] == ubs[dim]; --dim)
+					for (; dim >= 0 && indices[dim] == ubs[dim]; --dim) {
 						indices[dim] = lbs[dim];
-					if (dim < 0)
+					}
+
+					if (dim < 0) {
 						break;
+					}
+
 					++indices[dim];
 					dim = rank - 1;
-				}
-				else
+				} else {
 					++indices[dim];
+				}
 			}
 			return array;
 		}
@@ -332,8 +407,10 @@ namespace Yuzu.Binary
 				var t = ReadType();
 				var rf = ReadValueFunc(t);
 				result.Fields.Add(new ReaderClassDef.FieldDef {
-					Name = theirName, Type = t, OurIndex = -1,
-					ReadFunc = obj => ((YuzuUnknown)obj).Fields[theirName] = rf()
+					Name = theirName,
+					Type = t,
+					OurIndex = -1,
+					ReadFunc = obj => ((YuzuUnknown)obj).Fields[theirName] = rf(),
 				});
 			}
 			classDefs.Add(result);
@@ -342,14 +419,21 @@ namespace Yuzu.Binary
 
 		private void AddUnknownFieldDef(ReaderClassDef def, string fieldName, string typeName)
 		{
-			if (!Options.AllowUnknownFields)
+			if (!Options.AllowUnknownFields) {
 				throw Error("New field {0} for class {1}", fieldName, typeName);
-			var fd = new ReaderClassDef.FieldDef { Name = fieldName, OurIndex = -1, Type = ReadType() };
+			}
+			var fd = new ReaderClassDef.FieldDef {
+				Name = fieldName,
+				OurIndex = -1,
+				Type = ReadType(),
+			};
 			var rf = ReadValueFunc(fd.Type);
-			if (def.Meta.GetUnknownStorage == null)
+			if (def.Meta.GetUnknownStorage == null) {
 				fd.ReadFunc = obj => rf();
-			else
+			} else {
 				fd.ReadFunc = obj => def.Meta.GetUnknownStorage(obj).Add(fieldName, rf());
+			}
+
 			def.Fields.Add(fd);
 		}
 
@@ -358,8 +442,7 @@ namespace Yuzu.Binary
 			if (yi.SetValue != null) {
 				var rf = ReadValueFunc(yi.Type);
 				return obj => yi.SetValue(obj, rf());
-			}
-			else {
+			} else {
 				var mf = MergeValueFunc(yi.Type);
 				return obj => mf(yi.GetValue(obj));
 			}
@@ -370,47 +453,56 @@ namespace Yuzu.Binary
 			var ourCount = def.Meta.Items.Count;
 			var theirCount = Reader.ReadInt16();
 			int ourIndex = 0, theirIndex = 0;
-			var theirName = "";
+			var theirName = string.Empty;
 			while (ourIndex < ourCount && theirIndex < theirCount) {
 				var yi = def.Meta.Items[ourIndex];
 				var ourName = yi.Tag(Options);
-				if (theirName == "")
+				if (theirName == string.Empty) {
 					theirName = Reader.ReadString();
-				var cmp = String.CompareOrdinal(ourName, theirName);
-				if (cmp < 0) {
-					if (!yi.IsOptional)
-						throw Error("Missing required field {0} for class {1}", ourName, typeName);
-					ourIndex += 1;
 				}
-				else if (cmp > 0) {
+
+				var cmp = string.CompareOrdinal(ourName, theirName);
+				if (cmp < 0) {
+					if (!yi.IsOptional) {
+						throw Error("Missing required field {0} for class {1}", ourName, typeName);
+					}
+
+					ourIndex += 1;
+				} else if (cmp > 0) {
 					AddUnknownFieldDef(def, theirName, typeName);
 					theirIndex += 1;
-					theirName = "";
-				}
-				else {
-					if (!ReadCompatibleType(yi.Type))
+					theirName = string.Empty;
+				} else {
+					if (!ReadCompatibleType(yi.Type)) {
 						throw Error(
 							"Incompatible type for field {0}, expected {1}", ourName, yi.Type);
+					}
+
 					def.Fields.Add(new ReaderClassDef.FieldDef {
-						Name = theirName, OurIndex = ourIndex + 1, Type = yi.Type,
+						Name = theirName,
+						OurIndex = ourIndex + 1,
+						Type = yi.Type,
 						ReadFunc = MakeReadOrMergeFunc(yi),
 					});
 					ourIndex += 1;
 					theirIndex += 1;
-					theirName = "";
+					theirName = string.Empty;
 				}
 			}
 			for (; ourIndex < ourCount; ++ourIndex) {
 				var yi = def.Meta.Items[ourIndex];
 				var ourName = yi.Tag(Options);
-				if (!yi.IsOptional)
+				if (!yi.IsOptional) {
 					throw Error("Missing required field {0} for class {1}", ourName, typeName);
+				}
 			}
 			for (; theirIndex < theirCount; ++theirIndex) {
-				if (theirName == "")
+				if (theirName == string.Empty) {
 					theirName = Reader.ReadString();
+				}
+
 				AddUnknownFieldDef(def, theirName, typeName);
-				theirName = "";
+				theirName = string.Empty;
 			}
 		}
 
@@ -420,11 +512,12 @@ namespace Yuzu.Binary
 			int ourIndex = 0, requiredCountActiual = 0;
 			for (int theirIndex = 0; theirIndex < theirCount; ++theirIndex) {
 				var theirName = Reader.ReadString();
-				Meta.Item yi = null;
-				if (def.Meta.TagToItem.TryGetValue(theirName, out yi)) {
-					if (!ReadCompatibleType(yi.Type))
+				if (def.Meta.TagToItem.TryGetValue(theirName, out Meta.Item yi)) {
+					if (!ReadCompatibleType(yi.Type)) {
 						throw Error(
 							"Incompatible type for field {0}, expected {1}", theirName, yi.Type);
+					}
+
 					def.Fields.Add(new ReaderClassDef.FieldDef {
 						Name = theirName,
 						OurIndex = def.Meta.Items.IndexOf(yi) + 1,
@@ -432,34 +525,45 @@ namespace Yuzu.Binary
 						ReadFunc = MakeReadOrMergeFunc(yi),
 					});
 					ourIndex += 1;
-					if (!yi.IsOptional)
+					if (!yi.IsOptional) {
 						requiredCountActiual += 1;
-				}
-				else
+					}
+				} else {
 					AddUnknownFieldDef(def, theirName, typeName);
+				}
 			}
-			if (requiredCountActiual != def.Meta.RequiredCount)
+			if (requiredCountActiual != def.Meta.RequiredCount) {
 				throw Error(
 					"Expected {0} required field(s), but found {1} for class {2}",
-					def.Meta.RequiredCount, requiredCountActiual, typeName);
+					def.Meta.RequiredCount,
+					requiredCountActiual,
+					typeName
+				);
+			}
 		}
 
 		private ReaderClassDef GetClassDef(short classId)
 		{
-			if (classId < classDefs.Count)
+			if (classId < classDefs.Count) {
 				return classDefs[classId];
-			if (classId > classDefs.Count)
+			}
+			if (classId > classDefs.Count) {
 				throw Error("Bad classId: {0}", classId);
+			}
 			var typeName = Reader.ReadString();
 			var classType = Meta.GetTypeByReadAlias(typeName, Options) ?? TypeSerializer.Deserialize(typeName);
-			if (classType == null)
+			if (classType == null) {
 				return GetClassDefUnknown(typeName);
-			var result = new ReaderClassDef { Meta = Meta.Get(classType, Options) };
+			}
+			var result = new ReaderClassDef {
+				Meta = Meta.Get(classType, Options),
+			};
 			PrepareReaders(result);
-			if (BinaryOptions.Unordered)
+			if (BinaryOptions.Unordered) {
 				InitClassDefUnordered(result, typeName);
-			else
+			} else {
 				InitClassDef(result, typeName);
+			}
 			classDefs.Add(result);
 			return result;
 		}
@@ -470,10 +574,10 @@ namespace Yuzu.Binary
 			d.objStack.Push(obj);
 			try {
 				if (def.Meta.IsCompact) {
-					for (int i = 1; i < def.Fields.Count; ++i)
+					for (int i = 1; i < def.Fields.Count; ++i) {
 						def.Fields[i].ReadFunc(obj);
-				}
-				else {
+					}
+				} else {
 					if (def.Meta.GetUnknownStorage != null) {
 						var storage = def.Meta.GetUnknownStorage(obj);
 						storage.Clear();
@@ -483,19 +587,25 @@ namespace Yuzu.Binary
 					for (int i = 1; i < def.Fields.Count; ++i) {
 						var fd = def.Fields[i];
 						if (i < actualIndex || actualIndex == 0) {
-							if (fd.OurIndex < 0 || def.Meta.Items[fd.OurIndex - 1].IsOptional)
+							if (fd.OurIndex < 0 || def.Meta.Items[fd.OurIndex - 1].IsOptional) {
 								continue;
-							throw d.Error("Expected field '{0}' ({1}), but found '{2}'",
-								i, fd.Name, actualIndex);
+							}
+
+							throw d.Error(
+								"Expected field '{0}' ({1}), but found '{2}'",
+								i,
+								fd.Name,
+								actualIndex
+							);
 						}
 						fd.ReadFunc(obj);
 						actualIndex = d.Reader.ReadInt16();
 					}
-					if (actualIndex != 0)
+					if (actualIndex != 0) {
 						throw d.Error("Unfinished object, expected zero, but got {0}", actualIndex);
+					}
 				}
-			}
-			finally {
+			} finally {
 				d.objStack.Pop();
 			}
 			def.Meta.AfterDeserialization.Run(obj);
@@ -504,15 +614,21 @@ namespace Yuzu.Binary
 		protected void ReadIntoObject<T>(object obj)
 		{
 			var classId = Reader.ReadInt16();
-			if (classId == 0)
+			if (classId == 0) {
 				throw Error("Unable to read null into object");
+			}
+
 			var def = GetClassDef(classId);
 			var expectedType = obj.GetType();
 			if (
-				expectedType != def.Meta.Type &&
-				(!Meta.Get(expectedType, Options).AllowReadingFromAncestor || expectedType.BaseType != def.Meta.Type)
-			)
+				expectedType != def.Meta.Type
+				&& (!Meta.Get(expectedType, Options).AllowReadingFromAncestor
+					|| expectedType.BaseType != def.Meta.Type
+				)
+			) {
 				throw Error("Unable to read type {0} into {1}", def.Meta.Type, expectedType);
+			}
+
 			def.ReadFields(this, def, obj);
 		}
 
@@ -527,19 +643,26 @@ namespace Yuzu.Binary
 		{
 			var srcType = def.Meta.Type;
 			var dstType = typeof(T);
-			if (srcType != typeof(YuzuUnknown) && !dstType.IsAssignableFrom(srcType))
+			if (srcType != typeof(YuzuUnknown) && !dstType.IsAssignableFrom(srcType)) {
 				throw Error("Unable to assign type \"{0}\" to \"{1}\"", srcType.ToString(), dstType);
+			}
+
 			var result = def.Make?.Invoke(this, def);
-			if (srcType == typeof(YuzuUnknown) && !dstType.IsInstanceOfType(result))
+			if (srcType == typeof(YuzuUnknown) && !dstType.IsInstanceOfType(result)) {
 				throw Error("Unable to assign type \"{0}\" to \"{1}\"", ((YuzuUnknownBinary)result).ClassTag, dstType);
+			}
+
 			return result;
 		}
 
-		protected object ReadObject<T>() where T : class
+		protected object ReadObject<T>()
+			where T : class
 		{
 			var classId = Reader.ReadInt16();
-			if (classId == 0)
+			if (classId == 0) {
 				return null;
+			}
+
 			var def = GetClassDef(classId);
 			var result = MakeAndCheckAssignable<T>(def);
 			if (result == null) {
@@ -549,14 +672,19 @@ namespace Yuzu.Binary
 			return result;
 		}
 
-		protected object ReadObjectUnchecked<T>() where T : class
+		protected object ReadObjectUnchecked<T>()
+			where T : class
 		{
 			var classId = Reader.ReadInt16();
-			if (classId == 0)
+			if (classId == 0) {
 				return null;
+			}
+
 			var def = GetClassDef(classId);
-			if (def.Make != null)
+			if (def.Make != null) {
 				return def.Make(this, def);
+			}
+
 			var result = def.Meta.Factory();
 			def.ReadFields(this, def, result);
 			return result;
@@ -565,15 +693,19 @@ namespace Yuzu.Binary
 		protected void EnsureClassDef(Type t)
 		{
 			var def = GetClassDef(Reader.ReadInt16());
-			if (def.Meta.Type != t)
+			if (def.Meta.Type != t) {
 				throw Error("Expected type {0}, but found {1}", def.Meta.Type, t);
+			}
 		}
 
-		protected object ReadStruct<T>() where T : struct
+		protected object ReadStruct<T>()
+			where T : struct
 		{
 			var classId = Reader.ReadInt16();
-			if (classId == 0)
+			if (classId == 0) {
 				return null;
+			}
+
 			var def = GetClassDef(classId);
 			var result = MakeAndCheckAssignable<T>(def);
 			if (result == null) {
@@ -583,11 +715,14 @@ namespace Yuzu.Binary
 			return result;
 		}
 
-		protected void ReadIntoStruct<T>(ref T s) where T : struct
+		protected void ReadIntoStruct<T>(ref T s)
+			where T : struct
 		{
 			var classId = Reader.ReadInt16();
-			if (classId == 0)
+			if (classId == 0) {
 				return;
+			}
+
 			var def = GetClassDef(classId);
 			var result = MakeAndCheckAssignable<T>(def);
 			if (result == null) {
@@ -597,75 +732,109 @@ namespace Yuzu.Binary
 			s = (T)result;
 		}
 
-		protected object ReadStructUnchecked<T>() where T : struct
+		protected object ReadStructUnchecked<T>()
+			where T : struct
 		{
 			var classId = Reader.ReadInt16();
-			if (classId == 0)
+			if (classId == 0) {
 				return null;
+			}
+
 			var def = GetClassDef(classId);
-			if (def.Make != null)
+			if (def.Make != null) {
 				return def.Make(this, def);
+			}
+
 			var result = def.Meta.Factory();
 			def.ReadFields(this, def, result);
 			return result;
 		}
 
 		private Dictionary<Type, Func<object>> readerCache;
-		private Dictionary<Type, Action<object>> mergerCache = new Dictionary<Type, Action<object>>();
+		private readonly Dictionary<Type, Action<object>> mergerCache = new Dictionary<Type, Action<object>>();
 
 		private Func<object> ReadValueFunc(Type t)
 		{
-			if (readerCache.TryGetValue(t, out Func<object> f))
+			if (readerCache.TryGetValue(t, out Func<object> f)) {
 				return f;
+			}
 			return readerCache[t] = MakeReaderFunc(t);
 		}
 
 		private Action<object> MergeValueFunc(Type t)
 		{
-			if (mergerCache.TryGetValue(t, out Action<object> f))
+			if (mergerCache.TryGetValue(t, out Action<object> f)) {
 				return f;
+			}
 			return mergerCache[t] = MakeMergerFunc(t);
 		}
 
 		private Func<object> MakeEnumReaderFunc(Type t)
 		{
 			var ut = Enum.GetUnderlyingType(t);
-			if (ut == typeof(sbyte))
+			if (ut == typeof(sbyte)) {
 				return () => Enum.ToObject(t, Reader.ReadSByte());
-			if (ut == typeof(byte))
+			}
+
+			if (ut == typeof(byte)) {
 				return () => Enum.ToObject(t, Reader.ReadByte());
-			if (ut == typeof(short))
+			}
+
+			if (ut == typeof(short)) {
 				return () => Enum.ToObject(t, Reader.ReadInt16());
-			if (ut == typeof(ushort))
+			}
+
+			if (ut == typeof(ushort)) {
 				return () => Enum.ToObject(t, Reader.ReadUInt16());
-			if (ut == typeof(int))
+			}
+
+			if (ut == typeof(int)) {
 				return () => Enum.ToObject(t, Reader.ReadInt32());
-			if (ut == typeof(uint))
+			}
+
+			if (ut == typeof(uint)) {
 				return () => Enum.ToObject(t, Reader.ReadUInt32());
-			if (ut == typeof(long))
+			}
+
+			if (ut == typeof(long)) {
 				return () => Enum.ToObject(t, Reader.ReadInt64());
-			if (ut == typeof(ulong))
+			}
+
+			if (ut == typeof(ulong)) {
 				return () => Enum.ToObject(t, Reader.ReadUInt64());
+			}
+
 			throw new YuzuException();
 		}
 
 		private Func<object> ReadDataStructureOfRecord(Type t)
 		{
-			if (t == typeof(Record))
+			if (t == typeof(Record)) {
 				return ReadObject<object>;
-			if (!t.IsGenericType)
+			}
+
+			if (!t.IsGenericType) {
 				return null;
+			}
+
 			var g = t.GetGenericTypeDefinition();
 			if (g == typeof(List<>)) {
 				var readValue = ReadDataStructureOfRecord(t.GetGenericArguments()[0]);
-				if (readValue == null) return null;
+				if (readValue == null) {
+					return null;
+				}
+
 				return () => ReadListRecord(readValue);
 			}
 			if (g == typeof(Dictionary<,>)) {
 				var readValue = ReadDataStructureOfRecord(t.GetGenericArguments()[1]);
-				if (readValue == null) return null;
+				if (readValue == null) {
+					return null;
+				}
+
 				var d = (Func<Func<object>, object>)Delegate.CreateDelegate(
-					typeof(Func<Func<object>, object>), this,
+					typeof(Func<Func<object>, object>),
+					this,
 					Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadDictionaryRecord), t)
 				);
 				return () => d(readValue);
@@ -675,21 +844,31 @@ namespace Yuzu.Binary
 
 		private Func<object> MakeReaderFunc(Type t)
 		{
-			if (t.IsEnum)
+			if (t.IsEnum) {
 				return MakeEnumReaderFunc(t);
+			}
+
 			if (t.IsGenericType) {
 				var readRecord = ReadDataStructureOfRecord(t);
-				if (readRecord != null)
+				if (readRecord != null) {
 					return readRecord;
+				}
+
 				var g = t.GetGenericTypeDefinition();
-				if (g == typeof(List<>))
+				if (g == typeof(List<>)) {
 					return MakeDelegate(
 						Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadList), t));
-				if (g == typeof(Dictionary<,>))
+				}
+
+				if (g == typeof(Dictionary<,>)) {
 					return MakeDelegate(
 						Utils.GetPrivateCovariantGenericAll(GetType(), nameof(ReadDictionary), t));
-				if (g == typeof(Action<>))
+				}
+
+				if (g == typeof(Action<>)) {
 					return MakeDelegate(Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadAction), t));
+				}
+
 				if (g == typeof(Nullable<>)) {
 					var r = ReadValueFunc(t.GetGenericArguments()[0]);
 					return () => Reader.ReadBoolean() ? null : r();
@@ -727,54 +906,78 @@ namespace Yuzu.Binary
 			if (t.IsClass || t.IsInterface) {
 				return MakeDelegate(Utils.GetPrivateGeneric(GetType(), nameof(ReadObject), t));
 			}
-			if (Utils.IsStruct(t))
+			if (Utils.IsStruct(t)) {
 				return MakeDelegate(Utils.GetPrivateGeneric(GetType(), nameof(ReadStruct), t));
+			}
+
 			throw new NotImplementedException(t.Name);
 		}
 
 		private Action<object> MakeMergerFunc(Type t)
 		{
 			var idict = Utils.GetIDictionary(t);
-			if (idict != null)
+			if (idict != null) {
 				return MakeDelegateAction(
-					Utils.GetPrivateCovariantGenericAll(GetType(), nameof(ReadIntoDictionaryNG), idict));
+					Utils.GetPrivateCovariantGenericAll(GetType(), nameof(ReadIntoDictionaryNG), idict)
+				);
+			}
+
 			var icoll = Utils.GetICollection(t);
-			if (icoll != null)
+			if (icoll != null) {
 				return MakeDelegateAction(
-					Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadIntoCollectionNG), icoll));
-			if ((t.IsClass || t.IsInterface || Utils.IsStruct(t)) && t != typeof(object))
+					Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadIntoCollectionNG), icoll)
+				);
+			}
+
+			if ((t.IsClass || t.IsInterface || Utils.IsStruct(t)) && t != typeof(object)) {
 				return MakeDelegateAction(Utils.GetPrivateGeneric(GetType(), nameof(ReadIntoObject), t));
+			}
+
 			throw Error("Unable to merge field of type {0}", t);
 		}
 
 		public override object FromReaderInt()
 		{
-			if (BinaryOptions.AutoSignature)
+			if (BinaryOptions.AutoSignature) {
 				CheckSignature();
+			}
+
 			return ReadAny();
 		}
 
 		public override object FromReaderInt(object obj)
 		{
 			var expectedType = obj.GetType();
-			if (expectedType == typeof(object))
+			if (expectedType == typeof(object)) {
 				throw Error("Unable to read into untyped object");
-			if (BinaryOptions.AutoSignature)
+			}
+
+			if (BinaryOptions.AutoSignature) {
 				CheckSignature();
-			if (!ReadCompatibleType(expectedType))
+			}
+
+			if (!ReadCompatibleType(expectedType)) {
 				throw Error("Incompatible type to read into {0}", expectedType.Name);
+			}
+
 			MergeValueFunc(expectedType)(obj);
 			return obj;
 		}
 
 		public override T FromReaderInt<T>()
 		{
-			if (BinaryOptions.AutoSignature)
+			if (BinaryOptions.AutoSignature) {
 				CheckSignature();
-			if (typeof(T) == typeof(object))
+			}
+
+			if (typeof(T) == typeof(object)) {
 				return (T)ReadAny();
-			if (!ReadCompatibleType(typeof(T)))
+			}
+
+			if (!ReadCompatibleType(typeof(T))) {
 				throw Error("Incompatible type to read into {0}", typeof(T));
+			}
+
 			return (T)ReadValueFunc(typeof(T))();
 		}
 
@@ -782,26 +985,34 @@ namespace Yuzu.Binary
 		public bool IsValidSignature()
 		{
 			var s = BinaryOptions.Signature;
-			if (s.Length == 0)
+			if (s.Length == 0) {
 				return true;
-			if (!Reader.BaseStream.CanSeek)
+			}
+
+			if (!Reader.BaseStream.CanSeek) {
 				return s.Equals(Reader.ReadBytes(s.Length));
+			}
+
 			var pos = Reader.BaseStream.Position;
-			if (Reader.BaseStream.Length - pos < s.Length)
+			if (Reader.BaseStream.Length - pos < s.Length) {
 				return false;
-			foreach (var b in s)
+			}
+
+			foreach (var b in s) {
 				if (b != Reader.ReadByte()) {
 					Reader.BaseStream.Position = pos;
 					return false;
 				}
+			}
+
 			return true;
 		}
 
 		public void CheckSignature()
 		{
-			if (!IsValidSignature())
+			if (!IsValidSignature()) {
 				throw Error("Signature not found");
+			}
 		}
-
 	}
 }

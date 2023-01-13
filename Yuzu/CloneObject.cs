@@ -18,44 +18,52 @@ namespace Yuzu.Clone
 		{
 			if (yi.SetValue != null) {
 				var cloner = cl.GetCloner(yi.Type);
-				if (yi.SerializeCond != null)
+				if (yi.SerializeCond != null) {
 					return (dst, src) => {
 						var v = yi.GetValue(src);
-						if (yi.SerializeCond(src, v))
+						if (yi.SerializeCond(src, v)) {
 							yi.SetValue(dst, cloner(v));
+						}
 					};
-				else
+				} else {
 					return (dst, src) => yi.SetValue(dst, cloner(yi.GetValue(src)));
-			}
-			else {
+				}
+			} else {
 				var merger = cl.GetMerger(yi.Type);
-				if (yi.SerializeCond != null)
+				if (yi.SerializeCond != null) {
 					return (dst, src) => {
 						var v = yi.GetValue(src);
-						if (yi.SerializeCond(src, v))
+						if (yi.SerializeCond(src, v)) {
 							merger(yi.GetValue(dst), v);
+						}
 					};
-				else
+				} else {
 					return (dst, src) => merger(yi.GetValue(dst), yi.GetValue(src));
+				}
 			}
 		}
 
 		protected void MakeFieldCloners()
 		{
 			int i = 0;
-			foreach (var yi in meta.Items)
-				if (!cl.IsCopyable(yi))
+			foreach (var yi in meta.Items) {
+				if (!cl.IsCopyable(yi)) {
 					cloners[i++] = MakeFieldCloner(yi);
+				}
+			}
 		}
 
 		protected void CopyCopyable(object dst, object src)
 		{
-			foreach (var yi in copyable)
+			foreach (var yi in copyable) {
 				yi.SetValue(dst, yi.GetValue(src));
+			}
+
 			foreach (var yi in copyableIf) {
 				var v = yi.GetValue(src);
-				if (yi.SerializeCond(src, v))
+				if (yi.SerializeCond(src, v)) {
 					yi.SetValue(dst, v);
+				}
 			}
 		}
 
@@ -77,19 +85,27 @@ namespace Yuzu.Clone
 		internal Func<object, object> Get()
 		{
 			// Duplicate code to optimize fast path.
-			if (!meta.HasAnyTrigger() && cloners.Length == 0)
+			if (!meta.HasAnyTrigger() && cloners.Length == 0) {
 				return NoTriggersAllCopyable;
-			if (meta.HasAnyTrigger())
+			}
+
+			if (meta.HasAnyTrigger()) {
 				return GeneralCase;
+			}
+
 			return NoTriggers;
 		}
 
 		internal object NoTriggersAllCopyable(object src)
 		{
-			if (src == null)
+			if (src == null) {
 				return null;
-			if (src.GetType() != meta.Type)
+			}
+
+			if (src.GetType() != meta.Type) {
 				return cl.DeepObject(src);
+			}
+
 			var result = meta.Factory();
 			CopyCopyable(result, src);
 			return result;
@@ -97,33 +113,49 @@ namespace Yuzu.Clone
 
 		internal object NoTriggers(object src)
 		{
-			if (src == null)
+			if (src == null) {
 				return null;
-			if (src.GetType() != meta.Type)
+			}
+
+			if (src.GetType() != meta.Type) {
 				return cl.DeepObject(src);
+			}
+
 			var result = meta.Factory();
-			if (cloners[0] == null)
+			if (cloners[0] == null) {
 				MakeFieldCloners();
+			}
+
 			CopyCopyable(result, src);
-			foreach (var cloner in cloners)
+			foreach (var cloner in cloners) {
 				cloner(result, src);
+			}
+
 			return result;
 		}
 
 		internal object GeneralCase(object src)
 		{
-			if (src == null)
+			if (src == null) {
 				return null;
-			if (src.GetType() != meta.Type)
+			}
+
+			if (src.GetType() != meta.Type) {
 				return cl.DeepObject(src);
+			}
+
 			meta.BeforeSerialization.Run(src);
 			var result = meta.Factory();
-			if (cloners.Length > 0 && cloners[0] == null)
+			if (cloners.Length > 0 && cloners[0] == null) {
 				MakeFieldCloners();
+			}
+
 			meta.BeforeDeserialization.Run(result);
 			CopyCopyable(result, src);
-			foreach (var cloner in cloners)
+			foreach (var cloner in cloners) {
 				cloner(result, src);
+			}
+
 			meta.AfterSerialization.Run(src);
 			meta.AfterDeserialization.Run(result);
 			return result;
@@ -137,43 +169,60 @@ namespace Yuzu.Clone
 		internal Action<object, object> Get()
 		{
 			// Duplicate code to optimize fast path.
-			if (!meta.HasAnyTrigger() && cloners.Length == 0)
+			if (!meta.HasAnyTrigger() && cloners.Length == 0) {
 				return NoTriggersAllCopyable;
-			if (meta.HasAnyTrigger())
+			}
+
+			if (meta.HasAnyTrigger()) {
 				return GeneralCase;
+			}
+
 			return NoTriggers;
 		}
 
 		internal void NoTriggersAllCopyable(object dst, object src)
 		{
-			if (src == null || dst == null)
+			if (src == null || dst == null) {
 				return;
+			}
+
 			CopyCopyable(dst, src);
 		}
 
 		internal void NoTriggers(object dst, object src)
 		{
-			if (src == null || dst == null)
+			if (src == null || dst == null) {
 				return;
-			if (cloners[0] == null)
+			}
+
+			if (cloners[0] == null) {
 				MakeFieldCloners();
+			}
+
 			CopyCopyable(dst, src);
-			foreach (var cloner in cloners)
+			foreach (var cloner in cloners) {
 				cloner(dst, src);
+			}
 		}
 
 		internal void GeneralCase(object dst, object src)
 		{
-			if (src == null || dst == null)
+			if (src == null || dst == null) {
 				return;
+			}
+
 			meta.BeforeSerialization.Run(src);
 			var result = meta.Factory();
-			if (cloners.Length > 0 && cloners[0] == null)
+			if (cloners.Length > 0 && cloners[0] == null) {
 				MakeFieldCloners();
+			}
+
 			meta.BeforeDeserialization.Run(result);
 			CopyCopyable(dst, src);
-			foreach (var cloner in cloners)
+			foreach (var cloner in cloners) {
 				cloner(result, src);
+			}
+
 			meta.AfterSerialization.Run(src);
 			meta.AfterDeserialization.Run(result);
 		}
