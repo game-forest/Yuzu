@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -41,7 +41,7 @@ namespace YuzuTest
 	{
 	}
 
-	public class SampleEmptyDerivied: Empty
+	public class SampleEmptyDerivied : Empty
 	{
 		[YuzuRequired]
 		public int D;
@@ -97,7 +97,8 @@ namespace YuzuTest
 	}
 
 	[YuzuCopyable]
-	public class SampleCopyable {
+	public class SampleCopyable
+	{
 		[YuzuRequired]
 		public int X;
 	}
@@ -132,15 +133,15 @@ namespace YuzuTest
 		public Sample2 S2;
 	}
 
-	public enum SampleEnum { E1, E2, E3 };
+	public enum SampleEnum { E1, E2, E3 }
 	public class Sample4
 	{
 		[YuzuOptional]
 		public SampleEnum E;
 	}
 
-	public enum SampleEnumByte : byte { EB1, EB2, EB3 };
-	public enum SampleEnumLong : long { EL1, EL2, Large = 1L << 50 };
+	public enum SampleEnumByte : byte { EB1, EB2, EB3 }
+	public enum SampleEnumLong : long { EL1, EL2, Large = 1L << 50 }
 	public class SampleEnumMemberTyped
 	{
 		[YuzuOptional]
@@ -258,28 +259,38 @@ namespace YuzuTest
 		public void AssertAreEqual(SampleArrayNDim actual)
 		{
 			AssertBoundsAreEqual(A, actual.A);
-			if (A.Length > 0)
+			if (A.Length > 0) {
 				Assert.AreEqual(
 					A[A.GetLowerBound(0), A.GetLowerBound(1)],
-					actual.A[A.GetLowerBound(0), A.GetLowerBound(1)]);
-			if (A.Length > 1)
+					actual.A[A.GetLowerBound(0), A.GetLowerBound(1)]
+				);
+			}
+
+			if (A.Length > 1) {
 				Assert.AreEqual(
 					A[A.GetUpperBound(0), A.GetUpperBound(1)],
-					actual.A[A.GetUpperBound(0), A.GetUpperBound(1)]);
+					actual.A[A.GetUpperBound(0), A.GetUpperBound(1)]
+				);
+			}
 
 			if (B == null) {
 				Assert.IsNull(actual.B);
 				return;
 			}
 			AssertBoundsAreEqual(B, actual.B);
-			if (B.Length > 0)
+			if (B.Length > 0) {
 				Assert.AreEqual(
 					B[B.GetLowerBound(0), B.GetLowerBound(1), B.GetLowerBound(2)],
-					actual.B[B.GetLowerBound(0), B.GetLowerBound(1), B.GetLowerBound(2)]);
-			if (B.Length > 1)
+					actual.B[B.GetLowerBound(0), B.GetLowerBound(1), B.GetLowerBound(2)]
+				);
+			}
+
+			if (B.Length > 1) {
 				Assert.AreEqual(
 					B[B.GetUpperBound(0), B.GetUpperBound(1), B.GetUpperBound(2)],
-					actual.B[B.GetUpperBound(0), B.GetUpperBound(1), B.GetUpperBound(2)]);
+					actual.B[B.GetUpperBound(0), B.GetUpperBound(1), B.GetUpperBound(2)]
+				);
+			}
 		}
 	}
 
@@ -503,14 +514,16 @@ namespace YuzuTest
 			Counter++;
 			StringBuilder sb = new StringBuilder();
 			var len = rnd.Next(1, 40);
-			for (int i = 0; i < len; ++i)
+			for (int i = 0; i < len; ++i) {
 				sb.Append((char)rnd.Next((int)'a', (int)'z' + 1));
+			}
 			Name = sb.ToString();
 			Birth = new DateTime(1999, rnd.Next(10) + 1, 13);
 			var childCount = rnd.Next(28 / depth);
 			Children = new List<SamplePerson>();
-			for (int i = 0; i < childCount; ++i)
+			for (int i = 0; i < childCount; ++i) {
 				Children.Add(new SamplePerson(rnd, depth + 1));
+			}
 			EyeColor = new Color { R = (byte)rnd.Next(256), G = (byte)rnd.Next(256), B = (byte)rnd.Next(256) };
 		}
 	}
@@ -722,7 +735,7 @@ namespace YuzuTest
 	{
 		private string hidden = "X";
 		[YuzuRequired]
-		public string X { get { return hidden; }  set { hidden += value; } }
+		public string X { get { return hidden; } set { hidden += value; } }
 		[YuzuBeforeDeserialization]
 		public void Before() { hidden = "2"; }
 	}
@@ -767,7 +780,7 @@ namespace YuzuTest
 
 	public class SampleNested
 	{
-		public enum NestedEnum { One, Two };
+		public enum NestedEnum { One, Two }
 		public class NestedClass
 		{
 			[YuzuOptional]
@@ -805,26 +818,41 @@ namespace YuzuTest
 		[YuzuMember]
 		public Dictionary<int, List<SampleBoolBase>> F;
 
-		public static MetaOptions Override() =>
-			new MetaOptions().AddOverride(
+		public static MetaOptions Override()
+		{
+			return new MetaOptions().AddOverride(
 				typeof(SampleUnknownDictOfLists),
-				o => o.AddAttr(new YuzuAlias("Something")));
+				o => o.AddAttr(new YuzuAlias("Something"))
+			);
+		}
 
 		public static SampleUnknownDictOfLists Sample = new SampleUnknownDictOfLists {
 			F = new Dictionary<int, List<SampleBoolBase>> {
-				{ 7, new List<SampleBoolBase>{ new SampleBool { B = true } } } }
+				{
+					7,
+					new List<SampleBoolBase> {
+						new SampleBool {
+							B = true,
+						},
+					}
+				},
+			},
 		};
 	}
 
 	public class SampleSurrogateColor
 	{
-		public int R, G, B;
+		public int R;
+		public int G;
+		public int B;
 		[YuzuToSurrogate]
-		public string ToSurrogate() { return String.Format("#{0:X2}{1:X2}{2:X2}", R, G, B); }
+		public string ToSurrogate() { return string.Format("#{0:X2}{1:X2}{2:X2}", R, G, B); }
 		[YuzuFromSurrogate]
-		public static SampleSurrogateColor FromSurrogate(string s) {
-			if (s[0] != '#')
+		public static SampleSurrogateColor FromSurrogate(string s)
+		{
+			if (s[0] != '#') {
 				throw new Exception("Bad color: " + s);
+			}
 			return new SampleSurrogateColor {
 				R = int.Parse(s.Substring(1, 2), NumberStyles.AllowHexSpecifier),
 				G = int.Parse(s.Substring(3, 2), NumberStyles.AllowHexSpecifier),
@@ -837,7 +865,11 @@ namespace YuzuTest
 	public class SampleSurrogateColorIf
 	{
 		[YuzuRequired]
-		public int R, G, B;
+		public int R;
+		[YuzuRequired]
+		public int G;
+		[YuzuRequired]
+		public int B;
 		public static bool S;
 		[YuzuSurrogateIf]
 		public virtual bool SurrogateIf() { return S; }
@@ -877,7 +909,8 @@ namespace YuzuTest
 
 	public class SampleCompactSurrogate
 	{
-		public int X, Y;
+		public int X;
+		public int Y;
 		[YuzuToSurrogate]
 		public static SamplePoint ToSurrogate(SampleCompactSurrogate obj)
 		{
@@ -890,18 +923,19 @@ namespace YuzuTest
 		}
 	}
 
-	public class SampleSurrogateHashSet: HashSet<char>
+	public class SampleSurrogateHashSet : HashSet<char>
 	{
 		[YuzuToSurrogate]
 		public static string ToSurrogate(SampleSurrogateHashSet obj) =>
-			string.Join("", obj.OrderBy(ch => ch));
+			string.Join(string.Empty, obj.OrderBy(ch => ch));
 
 		[YuzuFromSurrogate]
 		public static SampleSurrogateHashSet FromSurrogate(string s)
 		{
 			var result = new SampleSurrogateHashSet();
-			foreach (var ch in s)
+			foreach (var ch in s) {
 				result.Add(ch);
+			}
 			return result;
 		}
 	}
@@ -920,7 +954,7 @@ namespace YuzuTest
 		[YuzuRequired]
 		public int X;
 
-		private SamplePrivateConstructor() {}
+		private SamplePrivateConstructor() { }
 
 		[YuzuFactory]
 		public static SamplePrivateConstructor Make() => new SamplePrivateConstructor();
@@ -970,7 +1004,8 @@ namespace YuzuTest
 		}
 		[ProtoContract]
 		[YuzuCompact]
-		public class S {
+		public class S
+		{
 			[YuzuRequired]
 			[ProtoMember(1)]
 			public Vertex V;
@@ -1008,8 +1043,8 @@ namespace YuzuTest
 	public class BadPrivate
 	{
 		[YuzuRequired]
-		private int F = 0;
-		public int G { get { return F; } }
+		private int f = 0;
+		public int G { get { return f; } }
 	}
 
 	public class BadPrivateGetter
@@ -1037,8 +1072,7 @@ namespace YuzuTest
 		{
 			try {
 				exceptionThrower();
-			}
-			catch (TExpectedException ex) {
+			} catch (TExpectedException ex) {
 				StringAssert.Contains(ex.Message, expectedExceptionMessage, "Bad exception message");
 				return;
 			}

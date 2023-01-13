@@ -25,6 +25,8 @@
     <Compile Remove="Yuzu\Grisu\LICENSE" />
   </ItemGroup>
 
+  <Import Project="Analyzers.targets" />
+
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>

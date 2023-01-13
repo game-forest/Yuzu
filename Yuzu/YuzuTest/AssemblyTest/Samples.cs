@@ -1,4 +1,4 @@
-﻿using Yuzu;
+using Yuzu;
 
 namespace YuzuTestAssembly
 {

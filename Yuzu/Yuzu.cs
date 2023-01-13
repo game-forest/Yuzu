@@ -18,7 +18,6 @@ namespace Yuzu
 	}
 
 	// YuzuField attributes must have default constructors for YuzuAll to work.
-
 	public class YuzuRequired : YuzuField
 	{
 		public YuzuRequired() : base(null) { }
@@ -38,8 +37,11 @@ namespace Yuzu
 	}
 
 	[AttributeUsage(
-		AttributeTargets.Field | AttributeTargets.Property |
-		AttributeTargets.Class | AttributeTargets.Struct)]
+		AttributeTargets.Field
+		| AttributeTargets.Property
+		| AttributeTargets.Class
+		| AttributeTargets.Struct
+	)]
 	public class YuzuAlias : Attribute
 	{
 		public readonly string[] ReadAliases;
@@ -56,7 +58,7 @@ namespace Yuzu
 		}
 	}
 
-	public enum YuzuNoDefault { NoDefault };
+	public enum YuzuNoDefault { NoDefault }
 
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 	public abstract class YuzuSerializeCondition : Attribute
@@ -74,8 +76,10 @@ namespace Yuzu
 		public override Func<object, object, bool> MakeChecker(Type tObj)
 		{
 			var fn = tObj.GetMethod(Method);
-			if (fn == null)
+			if (fn == null) {
 				throw new YuzuException();
+			}
+
 			var p = Expression.Parameter(typeof(object));
 			var pf = Expression.Parameter(typeof(object));
 			var e = Expression.Call(Expression.Convert(p, tObj), fn);
@@ -94,7 +98,8 @@ namespace Yuzu
 			var pItem = Expression.Parameter(typeof(object));
 			var e = Expression.Call(Expression.Convert(pObj, m.DeclaringType), m, pIndex, pItem);
 			return Expression.Lambda<Func<object, int, object, bool>>(
-				e, pObj, pIndex, pItem).Compile();
+				e, pObj, pIndex, pItem
+			).Compile();
 		}
 	}
 
@@ -112,8 +117,11 @@ namespace Yuzu
 	}
 
 	[AttributeUsage(
-		AttributeTargets.Field | AttributeTargets.Property |
-		AttributeTargets.Class | AttributeTargets.Struct)]
+		AttributeTargets.Field
+		| AttributeTargets.Property
+		| AttributeTargets.Class
+		| AttributeTargets.Struct
+	)]
 	public class YuzuCompact : Attribute { }
 
 	[AttributeUsage(AttributeTargets.Method)]
@@ -207,18 +215,25 @@ namespace Yuzu
 			return this;
 		}
 
-		public Attribute Attr(Type attrType) =>
-			attrType == null || NegatedAttributes.Contains(attrType) ? null :
-				Attributes.SingleOrDefault(a => a.GetType() == attrType) ??
-				Info.GetCustomAttribute(attrType);
+		public Attribute Attr(Type attrType)
+		{
+			return attrType == null || NegatedAttributes.Contains(attrType)
+				? null
+				: Attributes.SingleOrDefault(a => a.GetType() == attrType) ?? Info.GetCustomAttribute(attrType);
+		}
 
-		public bool HasAttr(Type attrType) =>
-			attrType != null && !NegatedAttributes.Contains(attrType) &&
-				(Attributes.Any(a => a.GetType() == attrType) || Info.IsDefined(attrType));
-
+		public bool HasAttr(Type attrType)
+		{
+			return attrType != null
+				&& !NegatedAttributes.Contains(attrType)
+				&& (Attributes.Any(a => a.GetType() == attrType)
+					|| Info.IsDefined(attrType)
+				);
+		}
 	}
 
-	public class MetaOverride: MetaItemOverride {
+	public class MetaOverride : MetaItemOverride
+	{
 		public Type TypeInfo() => Info as Type;
 		public ConcurrentDictionary<string, MetaItemOverride> Items =
 			new ConcurrentDictionary<string, MetaItemOverride>();
@@ -239,15 +254,19 @@ namespace Yuzu
 		{
 			var m = TypeInfo().GetMember(itemName);
 			var item = new MetaItemOverride { Info = m[0] };
-			if (Items.TryAdd(itemName, item))
+			if (Items.TryAdd(itemName, item)) {
 				after?.Invoke(item);
+			}
+
 			return this;
 		}
 
 		public MetaItemOverride Item(MemberInfo m)
 		{
-			if (Items.TryGetValue(m.Name, out MetaItemOverride item))
+			if (Items.TryGetValue(m.Name, out MetaItemOverride item)) {
 				return item;
+			}
+
 			return new MetaItemOverride { Info = m };
 		}
 		public MetaItemOverride Item(string itemName) => Item(TypeInfo().GetMember(itemName)[0]);
@@ -295,7 +314,7 @@ namespace Yuzu
 		public Func<Attribute, IEnumerable<string>> GetReadAliases = attr => (attr as YuzuAlias).ReadAliases;
 		public Func<Attribute, string> GetWriteAlias = attr => (attr as YuzuAlias).WriteAlias;
 
-		private ConcurrentDictionary<Type, MetaOverride> overrides =
+		private readonly ConcurrentDictionary<Type, MetaOverride> overrides =
 			new ConcurrentDictionary<Type, MetaOverride>();
 
 		public MetaOptions AddOverride(Type t, Action<MetaOverride> after = null)
@@ -307,15 +326,18 @@ namespace Yuzu
 
 		public MetaOverride GetOverride(Type t)
 		{
-			MetaOverride result;
-			if (overrides.TryGetValue(t, out result))
+			if (overrides.TryGetValue(t, out MetaOverride result)) {
 				return result;
+			}
+
 			return new MetaOverride { Info = t };
 		}
 		public MetaItemOverride GetItem(MemberInfo m)
 		{
-			if (overrides.TryGetValue(m.DeclaringType, out MetaOverride over))
+			if (overrides.TryGetValue(m.DeclaringType, out MetaOverride over)) {
 				return over.Item(m);
+			}
+
 			return new MetaItemOverride { Info = m };
 		}
 	}
@@ -339,20 +361,20 @@ namespace Yuzu
 		}
 	}
 
-	public class YuzuException: Exception
+	public class YuzuException : Exception
 	{
 		public readonly YuzuPosition Position = null;
 
 		public YuzuException() { }
 
-		public YuzuException(string message, YuzuPosition position = null): base(
-			position == null ? message : message + " at " + position.ToString())
+		public YuzuException(string message, YuzuPosition position = null)
+			: base(position == null ? message : message + " at " + position.ToString())
 		{
 			Position = position;
 		}
 	}
 
-	public class YuzuUnknown: DynamicObject
+	public class YuzuUnknown : DynamicObject
 	{
 		public string ClassTag;
 		public SortedDictionary<string, object> Fields = new SortedDictionary<string, object>();
@@ -361,15 +383,19 @@ namespace Yuzu
 		{
 			if (obj is IReadOnlyDictionary<string, object>) {
 				var u = new YuzuUnknown();
-				foreach (var p in obj as IReadOnlyDictionary<string, object>)
+				foreach (var p in obj as IReadOnlyDictionary<string, object>) {
 					u.Fields.Add(p.Key, p.Value);
+				}
+
 				return u;
 			}
 			return obj;
 		}
 
-		public override bool TryGetMember(GetMemberBinder binder, out object result) =>
-			Fields.TryGetValue(binder.Name, out result);
+		public override bool TryGetMember(GetMemberBinder binder, out object result)
+		{
+			return Fields.TryGetValue(binder.Name, out result);
+		}
 
 		public override bool TrySetMember(SetMemberBinder binder, object value)
 		{
@@ -384,18 +410,20 @@ namespace Yuzu
 		{
 			public string Name;
 			public object Value;
-			static public int Comparer(Item i1, Item i2) { return String.CompareOrdinal(i1.Name, i2.Name); }
+			public static int Comparer(Item i1, Item i2) => string.CompareOrdinal(i1.Name, i2.Name);
 		}
 		public List<Item> Fields = new List<Item>();
 		public bool IsOrdered { get; private set; }
 		internal object Internal;
 
-		public YuzuUnknownStorage() { IsOrdered = true; }
+		public YuzuUnknownStorage() => IsOrdered = true;
 
 		public void Sort()
 		{
-			if (IsOrdered)
+			if (IsOrdered) {
 				return;
+			}
+
 			Fields.Sort(Item.Comparer);
 			IsOrdered = true;
 		}
@@ -403,14 +431,16 @@ namespace Yuzu
 		{
 			Fields.Clear();
 			IsOrdered = true;
-			if (clearMetadata)
+			if (clearMetadata) {
 				Internal = null;
+			}
 		}
 		public virtual void Add(string name, object value)
 		{
 			Fields.Add(new Item { Name = name, Value = value });
-			if (Fields.Count > 1 && IsOrdered)
+			if (Fields.Count > 1 && IsOrdered) {
 				IsOrdered = Item.Comparer(Fields[0], Fields[1]) < 0;
+			}
 		}
 	}
 
@@ -427,19 +457,25 @@ namespace Yuzu
 		public abstract byte[] ToBytes(object obj);
 		public abstract void ToStream(object obj, Stream target);
 
-		protected Action<object> MakeDelegateAction(MethodInfo m) =>
-			(Action<object>)Delegate.CreateDelegate(typeof(Action<object>), this, m);
+		protected Action<object> MakeDelegateAction(MethodInfo m)
+		{
+			return (Action<object>)Delegate.CreateDelegate(typeof(Action<object>), this, m);
+		}
 
-		protected Action<object, TParam> MakeDelegateParam<TParam>(MethodInfo m) =>
-			(Action<object, TParam>)Delegate.CreateDelegate(typeof(Action<object, TParam>), this, m);
+		protected Action<object, TParam> MakeDelegateParam<TParam>(MethodInfo m)
+		{
+			return (Action<object, TParam>)Delegate.CreateDelegate(typeof(Action<object, TParam>), this, m);
+		}
 
-		protected Action<object, TParam1, TParam2> MakeDelegateParam2<TParam1, TParam2>(MethodInfo m) =>
-			(Action<object, TParam1, TParam2>)
-				Delegate.CreateDelegate(typeof(Action<object, TParam1, TParam2>), this, m);
-
+		protected Action<object, TParam1, TParam2> MakeDelegateParam2<TParam1, TParam2>(MethodInfo m)
+		{
+			return (Action<object, TParam1, TParam2>)Delegate.CreateDelegate(
+				typeof(Action<object, TParam1, TParam2>), this, m
+			);
+		}
 	}
 
-	public abstract class AbstractWriterSerializer: AbstractSerializer
+	public abstract class AbstractWriterSerializer : AbstractSerializer
 	{
 		protected BinaryWriter writer;
 

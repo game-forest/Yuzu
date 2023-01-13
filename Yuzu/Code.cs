@@ -9,7 +9,7 @@ namespace Yuzu.Code
 	{
 		public string VarName = "x";
 		public string Indent = "\t";
-	};
+	}
 
 	public class CodeConstructSerializer : AbstractStringSerializer
 	{
@@ -28,8 +28,10 @@ namespace Yuzu.Code
 				builder.Append(yi.Name);
 				builder.Append(" = ");
 				var v = Utils.CodeValueFormat(yi.GetValue(obj));
-				if (v == "")
+				if (v == string.Empty) {
 					throw new NotImplementedException(yi.Type.Name);
+				}
+
 				builder.Append(v);
 			}
 			builder.Append("\n};\n");
@@ -40,7 +42,7 @@ namespace Yuzu.Code
 	{
 		public string FuncName = "Init";
 		public string Indent = "\t";
-	};
+	}
 
 	public class CodeAssignSerializer : AbstractStringSerializer
 	{
@@ -51,8 +53,10 @@ namespace Yuzu.Code
 			builder.AppendFormat("void {0}({1} obj) {{\n", CodeAssignOptions.FuncName, obj.GetType().Name);
 			foreach (var yi in Meta.Get(obj.GetType(), Options).Items) {
 				string valueStr = Utils.CodeValueFormat(yi.GetValue(obj));
-				if (valueStr == "")
+				if (valueStr == string.Empty) {
 					throw new NotImplementedException(yi.Type.Name);
+				}
+
 				builder.AppendFormat("{0}obj.{1} = {2};\n", CodeAssignOptions.Indent, yi.Name, valueStr);
 			}
 			builder.Append("}\n");

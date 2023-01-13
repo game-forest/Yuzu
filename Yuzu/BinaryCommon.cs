@@ -49,13 +49,28 @@ namespace Yuzu.Binary
 
 	internal static class RT
 	{
-		public static Type[] roughTypeToType = new Type[] {
+		public static Type[] RoughTypeToType = new Type[] {
 			null,
-			typeof(sbyte), typeof(byte), typeof(short), typeof(ushort),
-			typeof(int), typeof(uint), typeof(long), typeof(ulong),
-			typeof(bool), typeof(char), typeof(float), typeof(double), typeof(decimal),
-			typeof(DateTime), typeof(TimeSpan), typeof(string),
-			typeof(object), null, typeof(DateTimeOffset), typeof(Guid),
+			typeof(sbyte),
+			typeof(byte),
+			typeof(short),
+			typeof(ushort),
+			typeof(int),
+			typeof(uint),
+			typeof(long),
+			typeof(ulong),
+			typeof(bool),
+			typeof(char),
+			typeof(float),
+			typeof(double),
+			typeof(decimal),
+			typeof(DateTime),
+			typeof(TimeSpan),
+			typeof(string),
+			typeof(object),
+			null,
+			typeof(DateTimeOffset),
+			typeof(Guid),
 		};
 
 		public static bool IsRecord(this Type t)
@@ -88,5 +103,4 @@ namespace Yuzu.Binary
 	{
 		public ReaderClassDef Def;
 	}
-
 }

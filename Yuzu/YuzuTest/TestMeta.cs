@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using ProtoBuf;
@@ -15,7 +15,7 @@ namespace YuzuTest.Metadata
 		public void TestAttributes()
 		{
 			var opt1 = new CommonOptions {
-				Meta = new MetaOptions { }
+				Meta = new MetaOptions { },
 			};
 			var opt2 = new CommonOptions {
 				Meta = new MetaOptions {
@@ -23,7 +23,7 @@ namespace YuzuTest.Metadata
 					OptionalAttribute = null,
 					MemberAttribute = null,
 					GetAlias = attr => (attr as ProtoMemberAttribute).Tag.ToString(),
-				}
+				},
 			};
 			var m1 = Meta.Get(typeof(Sample1), opt1);
 			var m2 = Meta.Get(typeof(Sample1), opt2);
@@ -64,7 +64,7 @@ namespace YuzuTest.Metadata
 			[YuzuRequired]
 			public int P1 { get; set; }
 #pragma warning disable CS0414
-			private int F2 = 0;
+			private int f2 = 0;
 #pragma warning restore CS0414
 			private int P2 { get; set; }
 		}
@@ -84,7 +84,7 @@ namespace YuzuTest.Metadata
 			public int F1 = 0;
 			public int P1 { get; set; }
 #pragma warning disable CS0414
-			private int F2 = 0;
+			private int f2 = 0;
 #pragma warning restore CS0414
 			private int P2 { get; set; }
 			[YuzuRequired]
@@ -97,7 +97,7 @@ namespace YuzuTest.Metadata
 			public int F1 = 0;
 			public int P1 { get; set; }
 #pragma warning disable CS0414
-			private int F2 = 0;
+			private int f2 = 0;
 #pragma warning restore CS0414
 			private int P2 { get; set; }
 			[YuzuMember]
@@ -159,65 +159,65 @@ namespace YuzuTest.Metadata
 		internal class ToSurrogateBadParams
 		{
 			[YuzuToSurrogate]
-			int ToS1(int y) { return 0; }
+			private int ToS1(int y) { return 0; }
 		}
 
 		internal class SurrogateIfBadParams
 		{
 			[YuzuSurrogateIf]
-			bool SIf1(int y) { return false; }
+			private bool SIf1(int y) { return false; }
 		}
 
 		internal class FromSurrogateBadParams
 		{
 			[YuzuToSurrogate]
-			int ToS1() { return 0; }
+			private int ToS1() { return 0; }
 			[YuzuFromSurrogate]
-			static FromSurrogateBadParams FromS1(string s) { return null; }
+			private static FromSurrogateBadParams FromS1(string s) { return null; }
 		}
 
 		internal class ToSurrogateStaticBadParams
 		{
 			[YuzuToSurrogate]
-			static int ToS2() { return 0; }
+			private static int ToS2() { return 0; }
 		}
 
 		internal class ToSurrogateStaticBadParamType
 		{
 			[YuzuToSurrogate]
-			static int ToS21(int x) { return 0; }
+			private static int ToS21(int x) { return 0; }
 		}
 
 		internal class ToSurrogateVoid
 		{
 			[YuzuToSurrogate]
-			void ToS3() { }
+			private void ToS3() { }
 		}
 
 		internal class SurrogateIfInt
 		{
 			[YuzuSurrogateIf]
-			int SIf3() { return 0; }
+			private int SIf3() { return 0; }
 		}
 
 		internal class FromSurrogateInt
 		{
 			[YuzuFromSurrogate]
-			static int FromS3() { return 0; }
+			private static int FromS3() { return 0; }
 		}
 
 		internal class ToSurrogateDup
 		{
 			[YuzuToSurrogate]
-			int ToS41() { return 0; }
+			private int ToS41() { return 0; }
 			[YuzuToSurrogate]
-			int ToS42() { return 0; }
+			private int ToS42() { return 0; }
 		}
 
 		internal class ToSurrogateChain
 		{
 			[YuzuToSurrogate]
-			SampleSurrogateColor ToS5() { return new SampleSurrogateColor(); }
+			private SampleSurrogateColor ToS5() { return new SampleSurrogateColor(); }
 		}
 
 		[TestMethod]
@@ -280,7 +280,7 @@ namespace YuzuTest.Metadata
 			public bool Func() => true;
 		}
 
-		internal class SampleItemIfDup: List<int>
+		internal class SampleItemIfDup : List<int>
 		{
 			[YuzuSerializeItemIf]
 			public bool Func1(int index, object item) => true;
@@ -404,12 +404,11 @@ namespace YuzuTest.Metadata
 		}
 
 		[TestMethod]
-		public void TestDefaultNull ()
+		public void TestDefaultNull()
 		{
 			var d = new DefaultNull();
 			Assert.IsFalse(
 				Meta.Get(typeof(DefaultNull), new CommonOptions()).Items[0].SerializeCond(d, d.S));
 		}
 	}
-
 }
