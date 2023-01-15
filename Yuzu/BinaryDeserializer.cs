@@ -462,19 +462,15 @@ namespace Yuzu.Binary
 					if (!yi.IsOptional) {
 						throw d.Error("Missing required field {0} for class {1}", ourName, typeName);
 					}
-
 					ourIndex += 1;
-				}
-				else if (cmp > 0) {
+				} else if (cmp > 0) {
 					AddUnknownFieldDef(d, def, theirName, typeName);
 					theirIndex += 1;
 					theirName = string.Empty;
 				} else {
 					if (!ReadCompatibleType(d, yi.Type)) {
-						throw d.Error(
-							"Incompatible type for field {0}, expected {1}", ourName, yi.Type);
+						throw d.Error($"Incompatible type for field {ourName}, expected {yi.Type}");
 					}
-
 					def.Fields.Add(new ReaderClassDef.FieldDef {
 						Name = theirName, OurIndex = ourIndex + 1, Type = yi.Type,
 						ReadFunc = d.MakeReadOrMergeFunc(yi),
@@ -495,7 +491,6 @@ namespace Yuzu.Binary
 				if (theirName == string.Empty) {
 					theirName = d.Reader.ReadString();
 				}
-
 				AddUnknownFieldDef(d, def, theirName, typeName);
 				theirName = string.Empty;
 			}
@@ -583,7 +578,7 @@ namespace Yuzu.Binary
 				var typeName = d.Reader.ReadString();
 				var classType = Meta.GetTypeByReadAlias(typeName, d.Options) ?? TypeSerializer.Deserialize(typeName);
 				if (classType == null) {
-					throw d.Error($"Unknown class def type '{classType}' in external cache is now supported.");
+					throw d.Error($"Unknown class def type '{classType}' in external cache is not supported.");
 				}
 				classDef.Meta = Meta.Get(classType, d.Options);
 				d.PrepareReaders(classDef);
