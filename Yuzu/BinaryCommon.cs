@@ -110,7 +110,7 @@ namespace Yuzu.Binary
 		internal Dictionary<Type, BinarySerializer.ClassDef> WriterCache;
 		internal const int Version = 0;
 
-		public static YuzuCache LoadFromStream(System.IO.MemoryStream ms)
+		public static YuzuCache ReadFromStream(System.IO.MemoryStream ms)
 		{
 			using var reader = new System.IO.BinaryReader(ms, System.Text.Encoding.UTF8, leaveOpen: false);
 			var version = reader.ReadInt32();
@@ -133,8 +133,7 @@ namespace Yuzu.Binary
 
 		internal void CompleteReaderCache(CommonOptions options)
 		{
-			var yd = new global::Yuzu.Binary.BinaryDeserializer { Options = options };
-			short id = -1;
+			var yd = new BinaryDeserializer { Options = options };
 			foreach (var i in ReaderCache) {
 				if (i.CompletionRecord != null) {
 					BinaryDeserializer.CompleteClassDef(yd, i);
@@ -142,7 +141,7 @@ namespace Yuzu.Binary
 			}
 		}
 
-		public static void SaveToStream(
+		public static void WriteToStream(
 			System.IO.MemoryStream ms, YuzuCache existingCache, IEnumerable<Type> types, CommonOptions options
 		) {
 			using var writer = new System.IO.BinaryWriter(ms, System.Text.Encoding.UTF8, leaveOpen: true);
@@ -166,6 +165,13 @@ namespace Yuzu.Binary
 			var ys = new global::Yuzu.Binary.BinarySerializer { Options = options };
 			short id = -1;
 			if (existingCache != null) {
+				// TODO:
+				//  case A: type no longer exists. For that case
+				//      trace full story from when we are parsing it's class def
+				//  case B: type exists => we must preserve it's id,
+				//      but must regenerate it's class def to reflect current fields
+				//  case C: same as B, but we detect some
+				//      fields become missing =>? should we alarm?
 				foreach (var i in existingCache.ReaderCache) {
 					if (i.CompletionRecord != null) {
 						BinaryDeserializer.CompleteClassDef(yd, i);

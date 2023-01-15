@@ -491,7 +491,7 @@ namespace Yuzu.Binary
 				// If we have unknown fields, their definition must be present in the first serialized object,
 				// but not necessariliy in subsequent ones.
 				if (i != null && i != result.ReaderDef) {
-					throw new YuzuException("Conflictiing reader class definitions for unknown storage of " + t.Name);
+					throw new YuzuException("Conflicting reader class definitions for unknown storage of " + t.Name);
 				}
 				return result;
 			}
@@ -505,7 +505,7 @@ namespace Yuzu.Binary
 				// If we have unknown fields, their definition must be present in the first serialized object,
 				// but not necessariliy in subsequent ones.
 				if (i != null && i != result.ReaderDef) {
-					throw new YuzuException("Conflictiing reader class definitions for unknown storage of " + t.Name);
+					throw new YuzuException("Conflicting reader class definitions for unknown storage of " + t.Name);
 				}
 				return result;
 			}
