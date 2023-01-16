@@ -11,8 +11,6 @@ namespace Yuzu.Binary
 {
 	public class BinaryDeserializer : AbstractReaderDeserializer
 	{
-		public static BinaryDeserializer Instance = new BinaryDeserializer();
-
 		public BinarySerializeOptions BinaryOptions = new BinarySerializeOptions();
 
 		public BinaryDeserializer() { InitReaders(); }
@@ -135,33 +133,59 @@ namespace Yuzu.Binary
 			return t == typeof(object) ? null : d.ReadValueFunc(t)(d);
 		}
 
-		private static void InitReaders()
+		private void InitReaders()
 		{
-			if (readerCache != null) {
-				return;
+			if (readerCacheCache == null) {
+				readerCacheCache =
+					new Dictionary<CommonOptions, Dictionary<Type, Func<BinaryDeserializer, object>>>();
 			}
-			readerCache = new Dictionary<Type, Func<BinaryDeserializer, object>>() {
-				{ typeof(sbyte), ReadSByte },
-				{ typeof(byte), ReadByte },
-				{ typeof(short), ReadShort },
-				{ typeof(ushort), ReadUShort },
-				{ typeof(int), ReadInt },
-				{ typeof(uint), ReadUInt },
-				{ typeof(long), ReadLong },
-				{ typeof(ulong), ReadULong },
-				{ typeof(bool), ReadBool },
-				{ typeof(char), ReadChar },
-				{ typeof(float), ReadFloat },
-				{ typeof(double), ReadDouble },
-				{ typeof(decimal), ReadDecimal },
-				{ typeof(DateTime), ReadDateTimeObj },
-				{ typeof(DateTimeOffset), ReadDateTimeOffsetObj },
-				{ typeof(TimeSpan), ReadTimeSpanObj },
-				{ typeof(Guid), ReadGuidObj },
-				{ typeof(string), ReadString },
-				{ typeof(object), ReadAny },
-				{ typeof(Record), ReadObject<object> },
-			};
+			if (mergerCacheCache == null) {
+				mergerCacheCache =
+					new Dictionary<CommonOptions, Dictionary<Type, Action<BinaryDeserializer, object>>>();
+			}
+			if (readerCache == null) {
+				if (!readerCacheCache.TryGetValue(Options, out readerCache)) {
+					lock (readerCacheCache) {
+						if (!readerCacheCache.TryGetValue(Options, out readerCache)) {
+							readerCache = new Dictionary<Type, Func<BinaryDeserializer, object>>() {
+								{ typeof(sbyte), ReadSByte },
+								{ typeof(byte), ReadByte },
+								{ typeof(short), ReadShort },
+								{ typeof(ushort), ReadUShort },
+								{ typeof(int), ReadInt },
+								{ typeof(uint), ReadUInt },
+								{ typeof(long), ReadLong },
+								{ typeof(ulong), ReadULong },
+								{ typeof(bool), ReadBool },
+								{ typeof(char), ReadChar },
+								{ typeof(float), ReadFloat },
+								{ typeof(double), ReadDouble },
+								{ typeof(decimal), ReadDecimal },
+								{ typeof(DateTime), ReadDateTimeObj },
+								{ typeof(DateTimeOffset), ReadDateTimeOffsetObj },
+								{ typeof(TimeSpan), ReadTimeSpanObj },
+								{ typeof(Guid), ReadGuidObj },
+								{ typeof(string), ReadString },
+								{ typeof(object), ReadAny },
+								{ typeof(Record), ReadObject<object> },
+							};
+							readerCacheCache.Add(Options, readerCache);
+						}
+					}
+				}
+			}
+			if (mergerCache == null) {
+				if (!mergerCacheCache.TryGetValue(Options, out mergerCache)) {
+					lock (mergerCacheCache) {
+						if (!mergerCacheCache.TryGetValue(Options, out mergerCache)) {
+							mergerCacheCache.Add(
+								Options,
+								mergerCache = new Dictionary<Type, Action<BinaryDeserializer, object>>()
+							);
+						}
+					}
+				}
+			}
 		}
 
 		private static object ReadDateTimeObj(BinaryDeserializer d) => ReadDateTime(d);
@@ -383,7 +407,6 @@ namespace Yuzu.Binary
 
 		public void ClearClassIds()
 		{
-			externalClassDefs.Clear();
 			internalClassDefs.Clear();
 			internalClassDefs.Add(new ReaderClassDef());
 		}
@@ -766,34 +789,38 @@ namespace Yuzu.Binary
 			return result;
 		}
 
-		private static Dictionary<Type, Func<BinaryDeserializer, object>> readerCache;
-		private static readonly Dictionary<Type, Action<BinaryDeserializer, object>> mergerCache =
-			new Dictionary<Type, Action<BinaryDeserializer, object>>();
+		private static Dictionary<CommonOptions, Dictionary<Type, Func<BinaryDeserializer, object>>> readerCacheCache =
+			new Dictionary<CommonOptions, Dictionary<Type, Func<BinaryDeserializer, object>>>();
+
+		private static Dictionary<CommonOptions, Dictionary<Type, Action<BinaryDeserializer, object>>>
+			mergerCacheCache =
+			new Dictionary<CommonOptions, Dictionary<Type, Action<BinaryDeserializer, object>>>();
+
+		private Dictionary<Type, Func<BinaryDeserializer, object>> readerCache;
+		private Dictionary<Type, Action<BinaryDeserializer, object>> mergerCache;
 
 		private Func<BinaryDeserializer, object> ReadValueFunc(Type t)
 		{
+			if (readerCache.TryGetValue(t, out Func<BinaryDeserializer, object> f)) {
+				return f;
+			}
 			lock (readerCache) {
-				if (readerCache.TryGetValue(t, out Func<BinaryDeserializer, object> f)) {
+				if (readerCache.TryGetValue(t, out f)) {
 					return f;
 				}
-
-				System.Diagnostics.Trace.WriteLine(
-					$"NICEDOG reader cache: new count = {readerCache.Count}; added: '{t.FullName}'"
-				);
 				return readerCache[t] = MakeReaderFunc(this, t);
 			}
 		}
 
 		private Action<BinaryDeserializer, object> MergeValueFunc(Type t)
 		{
+			if (mergerCache.TryGetValue(t, out Action<BinaryDeserializer, object> f)) {
+				return f;
+			}
 			lock (mergerCache) {
-				if (mergerCache.TryGetValue(t, out Action<BinaryDeserializer, object> f)) {
+				if (mergerCache.TryGetValue(t, out f)) {
 					return f;
 				}
-
-				System.Diagnostics.Trace.WriteLine(
-					$"NICEDOG merger cache: new count = {mergerCache.Count}; added: '{t.FullName}'"
-				);
 				return mergerCache[t] = MakeMergerFunc(this, t);
 			}
 		}
