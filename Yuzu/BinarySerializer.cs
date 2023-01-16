@@ -480,8 +480,9 @@ namespace Yuzu.Binary
 
 		private static ClassDef WriteClassId(BinarySerializer s, object obj)
 		{
+			ClassDef result = null;
 			var t = obj.GetType();
-			if (s.externalClassIdCache?.TryGetValue(t, out ClassDef result) ?? false) {
+			if (s.externalClassIdCache?.TryGetValue(t, out result) ?? false) {
 				s.writer.Write(result.Id);
 				var g = result.Meta.GetUnknownStorage;
 				if (g == null) {
