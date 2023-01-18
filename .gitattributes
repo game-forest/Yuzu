@@ -1,0 +1,7 @@
+*.cs           eol=lf
+*.csproj       eol=lf
+*.gitignore    eol=lf
+*.md           eol=lf
+*.sln          eol=lf
+*.txt          eol=lf
+*.gitignore    eol=lf

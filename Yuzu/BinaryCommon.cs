@@ -147,19 +147,7 @@ namespace Yuzu.Binary
 			using var writer = new System.IO.BinaryWriter(ms, System.Text.Encoding.UTF8, leaveOpen: true);
 			// version
 			writer.Write(0);
-			var tl = types
-				.Where(i => !i.IsGenericTypeDefinition)
-				.Where(i => i.IsValueType || i.GetConstructor(Type.EmptyTypes) != null)
-				.Where(i => {
-					bool thrown = false;
-					try {
-						Yuzu.Metadata.Meta.Get(i, options);
-					} catch {
-						thrown = true;
-					}
-					return !thrown;
-				})
-				.ToList();
+			var tl = types.ToList();
 
 			var yd = new global::Yuzu.Binary.BinaryDeserializer { Options = options };
 			var ys = new global::Yuzu.Binary.BinarySerializer { Options = options };

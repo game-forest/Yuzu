@@ -638,19 +638,13 @@ namespace Yuzu.Binary
 							if (fd.OurIndex < 0 || def.Meta.Items[fd.OurIndex - 1].IsOptional) {
 								continue;
 							}
-
-							throw d.Error(
-								"Expected field '{0}' ({1}), but found '{2}'",
-								i,
-								fd.Name,
-								actualIndex
-							);
+							throw d.Error($"Expected field '{i}' ({fd.Name}), but found '{actualIndex}'.");
 						}
 						fd.ReadFunc(d, obj);
 						actualIndex = d.Reader.ReadInt16();
 					}
 					if (actualIndex != 0) {
-						throw d.Error("Unfinished object, expected zero, but got {0}", actualIndex);
+						throw d.Error($"Unfinished object, expected zero, but got {actualIndex}.");
 					}
 				}
 			} finally {
@@ -663,18 +657,16 @@ namespace Yuzu.Binary
 		{
 			var classId = d.Reader.ReadInt16();
 			if (classId == 0) {
-				throw d.Error("Unable to read null into object");
+				throw d.Error("Unable to read null into object.");
 			}
-
 			var def = GetClassDef(d, classId);
 			var expectedType = obj.GetType();
 			if (
 				expectedType != def.Meta.Type &&
 				(!Meta.Get(expectedType, d.Options).AllowReadingFromAncestor || expectedType.BaseType != def.Meta.Type)
 			) {
-				throw d.Error("Unable to read type {0} into {1}", def.Meta.Type, expectedType);
+				throw d.Error($"Unable to read type {def.Meta.Type} into {expectedType}.");
 			}
-
 			def.ReadFields(d, def, obj);
 		}
 
@@ -690,13 +682,11 @@ namespace Yuzu.Binary
 			var srcType = def.Meta.Type;
 			var dstType = typeof(T);
 			if (srcType != typeof(YuzuUnknown) && !dstType.IsAssignableFrom(srcType)) {
-				throw d.Error("Unable to assign type \"{0}\" to \"{1}\"", srcType.ToString(), dstType);
+				throw d.Error($"Unable to assign type \"{srcType.ToString()}\" to \"{dstType}\".");
 			}
 			var result = def.Make?.Invoke(d, def);
 			if (srcType == typeof(YuzuUnknown) && !dstType.IsInstanceOfType(result)) {
-				throw d.Error(
-					"Unable to assign type \"{0}\" to \"{1}\"", ((YuzuUnknownBinary)result).ClassTag, dstType
-				);
+				throw d.Error($"Unable to assign type \"{((YuzuUnknownBinary)result).ClassTag}\" to \"{dstType}\".");
 			}
 			return result;
 		}
@@ -737,7 +727,7 @@ namespace Yuzu.Binary
 		{
 			var def = GetClassDef(d, d.Reader.ReadInt16());
 			if (def.Meta.Type != t) {
-				throw d.Error("Expected type {0}, but found {1}", def.Meta.Type, t);
+				throw d.Error($"Expected type {def.Meta.Type}, but found {t}.");
 			}
 		}
 

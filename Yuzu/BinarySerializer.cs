@@ -359,7 +359,6 @@ namespace Yuzu.Binary
 		private Dictionary<string, ClassDef> unknownClassIdCache = new Dictionary<string, ClassDef>();
 
 		public void ClearClassIds() {
-			externalClassIdCache = null; // ???
 			internalClassIdCache.Clear();
 		}
 
@@ -407,7 +406,11 @@ namespace Yuzu.Binary
 				// Capture.
 				short j = (short)(i + 1);
 				var ourName = yi?.Tag(s.Options);
-				var cmp = their == null ? -1 : yi == null ? 1 : string.CompareOrdinal(ourName, their.Name);
+				var cmp = their == null
+					? -1
+					: yi == null
+						? 1
+						: string.CompareOrdinal(ourName, their.Name);
 				if (cmp <= 0) {
 					var wf = s.GetWriteFunc(yi.Type);
 					var fd = new ClassDef.FieldDef { Name = ourName, Type = yi.Type };
@@ -510,7 +513,6 @@ namespace Yuzu.Binary
 				}
 				return result;
 			}
-			Console.WriteLine($"New Pes: `{t.FullName}`");
 			result = new ClassDef {
 				Id = (short)(s.internalClassIdCache.Count + s.unknownClassIdCache.Count + 1),
 				Meta = Meta.Get(t, s.Options),
