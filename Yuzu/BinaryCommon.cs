@@ -136,7 +136,7 @@ namespace Yuzu.Binary
 			var yd = new BinaryDeserializer { Options = options };
 			foreach (var i in ReaderCache) {
 				if (i.CompletionRecord != null) {
-					BinaryDeserializer.CompleteClassDef(yd, i);
+					BinaryDeserializer.TryCompleteClassDef(yd, i, out var e);
 				}
 			}
 		}
@@ -162,22 +162,34 @@ namespace Yuzu.Binary
 				//      fields become missing =>? should we alarm?
 				foreach (var i in existingCache.ReaderCache) {
 					if (i.CompletionRecord != null) {
-						BinaryDeserializer.CompleteClassDef(yd, i);
+						if (!BinaryDeserializer.TryCompleteClassDef(yd, i, out var _)) {
+							continue;
+						}
 					}
 					tl.Remove(i.Meta.Type);
 				}
 				writer.Write(tl.Count + existingCache.ReaderCache.Count);
 				foreach (var i in existingCache.ReaderCache) {
-					var classDef = new BinarySerializer.ClassDef {
-						Id = id,
-						Meta = i.Meta,
-					};
-					Yuzu.Binary.BinarySerializer.WriteClassDef(ys, writer, classDef);
+					if (i.CompletionRecord != null) {
+						// in case we failed to deserialize the old record
+						// (i.e. complete classdef) write it back as it was.
+						writer.Write(id);
+						// TypeName should be in buffer already
+						// writer.Write(i.CompletionRecord.TypeName);
+						writer.Write(i.CompletionRecord.Buffer);
+					} else {
+						var classDef = new BinarySerializer.ClassDef {
+							Id = id,
+							Meta = i.Meta,
+						};
+						Yuzu.Binary.BinarySerializer.WriteClassDef(ys, writer, classDef);
+					}
 					id--;
 				}
 			} else {
 				writer.Write(tl.Count);
 			}
+			tl.Sort((a, b) => a.FullName.CompareTo(b.FullName));
 			foreach (var type in tl) {
 				var classDef = new BinarySerializer.ClassDef {
 					Id = id,

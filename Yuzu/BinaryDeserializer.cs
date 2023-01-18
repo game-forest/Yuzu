@@ -563,7 +563,11 @@ namespace Yuzu.Binary
 				}
 				var r = d.externalClassDefs[classId];
 				if (r.CompletionRecord != null) {
-					CompleteClassDef(d, r);
+					if (!TryCompleteClassDef(d, r, out var e)) {
+						throw new System.InvalidOperationException(
+							$"Couldn't complete class def for class id {classId}", e
+						);
+					}
 				}
 				return r;
 			}
@@ -591,8 +595,10 @@ namespace Yuzu.Binary
 			return result;
 		}
 
-		internal static void CompleteClassDef(BinaryDeserializer d, ReaderClassDef classDef)
-		{
+		internal static bool TryCompleteClassDef(
+			BinaryDeserializer d, ReaderClassDef classDef, out System.Exception exception
+		) {
+			exception = null;
 			var previousReader = d.Reader;
 			try {
 				using var ms = new System.IO.MemoryStream(classDef.CompletionRecord.Buffer);
@@ -601,7 +607,7 @@ namespace Yuzu.Binary
 				var typeName = d.Reader.ReadString();
 				var classType = Meta.GetTypeByReadAlias(typeName, d.Options) ?? TypeSerializer.Deserialize(typeName);
 				if (classType == null) {
-					throw d.Error($"Unknown class def type '{classType}' in external cache is not supported.");
+					throw d.Error($"Unknown class def type '{typeName}' in external cache is not supported.");
 				}
 				classDef.Meta = Meta.Get(classType, d.Options);
 				d.PrepareReaders(classDef);
@@ -610,10 +616,17 @@ namespace Yuzu.Binary
 				} else {
 					InitClassDef(d, classDef, typeName);
 				}
+				classDef.CompletionRecord = null;
+			} catch (System.Exception e) {
+				exception = e;
+				System.Console.WriteLine(
+					$"warning: failed to complete class def {classDef.CompletionRecord.TypeName}:\n{e}"
+				);
+				return false;
 			} finally {
 				d.Reader = previousReader;
 			}
-			classDef.CompletionRecord = null;
+			return true;
 		}
 
 		private static void ReadFields(BinaryDeserializer d, ReaderClassDef def, object obj)

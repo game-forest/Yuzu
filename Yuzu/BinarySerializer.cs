@@ -857,6 +857,10 @@ namespace Yuzu.Binary
 			var writerCache = new Dictionary<Type, ClassDef>();
 			for (int i = 0; i < readerCache.Count; i++) {
 				var readerClassDef = readerCache[i];
+				if (readerClassDef.CompletionRecord != null) {
+					// couldn't complete the recrod, ignore for now
+					continue;
+				}
 				// var t = Yuzu.Util.TypeSerializer.Deserialize(readerClassDef.CompletionRecord.TypeName);
 				var t = readerClassDef.Meta.Type;
 				var writerDef = new Yuzu.Binary.BinarySerializer.ClassDef {
@@ -869,7 +873,6 @@ namespace Yuzu.Binary
 					throw new NotImplementedException();
 				}
 				if (writerCache.ContainsKey(t)) {
-					Console.WriteLine("pizda konechno, chto esche skazat");
 					// throw new InvalidOperationException();
 				}
 				writerCache[t] = writerDef;
