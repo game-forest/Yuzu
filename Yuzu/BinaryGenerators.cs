@@ -262,7 +262,7 @@ namespace Yuzu.Binary
 			var meta = Meta.Get(t, options);
 			if (CanInline(meta)) {
 				cw.Put("BinaryDeserializer.EnsureClassDef(dg, typeof({0}));\n", Utils.GetTypeSpec(t));
-				if (item.PropInfo == null) {
+				if (item.PropertyInfo == null) {
 					foreach (var yi in meta.Items) {
 						GenerateSetValue(yi.Type, name + "." + yi.Name, yi);
 					}
@@ -276,7 +276,7 @@ namespace Yuzu.Binary
 					cw.Put("{0} = {1};\n", name, tempStructName);
 				}
 				return true;
-			} else if (item.PropInfo == null) {
+			} else if (item.PropertyInfo == null) {
 				cw.Put("dg.ReadIntoStruct(ref {0});\n", name);
 				return true;
 			}
