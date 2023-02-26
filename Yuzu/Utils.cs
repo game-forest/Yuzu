@@ -9,7 +9,7 @@ using Yuzu.Binary;
 
 namespace Yuzu.Util
 {
-	internal static class Utils
+	public static class Utils
 	{
 		public static object[] ZeroObjects = new object[] { };
 
