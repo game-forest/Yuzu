@@ -9,7 +9,7 @@ using Yuzu.Binary;
 
 namespace Yuzu.Util
 {
-	internal static class Utils
+	public static class Utils
 	{
 		public static object[] ZeroObjects = new object[] { };
 
@@ -472,13 +472,13 @@ namespace Yuzu.Util
 
 	public class ActionList
 	{
-		internal struct MethodAction
+		public struct MethodAction
 		{
 			public MethodInfo Info;
 			public Action<object> Run;
 		}
 
-		internal List<MethodAction> Actions = new List<MethodAction>();
+		public List<MethodAction> Actions = new List<MethodAction>();
 
 		public void MaybeAdd(MethodInfo m, Type attr)
 		{

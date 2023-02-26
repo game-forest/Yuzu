@@ -201,6 +201,12 @@ namespace YuzuTest
 		public int? N;
 	}
 
+	public class SampleNullableStruct
+	{
+		[YuzuRequired]
+		public SamplePoint? P;
+	}
+
 	public class SampleMethodOrder
 	{
 		[YuzuRequired("4")]
