@@ -716,7 +716,7 @@ namespace Yuzu.Metadata
 				P("{");
 				indent++;
 				P($"var t = typeof({Utils.GetTypeSpec(t)});");
-				P($"var options = LimePersistence.Instance.YuzuOptions;");
+				P($"var options = InternalPersistence.Instance.YuzuOptions;");
 				P($"var meta = new Yuzu.Metadata.Meta();");
 				P($"meta.Type = t;");
 				P($"meta.Factory = meta.DefaultFactory;");
