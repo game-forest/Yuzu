@@ -709,9 +709,6 @@ namespace Yuzu.Metadata
 			P("private static Dictionary<Type, Func<Yuzu.Metadata.Meta>> makeCache = " +
 				"new Dictionary<Type, Func<Yuzu.Metadata.Meta>>();");
 			foreach (var t in types) {
-				if (!t.Assembly.FullName.StartsWith("Lime")) {
-					continue;
-				}
 				var name = Utils.GetMangledTypeNameNS(t);
 				var meta = Meta.Get(t, options);
 
@@ -738,6 +735,38 @@ namespace Yuzu.Metadata
 				}
 				if (meta.AllKind != YuzuItemKind.None) {
 					P($"meta.AllKind = {A(meta.AllKind)};");
+				}
+				if (meta.AfterDeserialization.Actions.Count > 0) {
+					foreach (var a in meta.AfterDeserialization.Actions) {
+						P($"meta.AfterDeserialization.Actions.Add(new Yuzu.Util.ActionList.MethodAction {{");
+						PP($"Info = typeof({A(a.Info.DeclaringType)}).GetMethod({A(a.Info.Name)}),");
+						PP($"Run = o => (({A(a.Info.DeclaringType)})o).{a.Info.Name}(),");
+						P("});");
+					}
+				}
+				if (meta.BeforeDeserialization.Actions.Count > 0) {
+					foreach (var a in meta.BeforeDeserialization.Actions) {
+						P($"meta.BeforeDeserialization.Actions.Add(new Yuzu.Util.ActionList.MethodAction {{");
+						PP($"Info = typeof({A(a.Info.DeclaringType)}).GetMethod({A(a.Info.Name)}),");
+						PP($"Run = o => (({A(a.Info.DeclaringType)})o).{a.Info.Name}(),");
+						P("});");
+					}
+				}
+				if (meta.AfterSerialization.Actions.Count > 0) {
+					foreach (var a in meta.AfterSerialization.Actions) {
+						P($"meta.AfterSerialization.Actions.Add(new Yuzu.Util.ActionList.MethodAction {{");
+						PP($"Info = typeof({A(a.Info.DeclaringType)}).GetMethod({A(a.Info.Name)}),");
+						PP($"Run = o => (({A(a.Info.DeclaringType)})o).{a.Info.Name}(),");
+						P("});");
+					}
+				}
+				if (meta.BeforeSerialization.Actions.Count > 0) {
+					foreach (var a in meta.BeforeSerialization.Actions) {
+						P($"meta.BeforeSerialization.Actions.Add(new Yuzu.Util.ActionList.MethodAction {{");
+						PP($"Info = typeof({A(a.Info.DeclaringType)}).GetMethod({A(a.Info.Name)}),");
+						PP($"Run = o => (({A(a.Info.DeclaringType)})o).{a.Info.Name}(),");
+						P("});");
+					}
 				}
 				int itemIndex = 0;
 				foreach (var i in meta.Items) {
@@ -836,9 +865,6 @@ namespace Yuzu.Metadata
 			P("{");
 			indent++;
 			foreach (var t in types) {
-				if (!t.Assembly.FullName.StartsWith("Lime")) {
-					continue;
-				}
 				var name = Utils.GetMangledTypeNameNS(t);
 				P($"makeCache[typeof({Utils.GetTypeSpec(t)})] = Make__{name};");
 			}
