@@ -164,7 +164,7 @@ namespace Yuzu.Util
 				).MakeGenericMethod(container.GetGenericArguments());
 		}
 
-		private static string DeclaringTypes(Type t, string separator)
+		private static string DeclaringTypes(Type t, char separator)
 		{
 			return t.DeclaringType == null
 				? string.Empty
@@ -205,7 +205,7 @@ namespace Yuzu.Util
 			var p = "global::" + t.Namespace + ".";
 			var n = string.Empty;
 			if (!t.IsGenericType) {
-				n = DeclaringTypes(t, ".") + t.Name;
+				n = DeclaringTypes(t, '.') + t.Name;
 			} else {
 				var fgargs = t.GetGenericArguments().Select(a => GetTypeSpec(a)).Reverse();
 				var dt = t;
@@ -214,44 +214,51 @@ namespace Yuzu.Util
 					if (dt.Name.Contains("`")) {
 						var count = int.Parse(name[(name.IndexOf('`') + 1)..]);
 						name = name.Remove(name.IndexOf('`'));
-						name = name + "<" + string.Join(", ", fgargs.Take(count).Reverse()) + ">";
+						var j = string.Join(", ", fgargs.Take(count).Reverse());
+						name += $"<{j}>";
 						fgargs = fgargs.Skip(count);
 					}
 					dt = dt.DeclaringType;
-					n = n == string.Empty ? name : name + "." + n;
+					n = n == string.Empty ? name : $"{name}.{n}";
 				}
 			}
 			return p + n;
 		}
 
-		// TODO: test
+		private const char MangledTypeSeparator = 'ᱹ';
+		private const char MangledGenericBegin = 'ʳ';
+		private const char MangledGenericEnd = 'ʴ';
+		private const char MangledGenericSeparator = 'ˎ';
+
 		public static string GetMangledTypeName(Type t)
 		{
-			var n = DeclaringTypes(t, "__") + t.Name;
+			if (knownTypes.TryGetValue(t, out string result)) {
+				return result;
+			}
 			if (!t.IsGenericType) {
-				return n;
+				return DeclaringTypes(t, MangledTypeSeparator) + t.Name;
 			}
 			var fgargs = t.GetGenericArguments().Select(a => GetMangledTypeName(a)).Reverse();
-			var args = string.Join("__", t.GetGenericArguments().Select(a => GetMangledTypeName(a)));
 			var dt = t;
+			var n = string.Empty;
 			while (dt != null) {
 				var name = dt.Name;
 				if (dt.Name.Contains("`")) {
 					var count = int.Parse(name[(name.IndexOf('`') + 1)..]);
 					name = name.Remove(name.IndexOf('`'));
-					name = name + "_" + string.Join(", ", fgargs.Take(count).Reverse()) + "_";
+					var j = string.Join(MangledGenericSeparator, fgargs.Take(count).Reverse());
+					name += $"{MangledGenericBegin}{j}{MangledGenericEnd}";
 					fgargs = fgargs.Skip(count);
 				}
 				dt = dt.DeclaringType;
-				n = n == string.Empty ? name : name + "__" + n;
+				n = n == string.Empty ? name : $"{name}{MangledTypeSeparator}{n}";
 			}
-			return n + "_" + args;
+			return n;
 		}
 
-		// TODO: test
 		public static string GetMangledTypeNameNS(Type t)
 		{
-			return t.Namespace.Replace('.', '_') + "__" + GetMangledTypeName(t);
+			return $"{t.Namespace.Replace('.', MangledTypeSeparator)}ᱹ{GetMangledTypeName(t)}";
 		}
 	}
 

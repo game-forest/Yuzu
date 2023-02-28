@@ -661,9 +661,9 @@ namespace YuzuTest.Json
 			var v2 = new SampleCollection<int> { 2, 5, 4 };
 			var result1 = js.ToString(v2);
 			Assert.AreEqual("[\n2,\n5,\n4\n]", result1);
-			var w2 = (SampleCollection<int>)SampleCollection_Int32_JsonDeserializer.Instance.FromString(result1);
+			var w2 = (SampleCollection<int>)SampleCollectionʳintʴ_JsonDeserializer.Instance.FromString(result1);
 			CollectionAssert.AreEqual(v2.ToList(), w2.ToList());
-			var w2g = (SampleExplicitCollection<int>)SampleExplicitCollection_Int32_JsonDeserializer.Instance
+			var w2g = (SampleExplicitCollection<int>)SampleExplicitCollectionʳintʴ_JsonDeserializer.Instance
 				.FromString(result1);
 			CollectionAssert.AreEqual(v2.ToList(), w2g.ToList());
 
@@ -759,7 +759,7 @@ namespace YuzuTest.Json
 			var result1 = js.ToString(v1);
 			Assert.AreEqual("[\n[\n1,\n2\n],\n[\n3\n]\n]", result1);
 			List<List<int>> w1 = new List<List<int>>();
-			YuzuGen.System.Collections.Generic.List_List_Int32_JsonDeserializer.Instance.FromString(w1, result1);
+			YuzuGen.System.Collections.Generic.ListʳListʳintʴʴ_JsonDeserializer.Instance.FromString(w1, result1);
 			Assert.AreEqual(v1.Count, w1.Count);
 			CollectionAssert.AreEqual(v1[0], w1[0]);
 			CollectionAssert.AreEqual(v1[1], w1[1]);
@@ -1762,7 +1762,7 @@ namespace YuzuTest.Json
 			var result2 = js.ToString(v2);
 			var w2 = new List<ISampleMember>();
 			jd.FromString(w2, result2);
-			YuzuGen.System.Collections.Generic.List_ISampleMember_JsonDeserializer.Instance.FromString(w2, result2);
+			YuzuGen.System.Collections.Generic.ListʳISampleMemberʴ_JsonDeserializer.Instance.FromString(w2, result2);
 			Assert.AreEqual(v2[0].X, w2[0].X);
 			Assert.AreEqual(v2[1].X, w2[1].X);
 
@@ -1835,7 +1835,7 @@ namespace YuzuTest.Json
 			Assert.AreEqual((v1[1] as SampleAssemblyDerivedR).R, (w1[1] as SampleAssemblyDerivedR).R);
 
 			var w1g = (List<SampleAssemblyBase>)YuzuGen.System.Collections.Generic
-				.List_SampleAssemblyBase_JsonDeserializer.Instance.FromString(result1);
+				.ListʳSampleAssemblyBaseʴ_JsonDeserializer.Instance.FromString(result1);
 			Assert.AreEqual((v1[0] as SampleAssemblyDerivedQ).Q, (w1g[0] as SampleAssemblyDerivedQ).Q);
 			Assert.AreEqual((v1[1] as SampleAssemblyDerivedR).R, (w1g[1] as SampleAssemblyDerivedR).R);
 		}
