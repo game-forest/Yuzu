@@ -579,11 +579,11 @@ namespace YuzuGen.YuzuTest
 
 namespace YuzuGen.System.Collections.Generic
 {
-	class List_ISampleMember_JsonDeserializer : JsonDeserializerGenBase
+	class ListʳISampleMemberʴ_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new List_ISampleMember_JsonDeserializer Instance = new List_ISampleMember_JsonDeserializer();
+		public static new ListʳISampleMemberʴ_JsonDeserializer Instance = new ListʳISampleMemberʴ_JsonDeserializer();
 
-		public List_ISampleMember_JsonDeserializer()
+		public ListʳISampleMemberʴ_JsonDeserializer()
 		{
 			Options.TagMode = TagMode.Names;
 			JsonOptions.EnumAsString = true;
@@ -1099,11 +1099,11 @@ namespace YuzuGen.YuzuTest
 
 namespace YuzuGen.System.Collections.Generic
 {
-	class List_List_Int32_JsonDeserializer : JsonDeserializerGenBase
+	class ListʳListʳintʴʴ_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new List_List_Int32_JsonDeserializer Instance = new List_List_Int32_JsonDeserializer();
+		public static new ListʳListʳintʴʴ_JsonDeserializer Instance = new ListʳListʳintʴʴ_JsonDeserializer();
 
-		public List_List_Int32_JsonDeserializer()
+		public ListʳListʳintʴʴ_JsonDeserializer()
 		{
 			Options.TagMode = TagMode.Names;
 			JsonOptions.EnumAsString = true;
@@ -1278,11 +1278,11 @@ namespace YuzuGen.YuzuTest
 		}
 	}
 
-	class SampleNested__NestedClass_JsonDeserializer : JsonDeserializerGenBase
+	class SampleNestedᱹNestedClass_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleNested__NestedClass_JsonDeserializer Instance = new SampleNested__NestedClass_JsonDeserializer();
+		public static new SampleNestedᱹNestedClass_JsonDeserializer Instance = new SampleNestedᱹNestedClass_JsonDeserializer();
 
-		public SampleNested__NestedClass_JsonDeserializer()
+		public SampleNestedᱹNestedClass_JsonDeserializer()
 		{
 			Options.TagMode = TagMode.Names;
 			JsonOptions.EnumAsString = true;
@@ -1333,7 +1333,7 @@ namespace YuzuGen.YuzuTest
 		{
 			var result = (global::YuzuTest.SampleNested)obj;
 			if ("C" != name) throw new YuzuException("C!=" + name);
-			result.C = YuzuGen.YuzuTest.SampleNested__NestedClass_JsonDeserializer.Instance.FromReaderTyped<global::YuzuTest.SampleNested.NestedClass>(Reader);
+			result.C = YuzuGen.YuzuTest.SampleNestedᱹNestedClass_JsonDeserializer.Instance.FromReaderTyped<global::YuzuTest.SampleNested.NestedClass>(Reader);
 			name = GetNextName(false);
 			if ("E" != name) throw new YuzuException("E!=" + name);
 			result.E = (global::YuzuTest.SampleNested.NestedEnum)Enum.Parse(typeof(global::YuzuTest.SampleNested.NestedEnum), RequireString());
@@ -1492,11 +1492,11 @@ namespace YuzuGen.YuzuTest
 		}
 	}
 
-	class SampleInterfacedGeneric_String_JsonDeserializer : JsonDeserializerGenBase
+	class SampleInterfacedGenericʳstringʴ_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleInterfacedGeneric_String_JsonDeserializer Instance = new SampleInterfacedGeneric_String_JsonDeserializer();
+		public static new SampleInterfacedGenericʳstringʴ_JsonDeserializer Instance = new SampleInterfacedGenericʳstringʴ_JsonDeserializer();
 
-		public SampleInterfacedGeneric_String_JsonDeserializer()
+		public SampleInterfacedGenericʳstringʴ_JsonDeserializer()
 		{
 			JsonOptions.EnumAsString = true;
 		}
@@ -1579,11 +1579,11 @@ namespace YuzuGen.YuzuTest
 		}
 	}
 
-	class SampleCollection_Int32_JsonDeserializer : JsonDeserializerGenBase
+	class SampleCollectionʳintʴ_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleCollection_Int32_JsonDeserializer Instance = new SampleCollection_Int32_JsonDeserializer();
+		public static new SampleCollectionʳintʴ_JsonDeserializer Instance = new SampleCollectionʳintʴ_JsonDeserializer();
 
-		public SampleCollection_Int32_JsonDeserializer()
+		public SampleCollectionʳintʴ_JsonDeserializer()
 		{
 			JsonOptions.EnumAsString = true;
 		}
@@ -1621,11 +1621,11 @@ namespace YuzuGen.YuzuTest
 		}
 	}
 
-	class SampleExplicitCollection_Int32_JsonDeserializer : JsonDeserializerGenBase
+	class SampleExplicitCollectionʳintʴ_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleExplicitCollection_Int32_JsonDeserializer Instance = new SampleExplicitCollection_Int32_JsonDeserializer();
+		public static new SampleExplicitCollectionʳintʴ_JsonDeserializer Instance = new SampleExplicitCollectionʳintʴ_JsonDeserializer();
 
-		public SampleExplicitCollection_Int32_JsonDeserializer()
+		public SampleExplicitCollectionʳintʴ_JsonDeserializer()
 		{
 			JsonOptions.EnumAsString = true;
 		}
@@ -2018,11 +2018,11 @@ namespace YuzuGen.YuzuTest
 
 namespace YuzuGen.System.Collections.Generic
 {
-	class List_SampleAssemblyBase_JsonDeserializer : JsonDeserializerGenBase
+	class ListʳSampleAssemblyBaseʴ_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new List_SampleAssemblyBase_JsonDeserializer Instance = new List_SampleAssemblyBase_JsonDeserializer();
+		public static new ListʳSampleAssemblyBaseʴ_JsonDeserializer Instance = new ListʳSampleAssemblyBaseʴ_JsonDeserializer();
 
-		public List_SampleAssemblyBase_JsonDeserializer()
+		public ListʳSampleAssemblyBaseʴ_JsonDeserializer()
 		{
 			JsonOptions.EnumAsString = true;
 		}
