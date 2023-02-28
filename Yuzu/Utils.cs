@@ -203,24 +203,52 @@ namespace Yuzu.Util
 				return GetTypeSpec(t) + suffix;
 			}
 			var p = "global::" + t.Namespace + ".";
-			var n = DeclaringTypes(t, ".") + t.Name;
+			var n = string.Empty;
 			if (!t.IsGenericType) {
-				return p + n;
+				n = DeclaringTypes(t, ".") + t.Name;
+			} else {
+				var fgargs = t.GetGenericArguments().Select(a => GetTypeSpec(a)).Reverse();
+				var dt = t;
+				while (dt != null) {
+					var name = dt.Name;
+					if (dt.Name.Contains("`")) {
+						var count = int.Parse(name[(name.IndexOf('`') + 1)..]);
+						name = name.Remove(name.IndexOf('`'));
+						name = name + "<" + string.Join(", ", fgargs.Take(count).Reverse()) + ">";
+						fgargs = fgargs.Skip(count);
+					}
+					dt = dt.DeclaringType;
+					n = n == string.Empty ? name : name + "." + n;
+				}
 			}
-			var args = string.Join(", ", t.GetGenericArguments().Select(a => GetTypeSpec(a)));
-			return p + string.Format("{0}<{1}>", n.Remove(n.IndexOf('`')), args);
+			return p + n;
 		}
 
+		// TODO: test
 		public static string GetMangledTypeName(Type t)
 		{
 			var n = DeclaringTypes(t, "__") + t.Name;
 			if (!t.IsGenericType) {
 				return n;
 			}
+			var fgargs = t.GetGenericArguments().Select(a => GetMangledTypeName(a)).Reverse();
 			var args = string.Join("__", t.GetGenericArguments().Select(a => GetMangledTypeName(a)));
-			return n.Remove(n.IndexOf('`')) + "_" + args;
+			var dt = t;
+			while (dt != null) {
+				var name = dt.Name;
+				if (dt.Name.Contains("`")) {
+					var count = int.Parse(name[(name.IndexOf('`') + 1)..]);
+					name = name.Remove(name.IndexOf('`'));
+					name = name + "_" + string.Join(", ", fgargs.Take(count).Reverse()) + "_";
+					fgargs = fgargs.Skip(count);
+				}
+				dt = dt.DeclaringType;
+				n = n == string.Empty ? name : name + "__" + n;
+			}
+			return n + "_" + args;
 		}
 
+		// TODO: test
 		public static string GetMangledTypeNameNS(Type t)
 		{
 			return t.Namespace.Replace('.', '_') + "__" + GetMangledTypeName(t);
