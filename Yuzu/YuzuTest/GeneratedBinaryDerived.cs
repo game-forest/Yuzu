@@ -11,7 +11,7 @@ namespace YuzuGenBin
 {
 	public class BinaryDeserializerGenDerived: BinaryDeserializerGen
 	{
-		private static void Read_YuzuTest__SampleMergeNonPrimitive(BinaryDeserializer d, ReaderClassDef def, object obj)
+		private static void Read_YuzuTestᱹSampleMergeNonPrimitive(BinaryDeserializer d, ReaderClassDef def, object obj)
 		{
 			var result = (global::YuzuTest.SampleMergeNonPrimitive)obj;
 			var dg = (BinaryDeserializerGenDerived)d;
@@ -43,17 +43,17 @@ namespace YuzuGenBin
 			if (fd.OurIndex != ReaderClassDef.EOF) throw dg.Error("Unfinished object");
 		}
 
-		private static object Make_YuzuTest__SampleMergeNonPrimitive(BinaryDeserializer d, ReaderClassDef def)
+		private static object Make_YuzuTestᱹSampleMergeNonPrimitive(BinaryDeserializer d, ReaderClassDef def)
 		{
 			var result = new global::YuzuTest.SampleMergeNonPrimitive();
-			Read_YuzuTest__SampleMergeNonPrimitive(d, def, result);
+			Read_YuzuTestᱹSampleMergeNonPrimitive(d, def, result);
 			return result;
 		}
 
 		static BinaryDeserializerGenDerived()
 		{
-			readCache[typeof(global::YuzuTest.SampleMergeNonPrimitive)] = Read_YuzuTest__SampleMergeNonPrimitive;
-			makeCache[typeof(global::YuzuTest.SampleMergeNonPrimitive)] = Make_YuzuTest__SampleMergeNonPrimitive;
+			readCache[typeof(global::YuzuTest.SampleMergeNonPrimitive)] = Read_YuzuTestᱹSampleMergeNonPrimitive;
+			makeCache[typeof(global::YuzuTest.SampleMergeNonPrimitive)] = Make_YuzuTestᱹSampleMergeNonPrimitive;
 		}
 	}
 }
