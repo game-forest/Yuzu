@@ -593,6 +593,7 @@ namespace Yuzu.Metadata
 					return metaMaker();
 				}
 			}
+			System.Console.WriteLine($"[NEWMETA] {Utils.GetTypeSpec(key.Type)}");
 			return new Meta(key.Type, key.Options);
 		};
 
@@ -868,7 +869,7 @@ namespace Yuzu.Metadata
 				var name = Utils.GetMangledTypeNameNS(t);
 				P($"makeCache[typeof({Utils.GetTypeSpec(t)})] = Make__{name};");
 			}
-			P("LimePersistence.Instance.InjectMetaCache(makeCache);");
+			P("InternalPersistence.Instance.InjectMetaCache(makeCache);");
 			indent--;
 			P("}");
 			indent--;

@@ -48,6 +48,37 @@ namespace Yuzu.Binary
 			return s != string.Empty ? s : d.Reader.ReadBoolean() ? null : string.Empty;
 		}
 
+		private static void ReadSkipType(System.IO.BinaryReader reader)
+		{
+			var rt = (RoughType)reader.ReadByte();
+			if (RoughType.FirstAtom <= rt && rt <= RoughType.LastAtom) {
+				var t = RT.RoughTypeToType[(int)rt];
+				if (t != null) {
+					return;
+				}
+			}
+			switch (rt) {
+				case RoughType.Sequence:
+					ReadSkipType(reader);
+					break;
+				case RoughType.Mapping:
+					ReadSkipType(reader);
+					ReadSkipType(reader);
+					break;
+				case RoughType.Record:
+					break;
+				case RoughType.Nullable:
+					ReadSkipType(reader);
+					break;
+				default:
+					throw AbstractReaderDeserializer.Error(
+						new YuzuPosition(reader.BaseStream.Position),
+						"Unknown rough type {0}",
+						rt
+					);
+			}
+		}
+
 		private static Type ReadType(System.IO.BinaryReader reader)
 		{
 			var rt = (RoughType)reader.ReadByte();
@@ -1064,7 +1095,7 @@ namespace Yuzu.Binary
 				// skip field name
 				reader.ReadString();
 				// skip field type
-				ReadType(reader);
+				ReadSkipType(reader);
 			}
 			var classDefAfterEndPosition = ms.Position;
 			ms.Position = classDefBeginPosition;
