@@ -424,6 +424,9 @@ namespace YuzuTest.Binary
 			Assert.AreEqual(v3[0].Value.X, w3[0].Value.X);
 			Assert.AreEqual(v3[0].Value.Y, w3[0].Value.Y);
 			Assert.IsNull(w3[1]);
+			var v5 = new SampleNullableStruct { P = new SamplePoint { X = 1, Y = 2 } };
+			var result5 = bs.ToBytes((object)v5.P);
+			var w5 = bd.FromBytes<object>(result5);
 		}
 
 		[TestMethod]
