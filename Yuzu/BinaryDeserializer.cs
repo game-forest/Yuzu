@@ -526,7 +526,9 @@ namespace Yuzu.Binary
 						throw d.Error($"Incompatible type for field {ourName}, expected {yi.Type}");
 					}
 					def.Fields.Add(new ReaderClassDef.FieldDef {
-						Name = theirName, OurIndex = ourIndex + 1, Type = yi.Type,
+						Name = theirName,
+						OurIndex = ourIndex + 1,
+						Type = yi.Type,
 						ReadFunc = d.MakeReadOrMergeFunc(yi),
 					});
 					ourIndex += 1;
