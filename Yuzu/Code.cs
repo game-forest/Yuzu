@@ -1,5 +1,6 @@
-﻿using System;
-
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using Yuzu.Metadata;
 using Yuzu.Util;
 
@@ -9,32 +10,141 @@ namespace Yuzu.Code
 	{
 		public string VarName = "x";
 		public string Indent = "\t";
+		public string NewLine = "\n";
+		public int IndentLevel = 0;
 	}
 
 	public class CodeConstructSerializer : AbstractStringSerializer
 	{
 		public CodeConstructSerializeOptions CodeConstructOptions = new CodeConstructSerializeOptions();
 
-		protected override void ToBuilder(object obj)
+		private int indentLevel;
+
+		private int IndentLevel
 		{
-			builder.AppendFormat("var {0} = new {1} {{\n", CodeConstructOptions.VarName, obj.GetType().Name);
+			get => indentLevel + CodeConstructOptions.IndentLevel;
+		}
+
+		private bool IsPrimitive(object value)
+		{
+			if (value == null) {
+				return true;
+			}
+			var t = value.GetType();
+			return t.IsPrimitive
+				|| t.IsEnum
+				|| t == typeof(string)
+				|| t == typeof(decimal)
+				|| t == typeof(DateTime)
+				|| t == typeof(DateTimeOffset)
+				|| t == typeof(TimeSpan)
+				|| t == typeof(Guid);
+		}
+
+		protected override void ToBuilder(object value)
+		{
+			var o = CodeConstructOptions;
+			builder.Append($"var {o.VarName} = ");
+			AppendValue(value);
+			builder.Append($";{o.NewLine}");
+		}
+
+		private void AppendValue(object value)
+		{
+			var t = value?.GetType();
+			if (IsPrimitive(value)) {
+				AppendPrimitiveValue(value);
+			} else if (Utils.GetICollection(t) != null) {
+				AppendCollection(value);
+			} else if (Utils.GetIDictionary(t) != null) {
+				AppendDictionary(value);
+			} else {
+				AppendCompositeValue(value);
+			}
+		}
+
+		private void AppendDictionary(object value)
+		{
+			var o = CodeConstructOptions;
+			builder.Append($"new {Utils.GetTypeSpec(value.GetType())} {{{o.NewLine}");
 			var first = true;
-			foreach (var yi in Meta.Get(obj.GetType(), Options).Items) {
+			foreach (DictionaryEntry e in (IDictionary)value) {
 				if (!first) {
-					builder.Append(",\n");
+					builder.Append($",{o.NewLine}");
 				}
 				first = false;
-				builder.Append(CodeConstructOptions.Indent);
+				AppendIndent();
+				builder.Append("{{");
+				indentLevel++;
+				AppendIndent();
+				AppendValue(e.Key);
+				builder.Append(", ");
+				AppendValue(e.Value);
+				indentLevel--;
+				AppendIndent();
+				builder.Append("}}");
+			}
+			builder.Append($"{o.NewLine}");
+			AppendIndent();
+			builder.Append("}");
+		}
+
+		private void AppendCollection(object value)
+		{
+			var o = CodeConstructOptions;
+			builder.Append($"new {Utils.GetTypeSpec(value.GetType())} {{{o.NewLine}");
+			indentLevel++;
+			var first = true;
+			foreach (var e in (IEnumerable)value) {
+				if (!first) {
+					builder.Append($",{o.NewLine}");
+				}
+				first = false;
+				AppendIndent();
+				AppendValue(e);
+			}
+			indentLevel--;
+			builder.Append($"{o.NewLine}");
+			AppendIndent();
+			builder.Append("}");
+		}
+
+		private void AppendPrimitiveValue(object value)
+		{
+			var v = Utils.CodeValueFormat(value);
+			builder.Append(v);
+		}
+
+		private void AppendCompositeValue(object value)
+		{
+			var o = CodeConstructOptions;
+			builder.Append($"new {Utils.GetTypeSpec(value.GetType())} {{{o.NewLine}");
+			indentLevel++;
+			var first = true;
+			foreach (var yi in Meta.Get(value.GetType(), Options).Items) {
+				if (!first) {
+					builder.Append($",{o.NewLine}");
+				}
+				if (yi.SetValue == null) {
+					continue;
+				}
+				first = false;
+				AppendIndent();
 				builder.Append(yi.Name);
 				builder.Append(" = ");
-				var v = Utils.CodeValueFormat(yi.GetValue(obj));
-				if (v == string.Empty) {
-					throw new NotImplementedException(yi.Type.Name);
-				}
-
-				builder.Append(v);
+				AppendValue(yi.GetValue(value));
 			}
-			builder.Append("\n};\n");
+			indentLevel--;
+			builder.Append($"{o.NewLine}");
+			AppendIndent();
+			builder.Append("}");
+		}
+
+		private void AppendIndent()
+		{
+			for (int i = 0; i < IndentLevel; i++) {
+				builder.Append(CodeConstructOptions.Indent);
+			}
 		}
 	}
 

@@ -21,11 +21,51 @@ namespace Yuzu.Util
 		public static string CodeValueFormat(object value)
 		{
 			if (value == null) {
-				return string.Empty;
+				return "null";
 			}
 
 			var t = value.GetType();
-			if (t == typeof(int) || t == typeof(uint) || t == typeof(float) || t == typeof(double)) {
+
+			if (t == typeof(char)) {
+				return char.IsControl((char)value) ? $"(char){(int)(char)value}" : $"'{value}'";
+			}
+
+			if (t == typeof(float)) {
+				var f = (float)value;
+				if (float.IsNaN(f)) {
+					return "float.NaN";
+				} else if (float.IsPositiveInfinity(f)) {
+					return "float.PositiveInfinity";
+				} else if (float.IsNegativeInfinity(f)) {
+					return "float.NegativeInfinity";
+				} else {
+					return $"{value}f";
+				}
+			}
+
+			if (t == typeof(double)) {
+				var d = (double)value;
+				if (double.IsNaN(d)) {
+					return "double.NaN";
+				} else if (double.IsPositiveInfinity(d)) {
+					return "double.PositiveInfinity";
+				} else if (double.IsNegativeInfinity(d)) {
+					return "double.NegativeInfinity";
+				} else {
+					return $"{value}";
+				}
+			}
+
+			if (
+				t == typeof(int)
+				|| t == typeof(uint)
+				|| t == typeof(long)
+				|| t == typeof(ulong)
+				|| t == typeof(byte)
+				|| t == typeof(sbyte)
+				|| t == typeof(short)
+				|| t == typeof(ushort)
+			) {
 				return value.ToString();
 			}
 
@@ -38,11 +78,14 @@ namespace Yuzu.Util
 			}
 
 			if (t.IsEnum) {
-				return t.Name + "." + value.ToString();
+				return GetTypeSpec(t) + "." + value.ToString();
 			}
 
-			return string.Empty;
-			//throw new NotImplementedException();
+			if (t == typeof(DateTime)) {
+				return "new DateTime(" + ((DateTime)value).Ticks + ")";
+			}
+
+			throw new NotImplementedException();
 		}
 
 		public static bool IsStruct(Type t)
