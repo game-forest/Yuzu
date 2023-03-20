@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Yuzu.Json;
 using Yuzu.Util;
 
 using AliasCacheType = System.Collections.Concurrent.ConcurrentDictionary<string, System.Type>;
@@ -56,6 +57,10 @@ namespace Yuzu.Metadata
 					return id;
 				}
 			}
+
+			internal ItemAttrs Ia { get; set; }
+			public MemberInfo Member { get; internal set; }
+
 			public bool IsOptional;
 			public bool IsCompact;
 			public bool IsCopyable;
@@ -145,7 +150,7 @@ namespace Yuzu.Metadata
 		}
 #endif
 
-		private struct ItemAttrs
+		internal struct ItemAttrs
 		{
 			private readonly Attribute[] attrs;
 			public Attribute Optional => attrs[0];
@@ -198,7 +203,7 @@ namespace Yuzu.Metadata
 			return !Enumerable.SequenceEqual((IEnumerable<T>)value, (IEnumerable<T>)defColl);
 		}
 
-		private Func<object, object, bool> GetSerializeIf(Item item, CommonOptions options)
+		public Func<object, object, bool> GetSerializeIf(Item item, CommonOptions options)
 		{
 			Default ??= Factory();
 
@@ -283,6 +288,8 @@ namespace Yuzu.Metadata
 					: YuzuNoDefault.NoDefault,
 				Name = m.Name,
 			};
+			item.Ia = ia;
+			item.Member = m;
 			if (!item.IsOptional) {
 				RequiredCount += 1;
 			}
@@ -587,14 +594,29 @@ namespace Yuzu.Metadata
 			}
 		}
 
+		private static volatile float timeSpenMakingNewMeta = 0.0f;
+		private static volatile float timeSpenMakingMetaFromGen = 0.0f;
+
 		private static readonly Func<TypeOptions, Meta> makeMeta = key => {
 			if (generatedMetaCache.TryGetValue(key.Options, out var makeCache)) {
 				if (makeCache.TryGetValue(key.Type, out var metaMaker)) {
-					return metaMaker();
+					var sw = System.Diagnostics.Stopwatch.StartNew();
+					var r = metaMaker();
+					sw.Stop();
+					timeSpenMakingMetaFromGen += (float)sw.Elapsed.TotalMilliseconds;
+					System.Console.WriteLine($"[META] total gen meta: {timeSpenMakingMetaFromGen} ms");
+					return r;
 				}
 			}
-			System.Console.WriteLine($"[NEWMETA] {Utils.GetTypeSpec(key.Type)}");
-			return new Meta(key.Type, key.Options);
+			{
+				var sw = System.Diagnostics.Stopwatch.StartNew();
+				var r = new Meta(key.Type, key.Options);
+				sw.Stop();
+				System.Console.WriteLine($"[META] + {Utils.GetTypeSpec(key.Type)} : {sw.Elapsed.TotalMilliseconds} ms");
+				timeSpenMakingNewMeta += (float)sw.Elapsed.TotalMilliseconds;
+				System.Console.WriteLine($"[META] total new meta: {timeSpenMakingNewMeta} ms");
+				return r;
+			}
 		};
 
 		private static volatile int msInGet = 0;
@@ -699,6 +721,9 @@ namespace Yuzu.Metadata
 			P("using System.Collections.Generic;");
 			P("using System;");
 			P("using Yuzu.Metadata;");
+			P("using System.Reflection;");
+			P("using System.Linq;");
+			P("using System.Collections;");
 			P(string.Empty);
 			P();
 			P("namespace YuzuGenerated");
@@ -707,13 +732,21 @@ namespace Yuzu.Metadata
 			P("public class GeneratedMeta");
 			P("{");
 			indent++;
-			P("private static Dictionary<Type, Func<Yuzu.Metadata.Meta>> makeCache = " +
-				"new Dictionary<Type, Func<Yuzu.Metadata.Meta>>();");
+			P("const BindingFlags bindingFlags =");
+			PP("BindingFlags.Static");
+			PP("| BindingFlags.Instance");
+			PP("| BindingFlags.Public");
+			PP("| BindingFlags.NonPublic");
+			PP("| BindingFlags.FlattenHierarchy;");
+			P(
+				"private static Dictionary<Type, Func<Yuzu.Metadata.Meta>> makeCache = " +
+				"new Dictionary<Type, Func<Yuzu.Metadata.Meta>>();"
+			);
 			foreach (var t in types) {
 				var name = Utils.GetMangledTypeNameNS(t);
 				var meta = Meta.Get(t, options);
 
-				P($"public static Yuzu.Metadata.Meta Make__{name}()");
+				P($"public static Yuzu.Metadata.Meta Make_{name}()");
 				P("{");
 				indent++;
 				P($"var t = typeof({Utils.GetTypeSpec(t)});");
@@ -769,6 +802,18 @@ namespace Yuzu.Metadata
 						P("});");
 					}
 				}
+				if (/*meta.Factory != null || */meta.FactoryMethod != null) {
+					throw new NotSupportedException("Factory not supported in meta gen.");
+				}
+				if (meta.SerializeItemIfMethod != null) {
+					PP($"SerializeItemIfMethod = typeof({A(t)}).GetMethod{meta.SerializeItemIfMethod.Name},");
+				}
+				if (meta.SerializeItemIf != null) {
+					PP(
+						$"{meta}.SerializeItemIf = " +
+						$"MetaOptions.GetSerializeItemCondition(meta.SerializeItemIfMethod);"
+					);
+				}
 				int itemIndex = 0;
 				foreach (var i in meta.Items) {
 					var itemName = $"item{itemIndex}";
@@ -786,25 +831,44 @@ namespace Yuzu.Metadata
 					if (i.IsMember) {
 						PP($"IsMember = {A(i.IsMember)},");
 					}
-					////PP($"SerializeCond = {i.SerializeCond},");
-					////PP($"SerializeIfMethod = {i.SerializeIfMethod},");
-					////PP($"DefaultValue = {i.DefaultValue},");
+					if (!Equals(i.DefaultValue, YuzuNoDefault.NoDefault)) {
+						var o = i.DefaultValue;
+						var ot = o.GetType();
+						string dvs = string.Empty;
+						if (ot.IsPrimitive) {
+							dvs = o.ToString();
+						} else {
+							if (Utils.IsStruct(ot)) {
+								dvs = ot.FullName;
+							} else {
+								dvs = ot.FullName;
+							}
+						}
+						PP($"DefaultValue = {dvs},");
+					}
+
 					PP($"Name = {A(i.Name)},");
 					P("};");
-					var attrs = meta.MetaOptions.GetItem((MemberInfo)i.FieldInfo ?? i.PropertyInfo);
-					var merge = attrs.HasAttr(meta.MetaOptions.MergeAttribute);
+
+					var merge = meta.MetaOptions.GetItem((MemberInfo)i.FieldInfo ?? i.PropertyInfo)
+						.HasAttr(meta.MetaOptions.MergeAttribute);
 					if (i.FieldInfo != null) {
 						var f = i.FieldInfo;
 						// Why do we even need FieldInfo at runtime?
-						P($"{itemName}.FieldInfo = typeof({A(t)}).GetField({A(i.Name)});");
+						P($"{itemName}.FieldInfo = typeof({A(t)}).GetField({A(i.Name)}, bindingFlags);");
 						P($"{itemName}.Type = typeof({Utils.GetTypeSpec(i.FieldInfo.FieldType)});");
 						P($"{itemName}.GetValue = (o) => (({A(t)})o).{i.Name};");
 						if (!merge) {
 							P($"{itemName}.SetValue = (o, v) => {itemName}.FieldInfo.SetValueDirect(__makeref(o), v);");
+							////P($"{itemName}.SetValue = (o, v) => {{");
+							////PP($"var t = ({A(t)})o;");
+							////PP($"t.{i.Name} = ({A(i.FieldInfo.FieldType)})v;");
+							////PP($"{itemName}.FieldInfo.SetValue(o, v);");
+							////P($"}};");
 						}
 					} else if (i.PropertyInfo != null) {
 						var p = i.PropertyInfo;
-						P($"{itemName}.PropertyInfo = typeof({A(t)}).GetProperty({A(i.Name)});");
+						P($"{itemName}.PropertyInfo = typeof({A(t)}).GetProperty({A(i.Name)}, bindingFlags);");
 						P($"{itemName}.Type = typeof({Utils.GetTypeSpec(p.PropertyType)});");
 						var setter = p.GetSetMethod();
 						if (Utils.IsStruct(t)) {
@@ -825,6 +889,125 @@ namespace Yuzu.Metadata
 							}
 						}
 					}
+
+					var attrs = meta.MetaOptions.GetItem(i.Member);
+					var serializeCond = attrs.Attr(meta.MetaOptions.SerializeConditionAttribute);
+					bool suckCock = false;
+					if (serializeCond != null) {
+						suckCock = true;
+						if (serializeCond is YuzuSerializeIf ysif) {
+							if (false) {
+								P($"var m{itemIndex}s = typeof({A(t)}).GetMember({A(i.Name)}, bindingFlags);");
+								P($"if (m{itemIndex}s.Length == 0 || m{itemIndex}s.Length > 1) {{");
+								PP($"throw new InvalidOperationException(\"\");");
+								P("}");
+								P($"var m{itemIndex} = m{itemIndex}s[0];");
+								P($"var attrs{itemIndex} = meta.MetaOptions.GetItem(m{itemIndex});");
+								P(
+									$"var serializeCond{itemIndex} " +
+									$"= attrs{itemIndex}.Attr(meta.MetaOptions.SerializeConditionAttribute);"
+								);
+								P(
+									$"{itemName}.SerializeCond " +
+									$"= meta.MetaOptions.GetSerializeCondition(serializeCond{itemIndex}, meta.Type);"
+								);
+								// Only used for clone code gen
+								P(
+									$"{itemName}.SerializeIfMethod " +
+									$"= meta.MetaOptions.GetSerializeMethod(serializeCond{itemIndex}, meta.Type);"
+								);
+								P($"{itemName}.DefaultValue = YuzuNoDefault.NoDefault;");
+							}
+							var sm = i.SerializeIfMethod;
+							if (sm.GetParameters().Length > 0) {
+								throw new NotSupportedException(
+									"SerializeIf with parameters not supported in meta gen."
+								);
+							}
+							P(
+								$"{itemName}.SerializeCond = (o, v) => " +
+								$"(({A(t)})o).{ysif.Method}();"
+							);
+							//P(
+							//$"{itemName}.SerializeCond = (o, v) => " +
+							//$"(({A(t)})o).{ysif.Method}(({A(sm.GetParameters()[0].ParameterType)})v);"
+							//);
+							P($"{itemName}.DefaultValue = YuzuNoDefault.NoDefault;");
+						} else if (serializeCond is YuzuDefault yd) {
+							throw new NotSupportedException("YuzuDefault not supported in meta gen.");
+						}
+					}
+					bool skip = false;
+					if (i.Ia.Member != null && !suckCock && !t.IsAbstract && !t.IsInterface) {
+						string scondsval = null;
+
+						var d = i.GetValue(meta.Default);
+						var dt = d?.GetType();
+						var icoll = Utils.GetICollection(i.Type);
+						////if (
+						////	d != null
+						////	&& !Utils.IsStruct(dt)
+						////	&& !dt.IsPrimitive
+						////	&& !dt.IsEnum
+						////	&& icoll == null
+						////	&& !(d is string)
+						////) {
+						////	Console.WriteLine("PENIS");
+						////	//throw new NotSupportedException("Default value must be struct.");
+						////	skip = true;
+						////}
+						var cc = new Yuzu.Code.CodeConstructSerializer {
+							CodeConstructOptions = new Code.CodeConstructSerializeOptions {
+								Indent = " ",
+							},
+							Options = options,
+						};
+						if (d == null || icoll == null) {
+								scondsval = $"(o, v) => !object.Equals(v, {cc.ToString(d)[8..^2]});";
+						} else if (!skip) {
+							var defColl = (IEnumerable)d;
+							var collMeta = Get(i.Type, options);
+							bool checkForEmpty = options.CheckForEmptyCollections && collMeta.SerializeItemIf != null;
+							if (
+								defColl.GetEnumerator().MoveNext()
+								&& (!checkForEmpty || IsNonEmptyCollectionConditional(meta.Default, defColl, collMeta))
+							) {
+								scondsval = "(o, v) => {{" +
+									$"var defColl = {cc.ToString(d)[8..^2]};\n" +
+									$"return !Enumerable.SequenceEqual(({A(i.Type)})v, defColl);" +
+								"}};";
+							} else {
+								if (checkForEmpty) {
+									scondsval = $"(o, v) => {{" +
+										"if (v == null) return false;" +
+										"int index = 0;" +
+										// Use non-generic IEnumerable to avoid boxing/unboxing.
+										"foreach (var i in (IEnumerable)v) {" +
+											" if (" +
+											$"(({A(collMeta.Type)})v)." +
+											$"{collMeta.SerializeItemIfMethod.Name}(index++, i)" +
+											") {" +
+												"return true;" +
+											"}" +
+										"}" +
+										"return false;" +
+									$"}};";
+									////scondsval = "(object obj, object value) => " +
+									////	"IsNonEmptyCollectionConditional(obj, value, collMeta);";
+								} else {
+									var gt = icoll.GetGenericArguments()[0];
+									scondsval = $"(o, v) => v == null || ((ICollection<{A(gt)}>)v).Any();";
+								}
+							}
+						}
+						if (!skip && string.IsNullOrEmpty(scondsval)) {
+							throw new NotSupportedException("Serialize condition not supported in meta gen.");
+						}
+						if (!skip) {
+							P($"{itemName}.SerializeCond = {scondsval}");
+						}
+					}
+
 					P($"meta.Items.Add({itemName});");
 					itemIndex++;
 				}
@@ -867,7 +1050,7 @@ namespace Yuzu.Metadata
 			indent++;
 			foreach (var t in types) {
 				var name = Utils.GetMangledTypeNameNS(t);
-				P($"makeCache[typeof({Utils.GetTypeSpec(t)})] = Make__{name};");
+				P($"makeCache[typeof({Utils.GetTypeSpec(t)})] = Make_{name};");
 			}
 			P("InternalPersistence.Instance.InjectMetaCache(makeCache);");
 			indent--;
