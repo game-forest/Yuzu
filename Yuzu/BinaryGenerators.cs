@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -124,6 +124,9 @@ namespace Yuzu.Binary
 
 		private void GenerateCollection(Type t, Type icoll, string name, string tempIndexName)
 		{
+			if (t.GetProperty("Capacity") != null) {
+				cw.Put($"{name}.Capacity += {tempIndexName};\n");
+			}
 			cw.Put("while (--{0} >= 0) {{\n", tempIndexName);
 			var tempElementName = cw.GetTempName();
 			cw.Put("var {0} = ", tempElementName);
