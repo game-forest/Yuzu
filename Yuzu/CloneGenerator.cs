@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -115,6 +115,9 @@ namespace Yuzu.Clone
 			var itemName = cw.GetTempName();
 			var clonerCall = GenerateClonerInit(itemType, itemName);
 			var add = cw.GenAddToCollection(meta.Type, icoll, dstName, clonerCall);
+			if (meta.Type.GetProperty("Capacity") != null) {
+				cw.Put($"{dstName}.Capacity += {srcName}.Capacity;\n");
+			}
 			if (meta.SerializeItemIfMethod != null) {
 				var indexName = cw.GetTempName();
 				cw.Put("int {0} = 0;\n", indexName);
