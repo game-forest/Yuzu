@@ -349,6 +349,7 @@ namespace YuzuGenClone
 			}
 			if (s.L != null) {
 				result.L = new global::System.Collections.Generic.List<object>();
+				result.L.Capacity += s.L.Capacity;
 				foreach (var tmp2 in s.L)
 					result.L.Add(cl.DeepObject(tmp2));
 			}
@@ -364,6 +365,7 @@ namespace YuzuGenClone
 			var result = new global::YuzuTest.SampleList();
 			if (s.E != null) {
 				result.E = new global::System.Collections.Generic.List<string>();
+				result.E.Capacity += s.E.Capacity;
 				foreach (var tmp1 in s.E)
 					result.E.Add(tmp1);
 			}
@@ -380,6 +382,7 @@ namespace YuzuGenClone
 			if (s.M != null) {
 				result.M = new global::System.Collections.Generic.List<global::System.Collections.Generic.List<int>>();
 				var tmp2 = cl.GetCloner<global::System.Collections.Generic.List<int>>();
+				result.M.Capacity += s.M.Capacity;
 				foreach (var tmp1 in s.M)
 					result.M.Add((global::System.Collections.Generic.List<int>)tmp2(tmp1));
 			}
@@ -398,6 +401,7 @@ namespace YuzuGenClone
 					result.DI.Add(tmp1.Key, tmp1.Value);
 			}
 			if (s.LI != null && result.LI != null) {
+				result.LI.Capacity += s.LI.Capacity;
 				foreach (var tmp2 in s.LI)
 					result.LI.Add(tmp2);
 			}
@@ -417,6 +421,7 @@ namespace YuzuGenClone
 					result.DI.Add(tmp1.Key, Clone_YuzuTest__Sample1(cl, tmp1.Value));
 			}
 			if (s.LI != null && result.LI != null) {
+				result.LI.Capacity += s.LI.Capacity;
 				foreach (var tmp2 in s.LI)
 					result.LI.Add(Clone_YuzuTest__Sample1(cl, tmp2));
 			}
@@ -457,6 +462,7 @@ namespace YuzuGenClone
 			result.Birth = s.Birth;
 			if (s.Children != null) {
 				result.Children = new global::System.Collections.Generic.List<global::YuzuTest.SamplePerson>();
+				result.Children.Capacity += s.Children.Capacity;
 				foreach (var tmp1 in s.Children)
 					result.Children.Add(Clone_YuzuTest__SamplePerson(cl, tmp1));
 			}

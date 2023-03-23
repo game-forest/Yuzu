@@ -25,6 +25,7 @@ namespace YuzuGenBin
 			if (2 != fd.OurIndex) throw dg.Error("2!=" + fd.OurIndex);
 			var tmp4 = d.Reader.ReadInt32();
 			if (tmp4 >= 0) {
+				result.LI.Capacity += tmp4;
 				while (--tmp4 >= 0) {
 					var tmp5 = (global::YuzuTest.Sample1)dg.ReadObject<global::YuzuTest.Sample1>();
 					result.LI.Add(tmp5);
