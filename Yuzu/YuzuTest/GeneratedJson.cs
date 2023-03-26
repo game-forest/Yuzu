@@ -17,7 +17,7 @@ namespace YuzuGen.YuzuTest
 
 		public Sample1_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 		}
 
 		public override object FromReaderInt()
@@ -50,7 +50,7 @@ namespace YuzuGen.YuzuTest
 
 		public Sample2_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 		}
 
 		public override object FromReaderInt()
@@ -83,7 +83,7 @@ namespace YuzuGen.YuzuTest
 
 		public Sample3_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 		}
 
 		public override object FromReaderInt()
@@ -120,7 +120,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleEnumMemberTyped_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 		}
 
 		public override object FromReaderInt()
@@ -154,7 +154,7 @@ namespace YuzuGen.YuzuTest
 
 		public Sample4_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -185,7 +185,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleDecimal_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -215,7 +215,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleNullable_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -251,7 +251,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleBool_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -281,7 +281,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleList_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 			JsonOptions.Comments = true;
 		}
@@ -323,7 +323,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleObj_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -353,7 +353,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleDict_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -400,7 +400,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleSortedDict_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -444,7 +444,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleDictKeys_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -519,7 +519,7 @@ namespace YuzuGen.YuzuTest
 
 		public ISampleMember_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -550,7 +550,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleMemberI_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -585,7 +585,7 @@ namespace YuzuGen.System.Collections.Generic
 
 		public ListʳISampleMemberʴ_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -632,7 +632,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleArray_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 			JsonOptions.ArrayLengthPrefix = true;
 		}
@@ -674,7 +674,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleArrayOfArray_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -730,7 +730,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleArrayNDim_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -763,7 +763,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleBase_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -793,7 +793,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleDerivedA_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -826,7 +826,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleDerivedB_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -859,7 +859,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleMatrix_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -911,7 +911,7 @@ namespace YuzuGen.YuzuTest
 
 		public SamplePoint_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -954,7 +954,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleRect_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -987,7 +987,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleDate_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -1023,7 +1023,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleGuid_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -1053,7 +1053,7 @@ namespace YuzuGen.YuzuTest
 
 		public Color_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -1105,7 +1105,7 @@ namespace YuzuGen.System.Collections.Generic
 
 		public ListʳListʳintʴʴ_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -1163,7 +1163,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleClassList_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -1204,7 +1204,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleSmallTypes_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -1246,7 +1246,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleWithNullFieldCompact_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -1284,7 +1284,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleNestedᱹNestedClass_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
@@ -1315,7 +1315,7 @@ namespace YuzuGen.YuzuTest
 
 		public SampleNested_JsonDeserializer()
 		{
-			Options.TagMode = TagMode.Names;
+			Options.TagMode = global::Yuzu.TagMode.Names;
 			JsonOptions.EnumAsString = true;
 		}
 
