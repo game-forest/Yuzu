@@ -11,11 +11,19 @@ namespace Yuzu.Code
 		public string VarName = "x";
 		public string Indent = "\t";
 		public string NewLine = "\n";
+		public int IndentLevel = 0;
 	}
 
 	public class CodeConstructSerializer : AbstractStringSerializer
 	{
 		public CodeConstructSerializeOptions CodeConstructOptions = new CodeConstructSerializeOptions();
+
+		private int indentLevel;
+
+		private int IndentLevel
+		{
+			get => indentLevel + CodeConstructOptions.IndentLevel;
+		}
 
 		private bool IsPrimitive(object value)
 		{
@@ -65,30 +73,40 @@ namespace Yuzu.Code
 					builder.Append($",{o.NewLine}");
 				}
 				first = false;
-				builder.Append(CodeConstructOptions.Indent);
+				AppendIndent();
 				builder.Append("{{");
+				indentLevel++;
+				AppendIndent();
 				AppendValue(e.Key);
 				builder.Append(", ");
 				AppendValue(e.Value);
+				indentLevel--;
+				AppendIndent();
 				builder.Append("}}");
 			}
-			builder.Append($"{o.NewLine}}}");
+			builder.Append($"{o.NewLine}");
+			AppendIndent();
+			builder.Append("}");
 		}
 
 		private void AppendCollection(object value)
 		{
 			var o = CodeConstructOptions;
 			builder.Append($"new {Utils.GetTypeSpec(value.GetType())} {{{o.NewLine}");
+			indentLevel++;
 			var first = true;
-			foreach (var e in (ICollection)value) {
+			foreach (var e in (IEnumerable)value) {
 				if (!first) {
 					builder.Append($",{o.NewLine}");
 				}
 				first = false;
-				builder.Append(CodeConstructOptions.Indent);
+				AppendIndent();
 				AppendValue(e);
 			}
-			builder.Append($"{o.NewLine}}}");
+			indentLevel--;
+			builder.Append($"{o.NewLine}");
+			AppendIndent();
+			builder.Append("}");
 		}
 
 		private void AppendPrimitiveValue(object value)
@@ -101,6 +119,7 @@ namespace Yuzu.Code
 		{
 			var o = CodeConstructOptions;
 			builder.Append($"new {Utils.GetTypeSpec(value.GetType())} {{{o.NewLine}");
+			indentLevel++;
 			var first = true;
 			foreach (var yi in Meta.Get(value.GetType(), Options).Items) {
 				if (!first) {
@@ -110,12 +129,22 @@ namespace Yuzu.Code
 					continue;
 				}
 				first = false;
-				builder.Append(CodeConstructOptions.Indent);
+				AppendIndent();
 				builder.Append(yi.Name);
 				builder.Append(" = ");
 				AppendValue(yi.GetValue(value));
 			}
-			builder.Append($"{o.NewLine}}}");
+			indentLevel--;
+			builder.Append($"{o.NewLine}");
+			AppendIndent();
+			builder.Append("}");
+		}
+
+		private void AppendIndent()
+		{
+			for (int i = 0; i < IndentLevel; i++) {
+				builder.Append(CodeConstructOptions.Indent);
+			}
 		}
 	}
 
