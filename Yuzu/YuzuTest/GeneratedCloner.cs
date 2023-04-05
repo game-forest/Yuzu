@@ -24,6 +24,101 @@ namespace YuzuGenClone
 			return result;
 		}
 
+		protected static global::YuzuTest.Matrix44Member Clone_YuzuTestᱹMatrix44Member(Cloner cl, object src)
+		{
+			if (src == null) return null;
+			if (src.GetType() != typeof(global::YuzuTest.Matrix44Member))
+				return (global::YuzuTest.Matrix44Member)cl.DeepObject(src);
+			var s = (global::YuzuTest.Matrix44Member)src;
+			var result = new global::YuzuTest.Matrix44Member();
+			result.M11 = s.M11;
+			result.M12 = s.M12;
+			result.M13 = s.M13;
+			result.M14 = s.M14;
+			result.M21 = s.M21;
+			result.M22 = s.M22;
+			result.M23 = s.M23;
+			result.M24 = s.M24;
+			result.M31 = s.M31;
+			result.M32 = s.M32;
+			result.M33 = s.M33;
+			result.M34 = s.M34;
+			result.M41 = s.M41;
+			result.M42 = s.M42;
+			result.M43 = s.M43;
+			result.M44 = s.M44;
+			return result;
+		}
+
+		protected static global::YuzuTest.Matrix44Required Clone_YuzuTestᱹMatrix44Required(Cloner cl, object src)
+		{
+			if (src == null) return null;
+			if (src.GetType() != typeof(global::YuzuTest.Matrix44Required))
+				return (global::YuzuTest.Matrix44Required)cl.DeepObject(src);
+			var s = (global::YuzuTest.Matrix44Required)src;
+			var result = new global::YuzuTest.Matrix44Required();
+			result.M11 = s.M11;
+			result.M12 = s.M12;
+			result.M13 = s.M13;
+			result.M14 = s.M14;
+			result.M21 = s.M21;
+			result.M22 = s.M22;
+			result.M23 = s.M23;
+			result.M24 = s.M24;
+			result.M31 = s.M31;
+			result.M32 = s.M32;
+			result.M33 = s.M33;
+			result.M34 = s.M34;
+			result.M41 = s.M41;
+			result.M42 = s.M42;
+			result.M43 = s.M43;
+			result.M44 = s.M44;
+			return result;
+		}
+
+		protected static global::YuzuTest.NodeForCloneBench Clone_YuzuTestᱹNodeForCloneBench(Cloner cl, object src)
+		{
+			if (src == null) return null;
+			if (src.GetType() != typeof(global::YuzuTest.NodeForCloneBench))
+				return (global::YuzuTest.NodeForCloneBench)cl.DeepObject(src);
+			var s = (global::YuzuTest.NodeForCloneBench)src;
+			var result = new global::YuzuTest.NodeForCloneBench();
+			if (s.Children != null) {
+				result.Children = new global::System.Collections.Generic.List<global::YuzuTest.NodeForCloneBench>();
+				foreach (var tmp1 in s.Children)
+					result.Children.Add(Clone_YuzuTestᱹNodeForCloneBench(cl, tmp1));
+			}
+			result.Name = s.Name;
+			result.Name1 = s.Name1;
+			result.Name2 = s.Name2;
+			result.Name3 = s.Name3;
+			if (s.NameList != null) {
+				result.NameList = new global::System.Collections.Generic.List<string>();
+				foreach (var tmp2 in s.NameList)
+					result.NameList.Add(tmp2);
+			}
+			result.NiceNumber1 = s.NiceNumber1;
+			result.NiceNumber2 = s.NiceNumber2;
+			result.NiceNumber3 = s.NiceNumber3;
+			result.NiceNumber4 = s.NiceNumber4;
+			result.NiceNumber5 = s.NiceNumber5;
+			if (s.NiceNumberList != null) {
+				result.NiceNumberList = new global::System.Collections.Generic.List<double>();
+				foreach (var tmp3 in s.NiceNumberList)
+					result.NiceNumberList.Add(tmp3);
+			}
+			result.Number1 = s.Number1;
+			result.Number2 = s.Number2;
+			result.Number3 = s.Number3;
+			result.Number4 = s.Number4;
+			if (s.NumberList != null) {
+				result.NumberList = new global::System.Collections.Generic.List<int>();
+				foreach (var tmp4 in s.NumberList)
+					result.NumberList.Add(tmp4);
+			}
+			return result;
+		}
+
 		protected static global::YuzuTest.Sample1 Clone_YuzuTestᱹSample1(Cloner cl, object src)
 		{
 			if (src == null) return null;
@@ -583,6 +678,9 @@ namespace YuzuGenClone
 		static ClonerGen()
 		{
 			clonerCache[typeof(global::YuzuTest.Color)] = Clone_YuzuTestᱹColor;
+			clonerCache[typeof(global::YuzuTest.Matrix44Member)] = Clone_YuzuTestᱹMatrix44Member;
+			clonerCache[typeof(global::YuzuTest.Matrix44Required)] = Clone_YuzuTestᱹMatrix44Required;
+			clonerCache[typeof(global::YuzuTest.NodeForCloneBench)] = Clone_YuzuTestᱹNodeForCloneBench;
 			clonerCache[typeof(global::YuzuTest.Sample1)] = Clone_YuzuTestᱹSample1;
 			clonerCache[typeof(global::YuzuTest.Sample2)] = Clone_YuzuTestᱹSample2;
 			clonerCache[typeof(global::YuzuTest.Sample3)] = Clone_YuzuTestᱹSample3;
