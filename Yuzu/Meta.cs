@@ -750,7 +750,7 @@ namespace Yuzu.Metadata
 				P("{");
 				indent++;
 				P($"var t = typeof({Utils.GetTypeSpec(t)});");
-				P($"var options = InternalPersistence.Instance.YuzuOptions;");
+				P($"var options = LimePersistence.Instance.YuzuOptions;");
 				P($"var meta = new Yuzu.Metadata.Meta();");
 				P($"meta.Type = t;");
 				P($"meta.Factory = meta.DefaultFactory;");
@@ -938,27 +938,14 @@ namespace Yuzu.Metadata
 						}
 					}
 					bool skip = false;
-					if (i.Ia.Member != null && !suckCock && !t.IsAbstract && !t.IsInterface) {
+					if (i.Ia.Member != null && !suckCock && !t.IsAbstract && !t.IsInterface && false) {
 						string scondsval = null;
-
 						var d = i.GetValue(meta.Default);
 						var dt = d?.GetType();
 						var icoll = Utils.GetICollection(i.Type);
-						////if (
-						////	d != null
-						////	&& !Utils.IsStruct(dt)
-						////	&& !dt.IsPrimitive
-						////	&& !dt.IsEnum
-						////	&& icoll == null
-						////	&& !(d is string)
-						////) {
-						////	Console.WriteLine("PENIS");
-						////	//throw new NotSupportedException("Default value must be struct.");
-						////	skip = true;
-						////}
 						var cc = new Yuzu.Code.CodeConstructSerializer {
 							CodeConstructOptions = new Code.CodeConstructSerializeOptions {
-								Indent = " ",
+								IndentLevel = indent,
 							},
 							Options = options,
 						};
@@ -1052,7 +1039,7 @@ namespace Yuzu.Metadata
 				var name = Utils.GetMangledTypeNameNS(t);
 				P($"makeCache[typeof({Utils.GetTypeSpec(t)})] = Make_{name};");
 			}
-			P("InternalPersistence.Instance.InjectMetaCache(makeCache);");
+			P("LimePersistence.Instance.InjectMetaCache(makeCache);");
 			indent--;
 			P("}");
 			indent--;
