@@ -1065,6 +1065,163 @@ namespace YuzuTest
 		public int F;
 	}
 
+	public class Matrix44Required
+	{
+		[YuzuRequired]
+		public float M11;
+		[YuzuRequired]
+		public float M12;
+		[YuzuRequired]
+		public float M13;
+		[YuzuRequired]
+		public float M14;
+		[YuzuRequired]
+		public float M21;
+		[YuzuRequired]
+		public float M22;
+		[YuzuRequired]
+		public float M23;
+		[YuzuRequired]
+		public float M24;
+		[YuzuRequired]
+		public float M31;
+		[YuzuRequired]
+		public float M32;
+		[YuzuRequired]
+		public float M33;
+		[YuzuRequired]
+		public float M34;
+		[YuzuRequired]
+		public float M41;
+		[YuzuRequired]
+		public float M42;
+		[YuzuRequired]
+		public float M43;
+		[YuzuRequired]
+		public float M44;
+
+		public Matrix44Required Clone()
+		{
+			return (Matrix44Required)MemberwiseClone();
+		}
+	}
+
+	public class Matrix44Member
+	{
+		[YuzuMember]
+		public float M11;
+		[YuzuMember]
+		public float M12;
+		[YuzuMember]
+		public float M13;
+		[YuzuMember]
+		public float M14;
+		[YuzuMember]
+		public float M21;
+		[YuzuMember]
+		public float M22;
+		[YuzuMember]
+		public float M23;
+		[YuzuMember]
+		public float M24;
+		[YuzuMember]
+		public float M31;
+		[YuzuMember]
+		public float M32;
+		[YuzuMember]
+		public float M33;
+		[YuzuMember]
+		public float M34;
+		[YuzuMember]
+		public float M41;
+		[YuzuMember]
+		public float M42;
+		[YuzuMember]
+		public float M43;
+		[YuzuMember]
+		public float M44;
+
+		public Matrix44Member Clone()
+		{
+			return (Matrix44Member)MemberwiseClone();
+		}
+	}
+
+	public class NodeForCloneBench
+	{
+		[YuzuRequired]
+		public string Name { get; set; }
+
+		[YuzuRequired]
+		public string Name1 { get; set; }
+
+		[YuzuRequired]
+		public string Name2 { get; set; }
+
+		[YuzuRequired]
+		public string Name3 { get; set; }
+
+		[YuzuRequired]
+		public int Number1 { get; set; }
+
+		[YuzuRequired]
+		public int Number2 { get; set; }
+
+		[YuzuRequired]
+		public int Number3 { get; set; }
+
+		[YuzuRequired]
+		public int Number4 { get; set; }
+
+		[YuzuRequired]
+		public double NiceNumber1 { get; set; }
+
+		[YuzuRequired]
+		public double NiceNumber2 { get; set; }
+
+		[YuzuRequired]
+		public double NiceNumber3 { get; set; }
+
+		[YuzuRequired]
+		public double NiceNumber4 { get; set; }
+
+		[YuzuRequired]
+		public double NiceNumber5 { get; set; }
+
+		[YuzuRequired]
+		public List<int> NumberList { get; set; }
+
+		[YuzuRequired]
+		public List<string> NameList { get; set; }
+
+		[YuzuRequired]
+		public List<double> NiceNumberList { get; set; }
+
+		[YuzuRequired]
+		public List<NodeForCloneBench> Children { get; set; }
+
+		public NodeForCloneBench Clone()
+		{
+			var result = (NodeForCloneBench)MemberwiseClone();
+			if (Children != null) {
+				result.Children = new List<NodeForCloneBench>();
+				foreach (var n in Children) {
+					result.Children.Add(n.Clone());
+				}
+			}
+			if (NumberList != null) {
+				result.NumberList = new List<int>(NumberList);
+			}
+			if (NameList != null) {
+				result.NameList = new List<string>(NameList);
+			}
+			if (NiceNumberList != null) {
+				result.NiceNumberList = new List<double>(NiceNumberList);
+			}
+			return result;
+		}
+	}
+
 	public static class XAssert
 	{
 		public static void Throws<TExpectedException>(Action exceptionThrower, string expectedExceptionMessage = "")

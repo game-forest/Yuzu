@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Running;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Yuzu;
@@ -12,6 +13,7 @@ using Yuzu.DictOfObjects;
 using Yuzu.Json;
 using Yuzu.Metadata;
 using Yuzu.Util;
+using YuzuGenClone;
 
 namespace YuzuTest
 {
@@ -79,6 +81,222 @@ namespace YuzuTest
 			Assert.AreEqual(src.F, dst.F);
 			Assert.AreEqual(src.S1, dst.S1);
 			Assert.AreEqual(src.S2, dst.S2);
+		}
+	}
+
+	public class BenchmarkClone
+	{
+		public BenchmarkClone()
+		{
+			sampleNoCollectionsNoChildren = new NodeForCloneBench();
+			FillObjectWithRandomData(sampleNoCollectionsNoChildren, 0);
+
+			sampleLotsOfDataInCollectionsNoChildren = new NodeForCloneBench();
+			FillObjectWithRandomData(sampleLotsOfDataInCollectionsNoChildren, 10000);
+
+			sampleNoCollectionsLotsOfChildren = new NodeForCloneBench();
+			FillObjectWithRandomData(sampleNoCollectionsLotsOfChildren, 0);
+			AddChildren(sampleNoCollectionsLotsOfChildren, 2, 0, 13);
+
+			sampleLotsOfDataInCollectionsLotsOfChildren = new NodeForCloneBench();
+			FillObjectWithRandomData(sampleLotsOfDataInCollectionsLotsOfChildren, 100);
+			AddChildren(sampleLotsOfDataInCollectionsLotsOfChildren, 2, 100, 13);
+
+			void AddChildren(NodeForCloneBench n, int childCount, int numDataInLists, int depthLimit)
+			{
+				if (depthLimit == 0) {
+					return;
+				}
+				n.Children = new List<NodeForCloneBench>();
+				for (int i = 0; i < childCount; i++) {
+					var child = new NodeForCloneBench();
+					FillObjectWithRandomData(child, numDataInLists);
+					n.Children.Add(child);
+					AddChildren(child, childCount, numDataInLists, depthLimit - 1);
+				}
+			}
+		}
+
+		public static void FillObjectWithRandomData(object obj, int numDataInLists)
+		{
+			var random = new Random();
+
+			foreach (var field in obj.GetType().GetFields()) {
+				var fieldType = field.FieldType;
+				if (fieldType == typeof(int)) {
+					field.SetValue(obj, random.Next());
+				} else if (fieldType == typeof(double)) {
+					field.SetValue(obj, random.NextDouble());
+				} else if (fieldType == typeof(string)) {
+					field.SetValue(obj, Guid.NewGuid().ToString());
+				} else if (fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(List<>)) {
+					if (numDataInLists > 0) {
+						var list = Activator.CreateInstance(fieldType) as IList<object>;
+						var listType = fieldType.GetGenericArguments()[0];
+						var count = numDataInLists;
+						for (var i = 0; i < count; i++) {
+							if (listType == typeof(int)) {
+								list.Add(random.Next());
+							} else if (listType == typeof(double)) {
+								list.Add(random.NextDouble());
+							} else if (listType == typeof(string)) {
+								list.Add(Guid.NewGuid().ToString());
+							}
+						}
+						field.SetValue(obj, list);
+					}
+				}
+			}
+			foreach (var property in obj.GetType().GetProperties()) {
+				var propertyType = property.PropertyType;
+				if (propertyType == typeof(int)) {
+					property.SetValue(obj, random.Next());
+				} else if (propertyType == typeof(double)) {
+					property.SetValue(obj, random.NextDouble());
+				} else if (propertyType == typeof(string)) {
+					property.SetValue(obj, Guid.NewGuid().ToString());
+				} else if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(List<>)) {
+					if (numDataInLists > 0) {
+						var list = Activator.CreateInstance(propertyType);
+						var listType = propertyType.GetGenericArguments()[0];
+						var count = numDataInLists;
+						for (var i = 0; i < count; i++) {
+							if (listType == typeof(int)) {
+								var ll = (List<int>)list;
+								ll.Add(random.Next());
+							} else if (listType == typeof(double)) {
+								var ll = (List<double>)list;
+								ll.Add(random.NextDouble());
+							} else if (listType == typeof(string)) {
+								var ll = (List<string>)list;
+								ll.Add(Guid.NewGuid().ToString());
+							}
+						}
+						property.SetValue(obj, list);
+					}
+				}
+			}
+		}
+
+		private NodeForCloneBench sampleNoCollectionsNoChildren;
+		private NodeForCloneBench sampleLotsOfDataInCollectionsNoChildren;
+		private NodeForCloneBench sampleNoCollectionsLotsOfChildren;
+		private NodeForCloneBench sampleLotsOfDataInCollectionsLotsOfChildren;
+
+		private YuzuGenClone.ClonerGen yuzuGenCloner = new YuzuGenClone.ClonerGen();
+
+		[Benchmark]
+		public void CloneWithMemberwiseClone_NoCollectionsNoChildren()
+		{
+			var s = sampleNoCollectionsNoChildren.Clone();
+		}
+
+		[Benchmark]
+		public void CloneWithYuzuGeneratedClone_NoCollectionsNoChildren()
+		{
+			var s = yuzuGenCloner.Deep(sampleNoCollectionsNoChildren);
+		}
+
+		[Benchmark]
+		public void CloneWithYuzuClone_NoCollectionsNoChildren()
+		{
+			var s = Yuzu.Clone.Cloner.Instance.Deep(sampleNoCollectionsNoChildren);
+		}
+
+		[Benchmark]
+		public void CloneWithMemberwiseClone_LotsOfDataInCollectionsNoChildren()
+		{
+			var s = sampleLotsOfDataInCollectionsNoChildren.Clone();
+		}
+
+		[Benchmark]
+		public void CloneWithYuzuGeneratedClone_LotsOfDataInCollectionsNoChildren()
+		{
+			var s = yuzuGenCloner.Deep(sampleLotsOfDataInCollectionsNoChildren);
+		}
+
+		[Benchmark]
+		public void CloneWithYuzuClone_LotsOfDataInCollectionsNoChildren()
+		{
+			var s = Yuzu.Clone.Cloner.Instance.Deep(sampleLotsOfDataInCollectionsNoChildren);
+		}
+
+		[Benchmark]
+		public void CloneWithMemberwiseClone_NoCollectionsLotsOfChildren()
+		{
+			var s = sampleNoCollectionsLotsOfChildren.Clone();
+		}
+
+		[Benchmark]
+		public void CloneWithYuzuGeneratedClone_NoCollectionsLotsOfChildren()
+		{
+			var s = yuzuGenCloner.Deep(sampleNoCollectionsLotsOfChildren);
+		}
+
+		[Benchmark]
+		public void CloneWithYuzuClone_NoCollectionsLotsOfChildren()
+		{
+			var s = Yuzu.Clone.Cloner.Instance.Deep(sampleNoCollectionsLotsOfChildren);
+		}
+
+		[Benchmark]
+		public void CloneWithMemberwiseClone_LotsOfDataInCollectionsLotsOfChildren()
+		{
+			var s = sampleLotsOfDataInCollectionsLotsOfChildren.Clone();
+		}
+
+		[Benchmark]
+		public void CloneWithYuzuGeneratedClone_LotsOfDataInCollectionsLotsOfChildren()
+		{
+			var s = yuzuGenCloner.Deep(sampleLotsOfDataInCollectionsLotsOfChildren);
+		}
+
+		[Benchmark]
+		public void CloneWithYuzuClone_LotsOfDataInCollectionsLotsOfChildren()
+		{
+			var s = Yuzu.Clone.Cloner.Instance.Deep(sampleLotsOfDataInCollectionsLotsOfChildren);
+		}
+
+		[Benchmark]
+		public void CloneWithMemberwiseClone_Matrix44Required()
+		{
+			var m = new Matrix44Required();
+			var m1 = m.Clone();
+		}
+
+		[Benchmark]
+		public void CloneWithMemberwiseClone_Matrix44Member()
+		{
+			var m = new Matrix44Member();
+			var m1 = m.Clone();
+		}
+
+		[Benchmark]
+		public void CloneWithYuzuClone_Matrix44Required()
+		{
+			var m = new Matrix44Required();
+			var m1 = Yuzu.Clone.Cloner.Instance.Deep(m);
+		}
+
+		[Benchmark]
+		public void CloneWithYuzuClone_Matrix44Member()
+		{
+			var m = new Matrix44Member();
+			var m1 = Yuzu.Clone.Cloner.Instance.Deep(m);
+		}
+
+		[Benchmark]
+		public void CloneWithYuzuGenClone_Matrix44Required()
+		{
+			var m = new Matrix44Required();
+			var m1 = yuzuGenCloner.Deep(m);
+		}
+
+		[Benchmark]
+		public void CloneWithYuzuGenClone_Matrix44Member()
+		{
+			var m = new Matrix44Member();
+			var m1 = yuzuGenCloner.Deep(m);
 		}
 	}
 
@@ -235,6 +453,9 @@ namespace YuzuTest
 			var cg = new ClonerGenerator();
 			bdg.SafetyChecks = true;
 			Gen(@"..\..\..\GeneratedCloner.cs", cg, cd => {
+				cd.Generate<NodeForCloneBench>();
+				cd.Generate<Matrix44Member>();
+				cd.Generate<Matrix44Required>();
 				cd.Generate<Sample1>();
 				cd.Generate<Sample2>();
 				cd.Generate<Sample3>();
@@ -284,6 +505,7 @@ namespace YuzuTest
 			Gen(@"..\..\..\GeneratedClonerDerived.cs", cg1, cd => {
 				cd.Generate<SampleClonerGenDerived>();
 			});
+			var summary = BenchmarkRunner.Run<BenchmarkClone>();
 		}
 	}
 }
