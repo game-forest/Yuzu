@@ -594,17 +594,16 @@ namespace Yuzu.Metadata
 			}
 		}
 
-		private static volatile float timeSpenMakingNewMeta = 0.0f;
-		private static volatile float timeSpenMakingMetaFromGen = 0.0f;
-
 		private static readonly Func<TypeOptions, Meta> makeMeta = key => {
 			if (generatedMetaCache.TryGetValue(key.Options, out var makeCache)) {
 				if (makeCache.TryGetValue(key.Type, out var metaMaker)) {
 					var sw = System.Diagnostics.Stopwatch.StartNew();
 					var r = metaMaker();
 					sw.Stop();
-					timeSpenMakingMetaFromGen += (float)sw.Elapsed.TotalMilliseconds;
-					System.Console.WriteLine($"[META] total gen meta: {timeSpenMakingMetaFromGen} ms");
+					System.Console.WriteLine(
+						$"[new_gen_meta] " +
+						$"'{Utils.GetTypeSpec(key.Type)}' {sw.Elapsed.TotalMilliseconds} ms"
+					);
 					return r;
 				}
 			}
@@ -612,9 +611,10 @@ namespace Yuzu.Metadata
 				var sw = System.Diagnostics.Stopwatch.StartNew();
 				var r = new Meta(key.Type, key.Options);
 				sw.Stop();
-				System.Console.WriteLine($"[META] + {Utils.GetTypeSpec(key.Type)} : {sw.Elapsed.TotalMilliseconds} ms");
-				timeSpenMakingNewMeta += (float)sw.Elapsed.TotalMilliseconds;
-				System.Console.WriteLine($"[META] total new meta: {timeSpenMakingNewMeta} ms");
+				System.Console.WriteLine(
+					$"[new_meta] " +
+					$"'{Utils.GetTypeSpec(key.Type)}' {sw.Elapsed.TotalMilliseconds} ms"
+				);
 				return r;
 			}
 		};
