@@ -5,13 +5,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Yuzu.Json;
 using Yuzu.Util;
 
 using AliasCacheType = System.Collections.Concurrent.ConcurrentDictionary<string, System.Type>;
 
 namespace Yuzu.Metadata
 {
+	public abstract class GeneratedMeta
+	{
+		public abstract Yuzu.CommonOptions Options { get; set; }
+
+		public abstract Dictionary<Type, Func<Yuzu.Metadata.Meta>> GetMetaMakers();
+	}
+
 	public class Meta
 	{
 		private struct TypeOptions : IEquatable<TypeOptions>
@@ -729,19 +735,40 @@ namespace Yuzu.Metadata
 			P("namespace YuzuGenerated");
 			P("{");
 			indent++;
-			P("public class GeneratedMeta");
+			P("public class Meta : GeneratedMeta");
 			P("{");
 			indent++;
-			P("const BindingFlags bindingFlags =");
+			P("private static Yuzu.CommonOptions options;");
+			P();
+			P("private const BindingFlags bindingFlags =");
 			PP("BindingFlags.Static");
 			PP("| BindingFlags.Instance");
 			PP("| BindingFlags.Public");
 			PP("| BindingFlags.NonPublic");
 			PP("| BindingFlags.FlattenHierarchy;");
+			P();
 			P(
 				"private static Dictionary<Type, Func<Yuzu.Metadata.Meta>> makeCache = " +
 				"new Dictionary<Type, Func<Yuzu.Metadata.Meta>>();"
 			);
+			P();
+			P("public override Yuzu.CommonOptions Options");
+			P("{");
+			PP("get");
+			PP("{");
+			PPP("return options;");
+			PP("}");
+			PP("set");
+			PP("{");
+			PPP("options = value;");
+			PP("}");
+			P("}");
+			P(string.Empty);
+			P("public override Dictionary<Type, Func<Yuzu.Metadata.Meta>> GetMetaMakers()");
+			P("{");
+			PP("return makeCache;");
+			P("}");
+
 			foreach (var t in types) {
 				var name = Utils.GetMangledTypeNameNS(t);
 				var meta = Meta.Get(t, options);
@@ -750,7 +777,6 @@ namespace Yuzu.Metadata
 				P("{");
 				indent++;
 				P($"var t = typeof({Utils.GetTypeSpec(t)});");
-				P($"var options = LimePersistence.Instance.YuzuOptions;");
 				P($"var meta = new Yuzu.Metadata.Meta();");
 				P($"meta.Type = t;");
 				P($"meta.Factory = meta.DefaultFactory;");
@@ -1031,15 +1057,14 @@ namespace Yuzu.Metadata
 				indent--;
 				P("}");
 			}
-			P("public GeneratedMeta() { }");
-			P("static GeneratedMeta()");
+			P("public Meta() { }");
+			P("static Meta()");
 			P("{");
 			indent++;
 			foreach (var t in types) {
 				var name = Utils.GetMangledTypeNameNS(t);
 				P($"makeCache[typeof({Utils.GetTypeSpec(t)})] = Make_{name};");
 			}
-			P("LimePersistence.Instance.InjectMetaCache(makeCache);");
 			indent--;
 			P("}");
 			indent--;
@@ -1063,6 +1088,19 @@ namespace Yuzu.Metadata
 				indent--;
 			}
 
+			void PPP(string text)
+			{
+				indent += 2;
+				P(text);
+				indent -= 2;
+			}
+			void PPPP(string text)
+			{
+				indent += 3;
+				P(text);
+				indent -= 3;
+			}
+
 			string A(object @object)
 			{
 				if (@object == null) {
@@ -1081,9 +1119,9 @@ namespace Yuzu.Metadata
 			}
 		}
 
-		public static void InjectMetaCache(Dictionary<Type, Func<Meta>> makeCache, CommonOptions yuzuOptions)
+		public static void InjectMetaCache(Yuzu.Metadata.GeneratedMeta meta)
 		{
-			generatedMetaCache[yuzuOptions] = makeCache;
+			generatedMetaCache[meta.Options] = meta.GetMetaMakers();
 		}
 
 		private static Dictionary<CommonOptions, Dictionary<Type, Func<Meta>>> generatedMetaCache =
