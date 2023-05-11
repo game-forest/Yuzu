@@ -96,8 +96,10 @@ namespace Yuzu.Clone
 			return NoTriggers;
 		}
 
+		//private static int noTriggersAllCopyableCount = 0;
 		internal object NoTriggersAllCopyable(object src)
 		{
+			//Console.WriteLine($"[no_triggers_all_copy] {++noTriggersAllCopyableCount}");
 			if (src == null) {
 				return null;
 			}
@@ -111,8 +113,10 @@ namespace Yuzu.Clone
 			return result;
 		}
 
+		//private static int noTriggersCount = 0;
 		internal object NoTriggers(object src)
 		{
+			//Console.WriteLine($"[no_triggers] {++noTriggersCount}");
 			if (src == null) {
 				return null;
 			}
@@ -134,8 +138,10 @@ namespace Yuzu.Clone
 			return result;
 		}
 
+		//private static int generalCaseCount = 0;
 		internal object GeneralCase(object src)
 		{
+			//Console.WriteLine($"[general_case] {++generalCaseCount}");
 			if (src == null) {
 				return null;
 			}

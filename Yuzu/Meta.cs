@@ -20,7 +20,7 @@ namespace Yuzu.Metadata
 
 	public class Meta
 	{
-		private struct TypeOptions : IEquatable<TypeOptions>
+		public struct TypeOptions : IEquatable<TypeOptions>
 		{
 			public Type Type;
 			public CommonOptions Options;
@@ -843,6 +843,7 @@ namespace Yuzu.Metadata
 				int itemIndex = 0;
 				foreach (var i in meta.Items) {
 					var itemName = $"item{itemIndex}";
+					var itemDeclaringType = i.Member.DeclaringType;
 					P($"var {itemName} = new Yuzu.Metadata.Meta.Item {{");
 					PP($"Alias = {A(i.Alias)},");
 					if (i.IsOptional) {
@@ -881,9 +882,12 @@ namespace Yuzu.Metadata
 					if (i.FieldInfo != null) {
 						var f = i.FieldInfo;
 						// Why do we even need FieldInfo at runtime?
-						P($"{itemName}.FieldInfo = typeof({A(t)}).GetField({A(i.Name)}, bindingFlags);");
+						P(
+							$"{itemName}.FieldInfo = " +
+							$"typeof({A(itemDeclaringType)}).GetField({A(i.Name)}, bindingFlags);"
+						);
 						P($"{itemName}.Type = typeof({Utils.GetTypeSpec(i.FieldInfo.FieldType)});");
-						P($"{itemName}.GetValue = (o) => (({A(t)})o).{i.Name};");
+						P($"{itemName}.GetValue = (o) => (({A(itemDeclaringType)})o).{i.Name};");
 						if (!merge) {
 							P($"{itemName}.SetValue = (o, v) => {itemName}.FieldInfo.SetValueDirect(__makeref(o), v);");
 							////P($"{itemName}.SetValue = (o, v) => {{");
@@ -894,7 +898,10 @@ namespace Yuzu.Metadata
 						}
 					} else if (i.PropertyInfo != null) {
 						var p = i.PropertyInfo;
-						P($"{itemName}.PropertyInfo = typeof({A(t)}).GetProperty({A(i.Name)}, bindingFlags);");
+						P(
+							$"{itemName}.PropertyInfo = " +
+							$"typeof({A(itemDeclaringType)}).GetProperty({A(i.Name)}, bindingFlags);"
+						);
 						P($"{itemName}.Type = typeof({Utils.GetTypeSpec(p.PropertyType)});");
 						var setter = p.GetSetMethod();
 						if (Utils.IsStruct(t)) {
@@ -909,116 +916,91 @@ namespace Yuzu.Metadata
 								);
 							}
 						} else {
-							P($"{itemName}.GetValue = (o) => (({A(t)})o).{i.Name};");
+							P($"{itemName}.GetValue = (o) => (({A(itemDeclaringType)})o).{i.Name};");
 							if (!merge && setter != null) {
-								P($"{itemName}.SetValue = (o, v) => (({A(t)})o).{i.Name} = ({A(p.PropertyType)})v;");
+								P(
+									$"{itemName}.SetValue = " +
+									$"(o, v) => (({A(itemDeclaringType)})o).{i.Name} = ({A(p.PropertyType)})v;"
+								);
 							}
 						}
 					}
 
 					var attrs = meta.MetaOptions.GetItem(i.Member);
+					bool serializeCondSet = false;
 					var serializeCond = attrs.Attr(meta.MetaOptions.SerializeConditionAttribute);
-					bool suckCock = false;
 					if (serializeCond != null) {
-						suckCock = true;
 						if (serializeCond is YuzuSerializeIf ysif) {
-							if (false) {
-								P($"var m{itemIndex}s = typeof({A(t)}).GetMember({A(i.Name)}, bindingFlags);");
-								P($"if (m{itemIndex}s.Length == 0 || m{itemIndex}s.Length > 1) {{");
-								PP($"throw new InvalidOperationException(\"\");");
-								P("}");
-								P($"var m{itemIndex} = m{itemIndex}s[0];");
-								P($"var attrs{itemIndex} = meta.MetaOptions.GetItem(m{itemIndex});");
-								P(
-									$"var serializeCond{itemIndex} " +
-									$"= attrs{itemIndex}.Attr(meta.MetaOptions.SerializeConditionAttribute);"
-								);
-								P(
-									$"{itemName}.SerializeCond " +
-									$"= meta.MetaOptions.GetSerializeCondition(serializeCond{itemIndex}, meta.Type);"
-								);
-								// Only used for clone code gen
-								P(
-									$"{itemName}.SerializeIfMethod " +
-									$"= meta.MetaOptions.GetSerializeMethod(serializeCond{itemIndex}, meta.Type);"
-								);
-								P($"{itemName}.DefaultValue = YuzuNoDefault.NoDefault;");
-							}
-							var sm = i.SerializeIfMethod;
-							if (sm.GetParameters().Length > 0) {
-								throw new NotSupportedException(
-									"SerializeIf with parameters not supported in meta gen."
-								);
-							}
+							P(
+								$"{itemName}.SerializeIfMethod " +
+								$"= typeof({A(itemDeclaringType)}).GetMethod({A(ysif.Method)}, bindingFlags);"
+							);
 							P(
 								$"{itemName}.SerializeCond = (o, v) => " +
-								$"(({A(t)})o).{ysif.Method}();"
+								$"(({A(itemDeclaringType)})o).{ysif.Method}();"
 							);
-							//P(
-							//$"{itemName}.SerializeCond = (o, v) => " +
-							//$"(({A(t)})o).{ysif.Method}(({A(sm.GetParameters()[0].ParameterType)})v);"
-							//);
+							serializeCondSet = true;
 							P($"{itemName}.DefaultValue = YuzuNoDefault.NoDefault;");
 						} else if (serializeCond is YuzuDefault yd) {
 							throw new NotSupportedException("YuzuDefault not supported in meta gen.");
+						} else {
+							throw new NotSupportedException(
+								$"Unknown SerializeConditionAttribute '{serializeCond.GetType()}'."
+							);
 						}
 					}
-					bool skip = false;
-					if (i.Ia.Member != null && !suckCock && !t.IsAbstract && !t.IsInterface && false) {
-						string scondsval = null;
-						var d = i.GetValue(meta.Default);
-						var dt = d?.GetType();
-						var icoll = Utils.GetICollection(i.Type);
-						var cc = new Yuzu.Code.CodeConstructSerializer {
+					if (i.Ia.Member != null && !serializeCondSet && !t.IsAbstract && !t.IsInterface) {
+						var cs = new Yuzu.Code.CodeConstructSerializer {
 							CodeConstructOptions = new Code.CodeConstructSerializeOptions {
 								IndentLevel = indent,
 							},
 							Options = options,
 						};
-						if (d == null || icoll == null) {
-								scondsval = $"(o, v) => !object.Equals(v, {cc.ToString(d)[8..^2]});";
-						} else if (!skip) {
-							var defColl = (IEnumerable)d;
+						string condText = null;
+						var defaultValue = i.GetValue(meta.Default);
+						var dt = defaultValue?.GetType();
+						var icoll = Utils.GetICollection(i.Type);
+						if (defaultValue == null || icoll == null) {
+								condText = $"(o, v) => !object.Equals(v, {cs.ToString(defaultValue)[8..^2]});";
+						} else {
+							var istr = new string('\t', indent);
+							var defColl = (IEnumerable)defaultValue;
 							var collMeta = Get(i.Type, options);
 							bool checkForEmpty = options.CheckForEmptyCollections && collMeta.SerializeItemIf != null;
 							if (
 								defColl.GetEnumerator().MoveNext()
 								&& (!checkForEmpty || IsNonEmptyCollectionConditional(meta.Default, defColl, collMeta))
 							) {
-								scondsval = "(o, v) => {{" +
-									$"var defColl = {cc.ToString(d)[8..^2]};\n" +
-									$"return !Enumerable.SequenceEqual(({A(i.Type)})v, defColl);" +
-								"}};";
+								condText = $"(o, v) => {{\n" +
+									$"{istr}\tvar defColl = \n{cs.ToString(defaultValue)[8..^2]};\n" +
+									$"{istr}\treturn!Enumerable.SequenceEqual(({A(i.Type)})v, defColl);" +
+								$"{istr}}};";
 							} else {
 								if (checkForEmpty) {
-									scondsval = $"(o, v) => {{" +
-										"if (v == null) return false;" +
-										"int index = 0;" +
+									condText = $"(o, v) => {{\n" +
+										$"{istr}\tif(v == null) return false;\n" +
+										$"{istr}\tint index = 0;\n" +
 										// Use non-generic IEnumerable to avoid boxing/unboxing.
-										"foreach (var i in (IEnumerable)v) {" +
-											" if (" +
-											$"(({A(collMeta.Type)})v)." +
-											$"{collMeta.SerializeItemIfMethod.Name}(index++, i)" +
-											") {" +
-												"return true;" +
-											"}" +
-										"}" +
-										"return false;" +
-									$"}};";
-									////scondsval = "(object obj, object value) => " +
-									////	"IsNonEmptyCollectionConditional(obj, value, collMeta);";
+										$"{istr}\tforeach (var i in (IEnumerable)v) {{\n" +
+											$"{istr}\t\tif (\n" +
+											$"{istr}\t\t(({A(collMeta.Type)})v).\n" +
+											$"{istr}\t\t\t{collMeta.SerializeItemIfMethod.Name}(index++, i)\n" +
+											$"{istr}\t\t) {{\n" +
+												$"{istr}\t\t\treturn true;\n" +
+											$"{istr}\t\t}}\n" +
+										$"{istr}\t}}\n" +
+										$"{istr}\treturn false;\n" +
+									$"{istr}}};";
 								} else {
 									var gt = icoll.GetGenericArguments()[0];
-									scondsval = $"(o, v) => v == null || ((ICollection<{A(gt)}>)v).Any();";
+									condText = $"(o, v) => v == null || ((ICollection<{A(gt)}>)v).Any();";
 								}
 							}
 						}
-						if (!skip && string.IsNullOrEmpty(scondsval)) {
+						if (string.IsNullOrEmpty(condText)) {
 							throw new NotSupportedException("Serialize condition not supported in meta gen.");
 						}
-						if (!skip) {
-							P($"{itemName}.SerializeCond = {scondsval}");
-						}
+						P($"{itemName}.SerializeCond = {condText}");
 					}
 
 					P($"meta.Items.Add({itemName});");
