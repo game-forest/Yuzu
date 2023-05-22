@@ -66,14 +66,14 @@ namespace YuzuGenBin
 			ReaderClassDef.FieldDef fd;
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (1 != fd.OurIndex) throw dg.Error("1!=" + fd.OurIndex);
-			result.S1 = (global::YuzuTest.Sample1)dg.ReadObject<global::YuzuTest.Sample1>();
+			result.S1 = (global::YuzuTest.Sample1)BinaryDeserializer.ReadObject<global::YuzuTest.Sample1>(dg);
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (2 == fd.OurIndex) {
 				result.F = d.Reader.ReadInt32();
 				fd = def.Fields[d.Reader.ReadInt16()];
 			}
 			if (3 == fd.OurIndex) {
-				result.S2 = (global::YuzuTest.Sample2)dg.ReadObject<global::YuzuTest.Sample2>();
+				result.S2 = (global::YuzuTest.Sample2)BinaryDeserializer.ReadObject<global::YuzuTest.Sample2>(dg);
 				fd = def.Fields[d.Reader.ReadInt16()];
 			}
 			if (fd.OurIndex != ReaderClassDef.EOF) throw dg.Error("Unfinished object");
@@ -175,7 +175,7 @@ namespace YuzuGenBin
 			ReaderClassDef.FieldDef fd;
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (1 != fd.OurIndex) throw dg.Error("1!=" + fd.OurIndex);
-			result.F = dg.ReadAny();
+			result.F = BinaryDeserializer.ReadAny(dg);
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (fd.OurIndex != ReaderClassDef.EOF) throw dg.Error("Unfinished object");
 		}
@@ -204,7 +204,7 @@ namespace YuzuGenBin
 					while (--tmp1 >= 0) {
 						var tmp2 = d.Reader.ReadString();
 						if (tmp2 == "" && d.Reader.ReadBoolean()) tmp2 = null;
-						var tmp3 = (global::YuzuTest.SampleDict)dg.ReadObject<global::YuzuTest.SampleDict>();
+						var tmp3 = (global::YuzuTest.SampleDict)BinaryDeserializer.ReadObject<global::YuzuTest.SampleDict>(dg);
 						result.Children.Add(tmp2, tmp3);
 					}
 				}
@@ -286,7 +286,7 @@ namespace YuzuGenBin
 			if (tmp7 >= 0) {
 				result.K = new global::System.Collections.Generic.Dictionary<global::YuzuTest.SampleKey, int>();
 				while (--tmp7 >= 0) {
-					var tmp8 = (global::YuzuTest.SampleKey)dg.ReadObject<global::YuzuTest.SampleKey>();
+					var tmp8 = (global::YuzuTest.SampleKey)BinaryDeserializer.ReadObject<global::YuzuTest.SampleKey>(dg);
 					var tmp9 = d.Reader.ReadInt32();
 					result.K.Add(tmp8, tmp9);
 				}
@@ -392,10 +392,10 @@ namespace YuzuGenBin
 			ReaderClassDef.FieldDef fd;
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (1 != fd.OurIndex) throw dg.Error("1!=" + fd.OurIndex);
-			result.A = (int[,])dg.ReadArrayNDim(typeof(int), 2);
+			result.A = (int[,])BinaryDeserializer.ReadArrayNDim(dg, typeof(int), 2);
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (2 != fd.OurIndex) throw dg.Error("2!=" + fd.OurIndex);
-			result.B = (string[,,])dg.ReadArrayNDim(typeof(string), 3);
+			result.B = (string[,,])BinaryDeserializer.ReadArrayNDim(dg, typeof(string), 3);
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (fd.OurIndex != ReaderClassDef.EOF) throw dg.Error("Unfinished object");
 		}
@@ -520,12 +520,12 @@ namespace YuzuGenBin
 			ReaderClassDef.FieldDef fd;
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (1 != fd.OurIndex) throw dg.Error("1!=" + fd.OurIndex);
-			dg.EnsureClassDef(typeof(global::YuzuTest.SamplePoint));
+			BinaryDeserializer.EnsureClassDef(dg, typeof(global::YuzuTest.SamplePoint));
 			result.A.X = d.Reader.ReadInt32();
 			result.A.Y = d.Reader.ReadInt32();
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (2 != fd.OurIndex) throw dg.Error("2!=" + fd.OurIndex);
-			dg.EnsureClassDef(typeof(global::YuzuTest.SamplePoint));
+			BinaryDeserializer.EnsureClassDef(dg, typeof(global::YuzuTest.SamplePoint));
 			result.B.X = d.Reader.ReadInt32();
 			result.B.Y = d.Reader.ReadInt32();
 			fd = def.Fields[d.Reader.ReadInt16()];
@@ -574,7 +574,7 @@ namespace YuzuGenBin
 				fd = def.Fields[d.Reader.ReadInt16()];
 			}
 			if (3 == fd.OurIndex) {
-				dg.EnsureClassDef(typeof(global::YuzuTest.SamplePoint));
+				BinaryDeserializer.EnsureClassDef(dg, typeof(global::YuzuTest.SamplePoint));
 				result.P.X = d.Reader.ReadInt32();
 				result.P.Y = d.Reader.ReadInt32();
 				fd = def.Fields[d.Reader.ReadInt16()];
@@ -616,7 +616,7 @@ namespace YuzuGenBin
 			if (tmp1 >= 0) {
 				result.E = new global::System.Collections.Generic.List<global::YuzuTest.SampleBase>();
 				while (--tmp1 >= 0) {
-					var tmp2 = (global::YuzuTest.SampleBase)dg.ReadObject<global::YuzuTest.SampleBase>();
+					var tmp2 = (global::YuzuTest.SampleBase)BinaryDeserializer.ReadObject<global::YuzuTest.SampleBase>(dg);
 					result.E.Add(tmp2);
 				}
 			}
@@ -666,7 +666,7 @@ namespace YuzuGenBin
 		{
 			var result = (global::YuzuTest.SampleWithNullFieldCompact)obj;
 			var dg = (BinaryDeserializerGen)d;
-			result.N = (global::YuzuTest.Sample1)dg.ReadObject<global::YuzuTest.Sample1>();
+			result.N = (global::YuzuTest.Sample1)BinaryDeserializer.ReadObject<global::YuzuTest.Sample1>(dg);
 		}
 
 		private static object Make_YuzuTest__SampleWithNullFieldCompact(BinaryDeserializer d, ReaderClassDef def)
@@ -703,7 +703,7 @@ namespace YuzuGenBin
 			ReaderClassDef.FieldDef fd;
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (1 != fd.OurIndex) throw dg.Error("1!=" + fd.OurIndex);
-			result.C = (global::YuzuTest.SampleNested.NestedClass)dg.ReadObject<global::YuzuTest.SampleNested.NestedClass>();
+			result.C = (global::YuzuTest.SampleNested.NestedClass)BinaryDeserializer.ReadObject<global::YuzuTest.SampleNested.NestedClass>(dg);
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (2 != fd.OurIndex) throw dg.Error("2!=" + fd.OurIndex);
 			result.E = (global::YuzuTest.SampleNested.NestedEnum)d.Reader.ReadInt32();
@@ -749,13 +749,13 @@ namespace YuzuGenBin
 			if (tmp1 >= 0) {
 				result.Children = new global::System.Collections.Generic.List<global::YuzuTest.SamplePerson>();
 				while (--tmp1 >= 0) {
-					var tmp2 = (global::YuzuTest.SamplePerson)dg.ReadObject<global::YuzuTest.SamplePerson>();
+					var tmp2 = (global::YuzuTest.SamplePerson)BinaryDeserializer.ReadObject<global::YuzuTest.SamplePerson>(dg);
 					result.Children.Add(tmp2);
 				}
 			}
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (4 != fd.OurIndex) throw dg.Error("4!=" + fd.OurIndex);
-			result.EyeColor = (global::YuzuTest.Color)dg.ReadObject<global::YuzuTest.Color>();
+			result.EyeColor = (global::YuzuTest.Color)BinaryDeserializer.ReadObject<global::YuzuTest.Color>(dg);
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (fd.OurIndex != ReaderClassDef.EOF) throw dg.Error("Unfinished object");
 		}
@@ -774,7 +774,7 @@ namespace YuzuGenBin
 			ReaderClassDef.FieldDef fd;
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (1 != fd.OurIndex) throw dg.Error("1!=" + fd.OurIndex);
-			result.I = (global::YuzuTest.ISample)dg.ReadObject<global::YuzuTest.ISample>();
+			result.I = (global::YuzuTest.ISample)BinaryDeserializer.ReadObject<global::YuzuTest.ISample>(dg);
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (fd.OurIndex != ReaderClassDef.EOF) throw dg.Error("Unfinished object");
 		}
@@ -840,7 +840,7 @@ namespace YuzuGenBin
 			if (tmp1 >= 0) {
 				result.A = new global::YuzuTest.SampleCollection<global::YuzuTest.ISample>();
 				while (--tmp1 >= 0) {
-					var tmp2 = (global::YuzuTest.ISample)dg.ReadObject<global::YuzuTest.ISample>();
+					var tmp2 = (global::YuzuTest.ISample)BinaryDeserializer.ReadObject<global::YuzuTest.ISample>(dg);
 					result.A.Add(tmp2);
 				}
 			}
@@ -864,7 +864,7 @@ namespace YuzuGenBin
 					result.C = new global::YuzuTest.SampleCollection<global::YuzuTest.SamplePoint>();
 					while (--tmp5 >= 0) {
 						var tmp6 = new global::YuzuTest.SamplePoint();
-						dg.EnsureClassDef(typeof(global::YuzuTest.SamplePoint));
+						BinaryDeserializer.EnsureClassDef(dg, typeof(global::YuzuTest.SamplePoint));
 						tmp6.X = d.Reader.ReadInt32();
 						tmp6.Y = d.Reader.ReadInt32();
 						result.C.Add(tmp6);
@@ -972,7 +972,7 @@ namespace YuzuGenBin
 			}
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (3 == fd.OurIndex) {
-				dg.ReadIntoObject<global::YuzuTest.Sample1>(result.M);
+				BinaryDeserializer.ReadIntoObject<global::YuzuTest.Sample1>(dg, result.M);
 				fd = def.Fields[d.Reader.ReadInt16()];
 			}
 			if (fd.OurIndex != ReaderClassDef.EOF) throw dg.Error("Unfinished object");
@@ -1032,11 +1032,11 @@ namespace YuzuGenBin
 		{
 			var result = (global::YuzuTest.SampleAoS.S)obj;
 			var dg = (BinaryDeserializerGen)d;
-			dg.EnsureClassDef(typeof(global::YuzuTest.SampleAoS.Color));
+			BinaryDeserializer.EnsureClassDef(dg, typeof(global::YuzuTest.SampleAoS.Color));
 			result.C.B = d.Reader.ReadByte();
 			result.C.G = d.Reader.ReadByte();
 			result.C.R = d.Reader.ReadByte();
-			dg.EnsureClassDef(typeof(global::YuzuTest.SampleAoS.Vertex));
+			BinaryDeserializer.EnsureClassDef(dg, typeof(global::YuzuTest.SampleAoS.Vertex));
 			result.V.X = d.Reader.ReadSingle();
 			result.V.Y = d.Reader.ReadSingle();
 			result.V.Z = d.Reader.ReadSingle();
@@ -1061,7 +1061,7 @@ namespace YuzuGenBin
 			if (tmp1 >= 0) {
 				result.A = new global::System.Collections.Generic.List<global::YuzuTest.SampleAoS.S>();
 				while (--tmp1 >= 0) {
-					var tmp2 = (global::YuzuTest.SampleAoS.S)dg.ReadObject<global::YuzuTest.SampleAoS.S>();
+					var tmp2 = (global::YuzuTest.SampleAoS.S)BinaryDeserializer.ReadObject<global::YuzuTest.SampleAoS.S>(dg);
 					result.A.Add(tmp2);
 				}
 			}
@@ -1081,7 +1081,7 @@ namespace YuzuGenBin
 			var result = new global::YuzuTest.SampleStructWithProps();
 			var dg = (BinaryDeserializerGen)d;
 			result.A = d.Reader.ReadInt32();
-			dg.EnsureClassDef(typeof(global::YuzuTest.SamplePoint));
+			BinaryDeserializer.EnsureClassDef(dg, typeof(global::YuzuTest.SamplePoint));
 			var tmp1 = new global::YuzuTest.SamplePoint();
 			tmp1.X = d.Reader.ReadInt32();
 			tmp1.Y = d.Reader.ReadInt32();
@@ -1178,7 +1178,7 @@ namespace YuzuGenBin
 			ReaderClassDef.FieldDef fd;
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (1 != fd.OurIndex) throw dg.Error("1!=" + fd.OurIndex);
-			result.B = (global::YuzuTest.SampleBase)dg.ReadObject<global::YuzuTest.SampleBase>();
+			result.B = (global::YuzuTest.SampleBase)BinaryDeserializer.ReadObject<global::YuzuTest.SampleBase>(dg);
 			fd = def.Fields[d.Reader.ReadInt16()];
 			if (fd.OurIndex != ReaderClassDef.EOF) throw dg.Error("Unfinished object");
 		}

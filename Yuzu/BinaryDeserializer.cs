@@ -1,7 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-
+using System.Text;
 using Yuzu.Deserializer;
 using Yuzu.Metadata;
 using Yuzu.Util;
@@ -10,48 +11,46 @@ namespace Yuzu.Binary
 {
 	public class BinaryDeserializer : AbstractReaderDeserializer
 	{
-		public static BinaryDeserializer Instance = new BinaryDeserializer();
-
 		public BinarySerializeOptions BinaryOptions = new BinarySerializeOptions();
 
 		public BinaryDeserializer() { InitReaders(); }
 
 		public override void Initialize() { }
 
-		private object ReadSByte() => Reader.ReadSByte();
-		private object ReadByte() => Reader.ReadByte();
-		private object ReadShort() => Reader.ReadInt16();
-		private object ReadUShort() => Reader.ReadUInt16();
-		private object ReadInt() => Reader.ReadInt32();
-		private object ReadUInt() => Reader.ReadUInt32();
-		private object ReadLong() => Reader.ReadInt64();
-		private object ReadULong() => Reader.ReadUInt64();
-		private object ReadBool() => Reader.ReadBoolean();
-		private object ReadChar() => Reader.ReadChar();
-		private object ReadFloat() => Reader.ReadSingle();
-		private object ReadDouble() => Reader.ReadDouble();
-		private object ReadDecimal() => Reader.ReadDecimal();
+		private static object ReadSByte(BinaryDeserializer d) => d.Reader.ReadSByte();
+		private static object ReadByte(BinaryDeserializer d) => d.Reader.ReadByte();
+		private static object ReadShort(BinaryDeserializer d) => d.Reader.ReadInt16();
+		private static object ReadUShort(BinaryDeserializer d) => d.Reader.ReadUInt16();
+		private static object ReadInt(BinaryDeserializer d) => d.Reader.ReadInt32();
+		private static object ReadUInt(BinaryDeserializer d) => d.Reader.ReadUInt32();
+		private static object ReadLong(BinaryDeserializer d) => d.Reader.ReadInt64();
+		private static object ReadULong(BinaryDeserializer d) => d.Reader.ReadUInt64();
+		private static object ReadBool(BinaryDeserializer d) => d.Reader.ReadBoolean();
+		private static object ReadChar(BinaryDeserializer d) => d.Reader.ReadChar();
+		private static object ReadFloat(BinaryDeserializer d) => d.Reader.ReadSingle();
+		private static object ReadDouble(BinaryDeserializer d) => d.Reader.ReadDouble();
+		private static object ReadDecimal(BinaryDeserializer d) => d.Reader.ReadDecimal();
 
-		private DateTime ReadDateTime() => DateTime.FromBinary(Reader.ReadInt64());
-		protected DateTimeOffset ReadDateTimeOffset()
+		private static DateTime ReadDateTime(BinaryDeserializer d) => DateTime.FromBinary(d.Reader.ReadInt64());
+		protected static DateTimeOffset ReadDateTimeOffset(BinaryDeserializer d)
 		{
-			var d = DateTime.FromBinary(Reader.ReadInt64());
-			var t = new TimeSpan(Reader.ReadInt64());
-			return new DateTimeOffset(d, t);
+			var dt = DateTime.FromBinary(d.Reader.ReadInt64());
+			var t = new TimeSpan(d.Reader.ReadInt64());
+			return new DateTimeOffset(dt, t);
 		}
-		private TimeSpan ReadTimeSpan() => new TimeSpan(Reader.ReadInt64());
+		private static TimeSpan ReadTimeSpan(BinaryDeserializer d) => new TimeSpan(d.Reader.ReadInt64());
 
-		private Guid ReadGuid() => new Guid(Reader.ReadBytes(16));
+		private static Guid ReadGuid(BinaryDeserializer d) => new Guid(d.Reader.ReadBytes(16));
 
-		private object ReadString()
+		private static object ReadString(BinaryDeserializer d)
 		{
-			var s = Reader.ReadString();
-			return s != string.Empty ? s : Reader.ReadBoolean() ? null : string.Empty;
+			var s = d.Reader.ReadString();
+			return s != string.Empty ? s : d.Reader.ReadBoolean() ? null : string.Empty;
 		}
 
-		private Type ReadType()
+		private static Type ReadType(System.IO.BinaryReader reader)
 		{
-			var rt = (RoughType)Reader.ReadByte();
+			var rt = (RoughType)reader.ReadByte();
 			if (RoughType.FirstAtom <= rt && rt <= RoughType.LastAtom) {
 				var t = RT.RoughTypeToType[(int)rt];
 				if (t != null) {
@@ -60,38 +59,40 @@ namespace Yuzu.Binary
 			}
 			switch (rt) {
 				case RoughType.Sequence:
-					return typeof(List<>).MakeGenericType(ReadType());
+					return typeof(List<>).MakeGenericType(ReadType(reader));
 				case RoughType.Mapping:
-					var k = ReadType();
-					var v = ReadType();
+					var k = ReadType(reader);
+					var v = ReadType(reader);
 					return typeof(Dictionary<,>).MakeGenericType(k, v);
 				case RoughType.Record:
 					return typeof(Record);
 				case RoughType.Nullable:
-					return typeof(Nullable<>).MakeGenericType(ReadType());
+					return typeof(Nullable<>).MakeGenericType(ReadType(reader));
 				default:
-					throw Error("Unknown rough type {0}", rt);
+					throw AbstractReaderDeserializer.Error(
+						new YuzuPosition(reader.BaseStream.Position),
+						"Unknown rough type {0}",
+						rt
+					);
 			}
 		}
 
-		private bool ReadCompatibleType(Type expectedType)
+		private static bool ReadCompatibleType(BinaryDeserializer d, Type expectedType)
 		{
 			if (expectedType.IsEnum) {
-				return ReadCompatibleType(Enum.GetUnderlyingType(expectedType));
+				return ReadCompatibleType(d, Enum.GetUnderlyingType(expectedType));
 			}
-
 			if (
 				!expectedType.IsArray
 				&& expectedType.IsRecord()
 				&& (!expectedType.Namespace?.StartsWith("System") ?? true)
 			) {
-				var sg = Meta.Get(expectedType, Options).Surrogate;
+				var sg = Meta.Get(expectedType, d.Options).Surrogate;
 				if (sg.SurrogateType != null && sg.FuncFrom != null) {
-					return ReadCompatibleType(sg.SurrogateType);
+					return ReadCompatibleType(d, sg.SurrogateType);
 				}
 			}
-
-			var rt = (RoughType)Reader.ReadByte();
+			var rt = (RoughType)d.Reader.ReadByte();
 			if (RoughType.FirstAtom <= rt && rt <= RoughType.LastAtom) {
 				var t = RT.RoughTypeToType[(int)rt];
 				if (t != null) {
@@ -100,279 +101,290 @@ namespace Yuzu.Binary
 			}
 			if (expectedType.IsArray) {
 				var r = expectedType.GetArrayRank();
-				return (
-					r == 1
-						? rt == RoughType.Sequence
-						: rt == RoughType.NDimArray && Reader.ReadByte() == r
-				) && ReadCompatibleType(expectedType.GetElementType());
+				return (r == 1
+					? rt == RoughType.Sequence
+					: rt == RoughType.NDimArray && d.Reader.ReadByte() == r
+				) && ReadCompatibleType(d, expectedType.GetElementType());
 			}
-
 			var idict = Utils.GetIDictionary(expectedType);
 			if (idict != null) {
 				if (rt != RoughType.Mapping) {
 					return false;
 				}
-
 				var g = expectedType.GetGenericArguments();
-				return ReadCompatibleType(g[0]) && ReadCompatibleType(g[1]);
+				return ReadCompatibleType(d, g[0]) && ReadCompatibleType(d, g[1]);
 			}
 			if (expectedType.IsGenericType && expectedType.GetGenericTypeDefinition() == typeof(Nullable<>)) {
-				return rt == RoughType.Nullable && ReadCompatibleType(expectedType.GetGenericArguments()[0]);
+				return rt == RoughType.Nullable && ReadCompatibleType(d, expectedType.GetGenericArguments()[0]);
 			}
-
 			var icoll = Utils.GetICollection(expectedType);
 			if (icoll != null) {
-				return rt == RoughType.Sequence && ReadCompatibleType(icoll.GetGenericArguments()[0]);
+				return rt == RoughType.Sequence && ReadCompatibleType(d, icoll.GetGenericArguments()[0]);
 			}
-
 			if (rt == RoughType.Record) {
 				return expectedType.IsRecord();
 			}
-
-			throw Error("Unknown rough type {0}", rt);
+			throw d.Error("Unknown rough type {0}", rt);
 		}
 
-		protected object ReadAny()
+		protected static object ReadAny(BinaryDeserializer d)
 		{
-			var t = ReadType();
-			return t == typeof(object) ? null : ReadValueFunc(t)();
+			var t = ReadType(d.Reader);
+			return t == typeof(object) ? null : d.ReadValueFunc(t)(d);
 		}
 
 		private void InitReaders()
 		{
-			readerCache = new Dictionary<Type, Func<object>>() {
-				{ typeof(sbyte), ReadSByte },
-				{ typeof(byte), ReadByte },
-				{ typeof(short), ReadShort },
-				{ typeof(ushort), ReadUShort },
-				{ typeof(int), ReadInt },
-				{ typeof(uint), ReadUInt },
-				{ typeof(long), ReadLong },
-				{ typeof(ulong), ReadULong },
-				{ typeof(bool), ReadBool },
-				{ typeof(char), ReadChar },
-				{ typeof(float), ReadFloat },
-				{ typeof(double), ReadDouble },
-				{ typeof(decimal), ReadDecimal },
-				{ typeof(DateTime), ReadDateTimeObj },
-				{ typeof(DateTimeOffset), ReadDateTimeOffsetObj },
-				{ typeof(TimeSpan), ReadTimeSpanObj },
-				{ typeof(Guid), ReadGuidObj },
-				{ typeof(string), ReadString },
-				{ typeof(object), ReadAny },
-				{ typeof(Record), ReadObject<object> },
-			};
-		}
-
-		private object ReadDateTimeObj() => ReadDateTime();
-		private object ReadDateTimeOffsetObj() => ReadDateTimeOffset();
-		private object ReadTimeSpanObj() => ReadTimeSpan();
-		private object ReadGuidObj() => ReadGuid();
-
-		protected void ReadIntoCollection<T>(ICollection<T> list)
-		{
-			var rf = ReadValueFunc(typeof(T));
-			var count = Reader.ReadInt32();
-			for (int i = 0; i < count; ++i) {
-				list.Add((T)rf());
+			if (readerCacheCache == null) {
+				readerCacheCache =
+					new Dictionary<CommonOptions, Dictionary<Type, Func<BinaryDeserializer, object>>>();
+			}
+			if (mergerCacheCache == null) {
+				mergerCacheCache =
+					new Dictionary<CommonOptions, Dictionary<Type, Action<BinaryDeserializer, object>>>();
+			}
+			if (readerCache == null) {
+				if (!readerCacheCache.TryGetValue(Options, out readerCache)) {
+					lock (readerCacheCache) {
+						if (!readerCacheCache.TryGetValue(Options, out readerCache)) {
+							readerCache = new Dictionary<Type, Func<BinaryDeserializer, object>>() {
+								{ typeof(sbyte), ReadSByte },
+								{ typeof(byte), ReadByte },
+								{ typeof(short), ReadShort },
+								{ typeof(ushort), ReadUShort },
+								{ typeof(int), ReadInt },
+								{ typeof(uint), ReadUInt },
+								{ typeof(long), ReadLong },
+								{ typeof(ulong), ReadULong },
+								{ typeof(bool), ReadBool },
+								{ typeof(char), ReadChar },
+								{ typeof(float), ReadFloat },
+								{ typeof(double), ReadDouble },
+								{ typeof(decimal), ReadDecimal },
+								{ typeof(DateTime), ReadDateTimeObj },
+								{ typeof(DateTimeOffset), ReadDateTimeOffsetObj },
+								{ typeof(TimeSpan), ReadTimeSpanObj },
+								{ typeof(Guid), ReadGuidObj },
+								{ typeof(string), ReadString },
+								{ typeof(object), ReadAny },
+								{ typeof(Record), ReadObject<object> },
+							};
+							readerCacheCache.Add(Options, readerCache);
+						}
+					}
+				}
+			}
+			if (mergerCache == null) {
+				if (!mergerCacheCache.TryGetValue(Options, out mergerCache)) {
+					lock (mergerCacheCache) {
+						if (!mergerCacheCache.TryGetValue(Options, out mergerCache)) {
+							mergerCacheCache.Add(
+								Options,
+								mergerCache = new Dictionary<Type, Action<BinaryDeserializer, object>>()
+							);
+						}
+					}
+				}
 			}
 		}
 
-		protected void ReadIntoCollectionNG<T>(object list) => ReadIntoCollection((ICollection<T>)list);
+		private static object ReadDateTimeObj(BinaryDeserializer d) => ReadDateTime(d);
+		private static object ReadDateTimeOffsetObj(BinaryDeserializer d) => ReadDateTimeOffset(d);
+		private static object ReadTimeSpanObj(BinaryDeserializer d) => ReadTimeSpan(d);
+		private static object ReadGuidObj(BinaryDeserializer d) => ReadGuid(d);
 
-		protected I ReadCollection<I, E>()
+		protected static void ReadIntoCollection<T>(BinaryDeserializer d, ICollection<T> list)
+		{
+			var rf = d.ReadValueFunc(typeof(T));
+			var count = d.Reader.ReadInt32();
+			for (int i = 0; i < count; ++i) {
+				list.Add((T)rf(d));
+			}
+		}
+
+		protected static void ReadIntoCollectionNG<T>(BinaryDeserializer d, object list)
+		{
+			ReadIntoCollection(d, (ICollection<T>)list);
+		}
+
+		protected static I ReadCollection<I, E>(BinaryDeserializer d)
 			where I : class, ICollection<E>, new()
 		{
-			var count = Reader.ReadInt32();
+			var count = d.Reader.ReadInt32();
 			if (count == -1) {
 				return null;
 			}
-
 			var list = new I();
-			var rf = ReadValueFunc(typeof(E));
+			var rf = d.ReadValueFunc(typeof(E));
 			for (int i = 0; i < count; ++i) {
-				list.Add((E)rf());
+				list.Add((E)rf(d));
 			}
-
 			return list;
 		}
 
-		protected List<T> ReadList<T>()
+		protected static List<T> ReadList<T>(BinaryDeserializer d)
 		{
-			var count = Reader.ReadInt32();
+			var count = d.Reader.ReadInt32();
 			if (count == -1) {
 				return null;
 			}
-
 			var list = new List<T>();
-			var rf = ReadValueFunc(typeof(T));
+			var rf = d.ReadValueFunc(typeof(T));
 			for (int i = 0; i < count; ++i) {
-				list.Add((T)rf());
+				list.Add((T)rf(d));
 			}
-
 			return list;
 		}
 
-		protected List<object> ReadListRecord(Func<object> readValue)
+		protected static List<object> ReadListRecord(BinaryDeserializer d, Func<BinaryDeserializer, object> readValue)
 		{
-			var count = Reader.ReadInt32();
+			var count = d.Reader.ReadInt32();
 			if (count == -1) {
 				return null;
 			}
-
 			var list = new List<object>();
 			for (int i = 0; i < count; ++i) {
-				list.Add(readValue());
+				list.Add(readValue(d));
 			}
-
 			return list;
 		}
 
-		protected void ReadIntoDictionary<K, V>(IDictionary<K, V> dict)
+		protected static void ReadIntoDictionary<K, V>(BinaryDeserializer d, IDictionary<K, V> dict)
 		{
-			var rk = ReadValueFunc(typeof(K));
-			var rv = ReadValueFunc(typeof(V));
-			var count = Reader.ReadInt32();
+			var rk = d.ReadValueFunc(typeof(K));
+			var rv = d.ReadValueFunc(typeof(V));
+			var count = d.Reader.ReadInt32();
 			for (int i = 0; i < count; ++i) {
-				dict.Add((K)rk(), (V)rv());
+				dict.Add((K)rk(d), (V)rv(d));
 			}
 		}
 
-		protected void ReadIntoDictionaryNG<K, V>(object dict) => ReadIntoDictionary((IDictionary<K, V>)dict);
-
-		protected Dictionary<K, V> ReadDictionary<K, V>()
+		protected static void ReadIntoDictionaryNG<K, V>(BinaryDeserializer d, object dict)
 		{
-			var count = Reader.ReadInt32();
+			ReadIntoDictionary(d, (IDictionary<K, V>)dict);
+		}
+
+		protected static Dictionary<K, V> ReadDictionary<K, V>(BinaryDeserializer d)
+		{
+			var count = d.Reader.ReadInt32();
 			if (count == -1) {
 				return null;
 			}
-
 			var dict = new Dictionary<K, V>();
-			var rk = ReadValueFunc(typeof(K));
-			var rv = ReadValueFunc(typeof(V));
+			var rk = d.ReadValueFunc(typeof(K));
+			var rv = d.ReadValueFunc(typeof(V));
 			for (int i = 0; i < count; ++i) {
-				var key = (K)rk();
-				var value = rv();
+				var key = (K)rk(d);
+				var value = rv(d);
 				if (value != null && !(value is V)) {
-					throw Error(
+					throw d.Error(
 						"Incompatible type for key {0}, expected: {1} but got {2}",
 						key.ToString(),
 						typeof(V),
 						value.GetType()
 					);
 				}
-
 				dict.Add(key, (V)value);
 			}
 			return dict;
 		}
 
-		protected I ReadIDictionary<I, K, V>()
+		protected static I ReadIDictionary<I, K, V>(BinaryDeserializer d)
 			where I : class, IDictionary<K, V>, new()
 		{
-			var count = Reader.ReadInt32();
+			var count = d.Reader.ReadInt32();
 			if (count == -1) {
 				return null;
 			}
-
 			var dict = new I();
-			var rk = ReadValueFunc(typeof(K));
-			var rv = ReadValueFunc(typeof(V));
+			var rk = d.ReadValueFunc(typeof(K));
+			var rv = d.ReadValueFunc(typeof(V));
 			for (int i = 0; i < count; ++i) {
-				var key = (K)rk();
-				var value = rv();
+				var key = (K)rk(d);
+				var value = rv(d);
 				if (!(value is V)) {
-					throw Error(
+					throw d.Error(
 						"Incompatible type for key {0}, expected: {1} but got {2}",
 						key.ToString(),
 						typeof(V),
 						value.GetType()
 					);
 				}
-
 				dict.Add(key, (V)value);
 			}
 			return dict;
 		}
 
-		protected Dictionary<K, object> ReadDictionaryRecord<K>(Func<object> readValue)
-		{
-			var count = Reader.ReadInt32();
+		protected static Dictionary<K, object> ReadDictionaryRecord<K>(
+			BinaryDeserializer d, Func<BinaryDeserializer, object> readValue
+		) {
+			var count = d.Reader.ReadInt32();
 			if (count == -1) {
 				return null;
 			}
-
 			var dict = new Dictionary<K, object>();
-			var rk = ReadValueFunc(typeof(K));
+			var rk = d.ReadValueFunc(typeof(K));
 			for (int i = 0; i < count; ++i) {
-				dict.Add((K)rk(), readValue());
+				dict.Add((K)rk(d), readValue(d));
 			}
-
 			return dict;
 		}
 
-		protected T[] ReadArray<T>()
+		protected static T[] ReadArray<T>(BinaryDeserializer d)
 		{
-			var count = Reader.ReadInt32();
+			var count = d.Reader.ReadInt32();
 			if (count == -1) {
 				return null;
 			}
-
-			var rf = ReadValueFunc(typeof(T));
+			var rf = d.ReadValueFunc(typeof(T));
 			var array = new T[count];
 			for (int i = 0; i < count; ++i) {
-				array[i] = (T)rf();
+				array[i] = (T)rf(d);
 			}
-
 			return array;
 		}
 
-		protected Array ReadArrayNDim(Type elementType, int rank)
+		protected static Array ReadArrayNDim(BinaryDeserializer d, Type elementType, int rank)
 		{
-			return ReadArrayNDim(elementType, rank, ReadValueFunc(elementType));
+			return ReadArrayNDim(d, elementType, rank, d.ReadValueFunc(elementType));
 		}
 
-		protected Array ReadArrayNDim(Type elementType, int rank, Func<object> readElemFunc)
-		{
-			int lengthOrNull = Reader.ReadInt32();
+		protected static Array ReadArrayNDim(
+			BinaryDeserializer d, Type elementType, int rank, Func<BinaryDeserializer, object> readElemFunc
+		) {
+			int lengthOrNull = d.Reader.ReadInt32();
 			if (lengthOrNull == -1) {
 				return null;
 			}
-
 			var lbs = new int[rank];
 			var ubs = new int[rank];
 			var lengths = new int[rank];
 			lengths[0] = lengthOrNull;
 			for (int dim = 1; dim < rank; ++dim) {
-				lengths[dim] = Reader.ReadInt32();
+				lengths[dim] = d.Reader.ReadInt32();
 			}
-
-			if (Reader.ReadBoolean()) {
+			if (d.Reader.ReadBoolean()) {
 				for (int dim = 0; dim < rank; ++dim) {
-					lbs[dim] = Reader.ReadInt32();
+					lbs[dim] = d.Reader.ReadInt32();
 				}
 			}
 			for (int dim = 0; dim < rank; ++dim) {
 				ubs[dim] = lengths[dim] + lbs[dim] - 1;
 			}
-
 			var array = Array.CreateInstance(elementType, lengths, lbs);
 			if (array.Length == 0) {
 				return array;
 			}
-
 			var indices = (int[])lbs.Clone();
 			for (int dim = rank - 1; ;) {
-				array.SetValue(readElemFunc(), indices);
+				array.SetValue(readElemFunc(d), indices);
 				if (indices[dim] == ubs[dim]) {
 					for (; dim >= 0 && indices[dim] == ubs[dim]; --dim) {
 						indices[dim] = lbs[dim];
 					}
-
 					if (dim < 0) {
 						break;
 					}
-
 					++indices[dim];
 					dim = rank - 1;
 				} else {
@@ -382,16 +394,24 @@ namespace Yuzu.Binary
 			return array;
 		}
 
-		protected Action<T> ReadAction<T>() => GetAction<T>(Reader.ReadString());
+		protected static Action<T> ReadAction<T>(BinaryDeserializer d)
+		{
+			return GetActionStatic<T>(d, d.Reader.ReadString());
+		}
 
 		// Zeroth element corresponds to 'null'.
-		private List<ReaderClassDef> classDefs = new List<ReaderClassDef> { new ReaderClassDef() };
+		private List<ReaderClassDef> externalClassDefs = new List<ReaderClassDef>();
+		private readonly List<ReaderClassDef> internalClassDefs = new List<ReaderClassDef> { new ReaderClassDef() };
 
 		protected virtual void PrepareReaders(ReaderClassDef def) => def.ReadFields = ReadFields;
 
-		public void ClearClassIds() => classDefs = new List<ReaderClassDef> { new ReaderClassDef() };
+		public void ClearClassIds()
+		{
+			internalClassDefs.Clear();
+			internalClassDefs.Add(new ReaderClassDef());
+		}
 
-		private ReaderClassDef GetClassDefUnknown(string typeName)
+		private static ReaderClassDef GetClassDefUnknown(BinaryDeserializer d, string typeName)
 		{
 			var result = new ReaderClassDef {
 				Meta = Meta.Unknown,
@@ -401,85 +421,85 @@ namespace Yuzu.Binary
 					return obj;
 				},
 			};
-			var theirCount = Reader.ReadInt16();
+			var theirCount = d.Reader.ReadInt16();
 			for (int theirIndex = 0; theirIndex < theirCount; ++theirIndex) {
-				var theirName = Reader.ReadString();
-				var t = ReadType();
-				var rf = ReadValueFunc(t);
+				var theirName = d.Reader.ReadString();
+				var t = ReadType(d.Reader);
+				var rf = d.ReadValueFunc(t);
 				result.Fields.Add(new ReaderClassDef.FieldDef {
 					Name = theirName,
 					Type = t,
 					OurIndex = -1,
-					ReadFunc = obj => ((YuzuUnknown)obj).Fields[theirName] = rf(),
+					ReadFunc = (d, obj) => ((YuzuUnknown)obj).Fields[theirName] = rf(d),
 				});
 			}
-			classDefs.Add(result);
+			d.internalClassDefs.Add(result);
 			return result;
 		}
 
-		private void AddUnknownFieldDef(ReaderClassDef def, string fieldName, string typeName)
-		{
-			if (!Options.AllowUnknownFields) {
-				throw Error("New field {0} for class {1}", fieldName, typeName);
+		private static void AddUnknownFieldDef(
+			BinaryDeserializer d, ReaderClassDef def, string fieldName, string typeName
+		) {
+			if (!d.Options.AllowUnknownFields) {
+				throw d.Error("New field {0} for class {1}", fieldName, typeName);
 			}
 			var fd = new ReaderClassDef.FieldDef {
 				Name = fieldName,
 				OurIndex = -1,
-				Type = ReadType(),
+				Type = ReadType(d.Reader),
 			};
-			var rf = ReadValueFunc(fd.Type);
+			var rf = d.ReadValueFunc(fd.Type);
 			if (def.Meta.GetUnknownStorage == null) {
-				fd.ReadFunc = obj => rf();
+				fd.ReadFunc = (d, obj) => rf(d);
 			} else {
-				fd.ReadFunc = obj => def.Meta.GetUnknownStorage(obj).Add(fieldName, rf());
+				fd.ReadFunc = (d, obj) => def.Meta.GetUnknownStorage(obj).Add(fieldName, rf(d));
 			}
-
 			def.Fields.Add(fd);
 		}
 
-		private Action<object> MakeReadOrMergeFunc(Meta.Item yi)
+		private Action<BinaryDeserializer, object> MakeReadOrMergeFunc(Meta.Item yi)
 		{
 			if (yi.SetValue != null) {
 				var rf = ReadValueFunc(yi.Type);
-				return obj => yi.SetValue(obj, rf());
+				return (d, obj) => yi.SetValue(obj, rf(d));
 			} else {
 				var mf = MergeValueFunc(yi.Type);
-				return obj => mf(yi.GetValue(obj));
+				return (d, obj) => mf(d, yi.GetValue(obj));
 			}
 		}
 
-		private void InitClassDef(ReaderClassDef def, string typeName)
+		private static void InitClassDef(BinaryDeserializer d, ReaderClassDef def, string typeName)
 		{
 			var ourCount = def.Meta.Items.Count;
-			var theirCount = Reader.ReadInt16();
+			var theirCount = d.Reader.ReadInt16();
 			int ourIndex = 0, theirIndex = 0;
 			var theirName = string.Empty;
 			while (ourIndex < ourCount && theirIndex < theirCount) {
 				var yi = def.Meta.Items[ourIndex];
-				var ourName = yi.Tag(Options);
+				var ourName = yi.Tag(d.Options);
 				if (theirName == string.Empty) {
-					theirName = Reader.ReadString();
+					theirName = d.Reader.ReadString();
 				}
-
 				var cmp = string.CompareOrdinal(ourName, theirName);
 				if (cmp < 0) {
 					if (!yi.IsOptional) {
-						throw Error("Missing required field {0} for class {1}", ourName, typeName);
+						throw d.Error("Missing required field {0} for class {1}", ourName, typeName);
 					}
 					ourIndex += 1;
-				} else if (cmp > 0) {
-					AddUnknownFieldDef(def, theirName, typeName);
+				}
+				else if (cmp > 0) {
+					AddUnknownFieldDef(d, def, theirName, typeName);
 					theirIndex += 1;
 					theirName = string.Empty;
 				} else {
-					if (!ReadCompatibleType(yi.Type)) {
-						throw Error($"Incompatible type for field {ourName}, expected {yi.Type}");
+					if (!ReadCompatibleType(d, yi.Type)) {
+						throw d.Error($"Incompatible type for field {ourName}, expected {yi.Type}");
 					}
 					def.Fields.Add(new ReaderClassDef.FieldDef {
 						Name = theirName,
 						OurIndex = ourIndex + 1,
 						Type = yi.Type,
-						ReadFunc = MakeReadOrMergeFunc(yi),
+						ReadFunc = d.MakeReadOrMergeFunc(yi),
 					});
 					ourIndex += 1;
 					theirIndex += 1;
@@ -488,48 +508,47 @@ namespace Yuzu.Binary
 			}
 			for (; ourIndex < ourCount; ++ourIndex) {
 				var yi = def.Meta.Items[ourIndex];
-				var ourName = yi.Tag(Options);
+				var ourName = yi.Tag(d.Options);
 				if (!yi.IsOptional) {
-					throw Error("Missing required field {0} for class {1}", ourName, typeName);
+					throw d.Error("Missing required field {0} for class {1}", ourName, typeName);
 				}
 			}
 			for (; theirIndex < theirCount; ++theirIndex) {
 				if (theirName == string.Empty) {
-					theirName = Reader.ReadString();
+					theirName = d.Reader.ReadString();
 				}
-				AddUnknownFieldDef(def, theirName, typeName);
+				AddUnknownFieldDef(d, def, theirName, typeName);
 				theirName = string.Empty;
 			}
 		}
 
-		private void InitClassDefUnordered(ReaderClassDef def, string typeName)
+		private static void InitClassDefUnordered(BinaryDeserializer d, ReaderClassDef def, string typeName)
 		{
-			var theirCount = Reader.ReadInt16();
+			var theirCount = d.Reader.ReadInt16();
 			int ourIndex = 0, requiredCountActiual = 0;
 			for (int theirIndex = 0; theirIndex < theirCount; ++theirIndex) {
-				var theirName = Reader.ReadString();
+				var theirName = d.Reader.ReadString();
 				if (def.Meta.TagToItem.TryGetValue(theirName, out Meta.Item yi)) {
-					if (!ReadCompatibleType(yi.Type)) {
-						throw Error(
+					if (!ReadCompatibleType(d, yi.Type)) {
+						throw d.Error(
 							"Incompatible type for field {0}, expected {1}", theirName, yi.Type);
 					}
-
 					def.Fields.Add(new ReaderClassDef.FieldDef {
 						Name = theirName,
 						OurIndex = def.Meta.Items.IndexOf(yi) + 1,
 						Type = yi.Type,
-						ReadFunc = MakeReadOrMergeFunc(yi),
+						ReadFunc = d.MakeReadOrMergeFunc(yi),
 					});
 					ourIndex += 1;
 					if (!yi.IsOptional) {
 						requiredCountActiual += 1;
 					}
 				} else {
-					AddUnknownFieldDef(def, theirName, typeName);
+					AddUnknownFieldDef(d, def, theirName, typeName);
 				}
 			}
 			if (requiredCountActiual != def.Meta.RequiredCount) {
-				throw Error(
+				throw d.Error(
 					"Expected {0} required field(s), but found {1} for class {2}",
 					def.Meta.RequiredCount,
 					requiredCountActiual,
@@ -538,30 +557,79 @@ namespace Yuzu.Binary
 			}
 		}
 
-		private ReaderClassDef GetClassDef(short classId)
+		private static ReaderClassDef GetClassDef(BinaryDeserializer d, short classId)
 		{
-			if (classId < classDefs.Count) {
-				return classDefs[classId];
+			if (classId < 0) {
+				classId = (short)(-classId - 1);
+				if (classId >= d.externalClassDefs.Count) {
+					throw new YuzuException($"Unknown external class id {-(classId + 1)}.");
+				}
+				var r = d.externalClassDefs[classId];
+				if (r.CompletionRecord != null) {
+					if (!TryCompleteClassDef(d, r, out var e)) {
+						throw new System.InvalidOperationException(
+							$"Couldn't complete class def for class id {classId}", e
+						);
+					}
+				}
+				return r;
 			}
-			if (classId > classDefs.Count) {
-				throw Error("Bad classId: {0}", classId);
+			if (classId < d.internalClassDefs.Count) {
+				return d.internalClassDefs[classId];
 			}
-			var typeName = Reader.ReadString();
-			var classType = Meta.GetTypeByReadAlias(typeName, Options) ?? TypeSerializer.Deserialize(typeName);
+			if (classId > d.internalClassDefs.Count) {
+				throw d.Error("Bad classId: {0}", classId);
+			}
+			var typeName = d.Reader.ReadString();
+			var classType = Meta.GetTypeByReadAlias(typeName, d.Options) ?? TypeSerializer.Deserialize(typeName);
 			if (classType == null) {
-				return GetClassDefUnknown(typeName);
+				return GetClassDefUnknown(d, typeName);
 			}
 			var result = new ReaderClassDef {
-				Meta = Meta.Get(classType, Options),
+				Meta = Meta.Get(classType, d.Options),
 			};
-			PrepareReaders(result);
-			if (BinaryOptions.Unordered) {
-				InitClassDefUnordered(result, typeName);
+			d.PrepareReaders(result);
+			if (d.BinaryOptions.Unordered) {
+				InitClassDefUnordered(d, result, typeName);
 			} else {
-				InitClassDef(result, typeName);
+				InitClassDef(d, result, typeName);
 			}
-			classDefs.Add(result);
+			d.internalClassDefs.Add(result);
 			return result;
+		}
+
+		internal static bool TryCompleteClassDef(
+			BinaryDeserializer d, ReaderClassDef classDef, out System.Exception exception
+		) {
+			exception = null;
+			var previousReader = d.Reader;
+			try {
+				using var ms = new System.IO.MemoryStream(classDef.CompletionRecord.Buffer);
+				using var reader = new System.IO.BinaryReader(ms);
+				d.Reader = reader;
+				var typeName = d.Reader.ReadString();
+				var classType = Meta.GetTypeByReadAlias(typeName, d.Options) ?? TypeSerializer.Deserialize(typeName);
+				if (classType == null) {
+					throw d.Error($"Unknown class def type '{typeName}' in external cache is not supported.");
+				}
+				classDef.Meta = Meta.Get(classType, d.Options);
+				d.PrepareReaders(classDef);
+				if (d.BinaryOptions.Unordered) {
+					InitClassDefUnordered(d, classDef, typeName);
+				} else {
+					InitClassDef(d, classDef, typeName);
+				}
+				classDef.CompletionRecord = null;
+			} catch (System.Exception e) {
+				exception = e;
+				System.Console.WriteLine(
+					$"warning: failed to complete class def {classDef.CompletionRecord.TypeName}:\n{e}"
+				);
+				return false;
+			} finally {
+				d.Reader = previousReader;
+			}
+			return true;
 		}
 
 		private static void ReadFields(BinaryDeserializer d, ReaderClassDef def, object obj)
@@ -571,7 +639,7 @@ namespace Yuzu.Binary
 			try {
 				if (def.Meta.IsCompact) {
 					for (int i = 1; i < def.Fields.Count; ++i) {
-						def.Fields[i].ReadFunc(obj);
+						def.Fields[i].ReadFunc(d, obj);
 					}
 				} else {
 					if (def.Meta.GetUnknownStorage != null) {
@@ -588,7 +656,7 @@ namespace Yuzu.Binary
 							}
 							throw d.Error($"Expected field '{i}' ({fd.Name}), but found '{actualIndex}'.");
 						}
-						fd.ReadFunc(obj);
+						fd.ReadFunc(d, obj);
 						actualIndex = d.Reader.ReadInt16();
 					}
 					if (actualIndex != 0) {
@@ -601,327 +669,313 @@ namespace Yuzu.Binary
 			def.Meta.AfterDeserialization.Run(obj);
 		}
 
-		protected void ReadIntoObject<T>(object obj)
+		protected static void ReadIntoObject<T>(BinaryDeserializer d, object obj)
 		{
-			var classId = Reader.ReadInt16();
+			var classId = d.Reader.ReadInt16();
 			if (classId == 0) {
-				throw Error("Unable to read null into object.");
+				throw d.Error("Unable to read null into object.");
 			}
-			var def = GetClassDef(classId);
+			var def = GetClassDef(d, classId);
 			var expectedType = obj.GetType();
 			if (
-				expectedType != def.Meta.Type
-				&& (!Meta.Get(expectedType, Options).AllowReadingFromAncestor
-					|| expectedType.BaseType != def.Meta.Type
-				)
+				expectedType != def.Meta.Type &&
+				(!Meta.Get(expectedType, d.Options).AllowReadingFromAncestor || expectedType.BaseType != def.Meta.Type)
 			) {
-				throw Error($"Unable to read type {def.Meta.Type} into {expectedType}.");
+				throw d.Error($"Unable to read type {def.Meta.Type} into {expectedType}.");
 			}
-			def.ReadFields(this, def, obj);
+			def.ReadFields(d, def, obj);
 		}
 
-		protected void ReadIntoObjectUnchecked<T>(object obj)
+		protected static void ReadIntoObjectUnchecked<T>(BinaryDeserializer d, object obj)
 		{
-			var classId = Reader.ReadInt16();
-			var def = GetClassDef(classId);
-			def.ReadFields(this, def, obj);
+			var classId = d.Reader.ReadInt16();
+			var def = GetClassDef(d, classId);
+			def.ReadFields(d, def, obj);
 		}
 
-		private object MakeAndCheckAssignable<T>(ReaderClassDef def)
+		private static object MakeAndCheckAssignable<T>(BinaryDeserializer d, ReaderClassDef def)
 		{
 			var srcType = def.Meta.Type;
 			var dstType = typeof(T);
 			if (srcType != typeof(YuzuUnknown) && !dstType.IsAssignableFrom(srcType)) {
-				throw Error($"Unable to assign type \"{srcType.ToString()}\" to \"{dstType}\".");
+				throw d.Error($"Unable to assign type \"{srcType.ToString()}\" to \"{dstType}\".");
 			}
-
-			var result = def.Make?.Invoke(this, def);
+			var result = def.Make?.Invoke(d, def);
 			if (srcType == typeof(YuzuUnknown) && !dstType.IsInstanceOfType(result)) {
-				throw Error($"Unable to assign type \"{((YuzuUnknownBinary)result).ClassTag}\" to \"{dstType}\".");
+				throw d.Error($"Unable to assign type \"{((YuzuUnknownBinary)result).ClassTag}\" to \"{dstType}\".");
 			}
-
 			return result;
 		}
 
-		protected object ReadObject<T>()
+		protected static object ReadObject<T>(BinaryDeserializer d)
 			where T : class
 		{
-			var classId = Reader.ReadInt16();
+			var classId = d.Reader.ReadInt16();
 			if (classId == 0) {
 				return null;
 			}
-
-			var def = GetClassDef(classId);
-			var result = MakeAndCheckAssignable<T>(def);
+			var def = GetClassDef(d, classId);
+			var result = MakeAndCheckAssignable<T>(d, def);
 			if (result == null) {
 				result = def.Meta.Factory();
-				def.ReadFields(this, def, result);
+				def.ReadFields(d, def, result);
 			}
 			return result;
 		}
 
-		protected object ReadObjectUnchecked<T>()
+		protected static object ReadObjectUnchecked<T>(BinaryDeserializer d)
 			where T : class
 		{
-			var classId = Reader.ReadInt16();
+			var classId = d.Reader.ReadInt16();
 			if (classId == 0) {
 				return null;
 			}
-
-			var def = GetClassDef(classId);
+			var def = GetClassDef(d, classId);
 			if (def.Make != null) {
-				return def.Make(this, def);
+				return def.Make(d, def);
 			}
-
 			var result = def.Meta.Factory();
-			def.ReadFields(this, def, result);
+			def.ReadFields(d, def, result);
 			return result;
 		}
 
-		protected void EnsureClassDef(Type t)
+		protected static void EnsureClassDef(BinaryDeserializer d, Type t)
 		{
-			var def = GetClassDef(Reader.ReadInt16());
+			var def = GetClassDef(d, d.Reader.ReadInt16());
 			if (def.Meta.Type != t) {
-				throw Error($"Expected type {def.Meta.Type}, but found {t}.");
+				throw d.Error($"Expected type {def.Meta.Type}, but found {t}.");
 			}
 		}
 
-		protected object ReadStruct<T>()
+		protected static object ReadStruct<T>(BinaryDeserializer d)
 			where T : struct
 		{
-			var classId = Reader.ReadInt16();
+			var classId = d.Reader.ReadInt16();
 			if (classId == 0) {
 				return null;
 			}
-
-			var def = GetClassDef(classId);
-			var result = MakeAndCheckAssignable<T>(def);
+			var def = GetClassDef(d, classId);
+			var result = MakeAndCheckAssignable<T>(d, def);
 			if (result == null) {
 				result = def.Meta.Factory();
-				def.ReadFields(this, def, result);
+				def.ReadFields(d, def, result);
 			}
 			return result;
 		}
 
-		protected void ReadIntoStruct<T>(ref T s)
+		protected static void ReadIntoStruct<T>(BinaryDeserializer d, ref T s)
 			where T : struct
 		{
-			var classId = Reader.ReadInt16();
+			var classId = d.Reader.ReadInt16();
 			if (classId == 0) {
 				return;
 			}
-
-			var def = GetClassDef(classId);
-			var result = MakeAndCheckAssignable<T>(def);
+			var def = GetClassDef(d, classId);
+			var result = MakeAndCheckAssignable<T>(d, def);
 			if (result == null) {
 				result = def.Meta.Factory();
-				def.ReadFields(this, def, result);
+				def.ReadFields(d, def, result);
 			}
 			s = (T)result;
 		}
 
-		protected object ReadStructUnchecked<T>()
+		protected static object ReadStructUnchecked<T>(BinaryDeserializer d)
 			where T : struct
 		{
-			var classId = Reader.ReadInt16();
+			var classId = d.Reader.ReadInt16();
 			if (classId == 0) {
 				return null;
 			}
-
-			var def = GetClassDef(classId);
+			var def = GetClassDef(d, classId);
 			if (def.Make != null) {
-				return def.Make(this, def);
+				return def.Make(d, def);
 			}
-
 			var result = def.Meta.Factory();
-			def.ReadFields(this, def, result);
+			def.ReadFields(d, def, result);
 			return result;
 		}
 
-		private Dictionary<Type, Func<object>> readerCache;
-		private readonly Dictionary<Type, Action<object>> mergerCache = new Dictionary<Type, Action<object>>();
+		private static Dictionary<CommonOptions, Dictionary<Type, Func<BinaryDeserializer, object>>> readerCacheCache =
+			new Dictionary<CommonOptions, Dictionary<Type, Func<BinaryDeserializer, object>>>();
 
-		private Func<object> ReadValueFunc(Type t)
+		private static Dictionary<CommonOptions, Dictionary<Type, Action<BinaryDeserializer, object>>>
+			mergerCacheCache =
+			new Dictionary<CommonOptions, Dictionary<Type, Action<BinaryDeserializer, object>>>();
+
+		private Dictionary<Type, Func<BinaryDeserializer, object>> readerCache;
+		private Dictionary<Type, Action<BinaryDeserializer, object>> mergerCache;
+
+		private Func<BinaryDeserializer, object> ReadValueFunc(Type t)
 		{
-			if (readerCache.TryGetValue(t, out Func<object> f)) {
+			if (readerCache.TryGetValue(t, out Func<BinaryDeserializer, object> f)) {
 				return f;
 			}
-			return readerCache[t] = MakeReaderFunc(t);
+			lock (readerCache) {
+				if (readerCache.TryGetValue(t, out f)) {
+					return f;
+				}
+				return readerCache[t] = MakeReaderFunc(this, t);
+			}
 		}
 
-		private Action<object> MergeValueFunc(Type t)
+		private Action<BinaryDeserializer, object> MergeValueFunc(Type t)
 		{
-			if (mergerCache.TryGetValue(t, out Action<object> f)) {
+			if (mergerCache.TryGetValue(t, out Action<BinaryDeserializer, object> f)) {
 				return f;
 			}
-			return mergerCache[t] = MakeMergerFunc(t);
+			lock (mergerCache) {
+				if (mergerCache.TryGetValue(t, out f)) {
+					return f;
+				}
+				return mergerCache[t] = MakeMergerFunc(this, t);
+			}
 		}
 
-		private Func<object> MakeEnumReaderFunc(Type t)
+		private static Func<BinaryDeserializer, object> MakeEnumReaderFunc(Type t)
 		{
 			var ut = Enum.GetUnderlyingType(t);
 			if (ut == typeof(sbyte)) {
-				return () => Enum.ToObject(t, Reader.ReadSByte());
+				return d => Enum.ToObject(t, d.Reader.ReadSByte());
 			}
-
 			if (ut == typeof(byte)) {
-				return () => Enum.ToObject(t, Reader.ReadByte());
+				return d => Enum.ToObject(t, d.Reader.ReadByte());
 			}
-
 			if (ut == typeof(short)) {
-				return () => Enum.ToObject(t, Reader.ReadInt16());
+				return d => Enum.ToObject(t, d.Reader.ReadInt16());
 			}
-
 			if (ut == typeof(ushort)) {
-				return () => Enum.ToObject(t, Reader.ReadUInt16());
+				return d => Enum.ToObject(t, d.Reader.ReadUInt16());
 			}
-
 			if (ut == typeof(int)) {
-				return () => Enum.ToObject(t, Reader.ReadInt32());
+				return d => Enum.ToObject(t, d.Reader.ReadInt32());
 			}
-
 			if (ut == typeof(uint)) {
-				return () => Enum.ToObject(t, Reader.ReadUInt32());
+				return d => Enum.ToObject(t, d.Reader.ReadUInt32());
 			}
-
 			if (ut == typeof(long)) {
-				return () => Enum.ToObject(t, Reader.ReadInt64());
+				return d => Enum.ToObject(t, d.Reader.ReadInt64());
 			}
-
 			if (ut == typeof(ulong)) {
-				return () => Enum.ToObject(t, Reader.ReadUInt64());
+				return d => Enum.ToObject(t, d.Reader.ReadUInt64());
 			}
-
 			throw new YuzuException();
 		}
 
-		private Func<object> ReadDataStructureOfRecord(Type t)
+		private static Func<BinaryDeserializer, object> ReadDataStructureOfRecord(BinaryDeserializer d, Type t)
 		{
 			if (t == typeof(Record)) {
 				return ReadObject<object>;
 			}
-
 			if (!t.IsGenericType) {
 				return null;
 			}
-
 			var g = t.GetGenericTypeDefinition();
 			if (g == typeof(List<>)) {
-				var readValue = ReadDataStructureOfRecord(t.GetGenericArguments()[0]);
+				var readValue = ReadDataStructureOfRecord(d, t.GetGenericArguments()[0]);
 				if (readValue == null) {
 					return null;
 				}
-
-				return () => ReadListRecord(readValue);
+				return d => ReadListRecord(d, readValue);
 			}
 			if (g == typeof(Dictionary<,>)) {
-				var readValue = ReadDataStructureOfRecord(t.GetGenericArguments()[1]);
+				var readValue = ReadDataStructureOfRecord(d, t.GetGenericArguments()[1]);
 				if (readValue == null) {
 					return null;
 				}
-
-				var d = (Func<Func<object>, object>)Delegate.CreateDelegate(
-					typeof(Func<Func<object>, object>),
-					this,
-					Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadDictionaryRecord), t)
+				var rdrd = (Func<BinaryDeserializer, Func<BinaryDeserializer, object>, object>)Delegate.CreateDelegate(
+					typeof(Func<BinaryDeserializer, Func<BinaryDeserializer, object>, object>),
+					Utils.GetPrivateCovariantGenericStatic(d.GetType(), nameof(ReadDictionaryRecord), t)
 				);
-				return () => d(readValue);
+				return d => rdrd(d, readValue);
 			}
 			return null;
 		}
 
-		private Func<object> MakeReaderFunc(Type t)
+		private static Func<BinaryDeserializer, object> MakeReaderFunc(BinaryDeserializer d, Type t)
 		{
 			if (t.IsEnum) {
 				return MakeEnumReaderFunc(t);
 			}
-
 			if (t.IsGenericType) {
-				var readRecord = ReadDataStructureOfRecord(t);
+				var readRecord = ReadDataStructureOfRecord(d, t);
 				if (readRecord != null) {
 					return readRecord;
 				}
-
 				var g = t.GetGenericTypeDefinition();
 				if (g == typeof(List<>)) {
-					return MakeDelegate(
-						Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadList), t));
+					return MakeDelegateStatic(
+						Utils.GetPrivateCovariantGenericStatic(d.GetType(), nameof(ReadList), t));
 				}
-
 				if (g == typeof(Dictionary<,>)) {
-					return MakeDelegate(
-						Utils.GetPrivateCovariantGenericAll(GetType(), nameof(ReadDictionary), t));
+					return MakeDelegateStatic(
+						Utils.GetPrivateCovariantGenericAllStatic(d.GetType(), nameof(ReadDictionary), t));
 				}
-
 				if (g == typeof(Action<>)) {
-					return MakeDelegate(Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadAction), t));
+					return MakeDelegateStatic(
+						Utils.GetPrivateCovariantGenericStatic(d.GetType(), nameof(ReadAction), t)
+					);
 				}
-
 				if (g == typeof(Nullable<>)) {
-					var r = ReadValueFunc(t.GetGenericArguments()[0]);
-					return () => Reader.ReadBoolean() ? null : r();
+					var r = d.ReadValueFunc(t.GetGenericArguments()[0]);
+					return d => d.Reader.ReadBoolean() ? null : r(d);
 				}
 			}
 			if (t.IsArray) {
 				if (t.GetArrayRank() > 1) {
 					var et = t.GetElementType();
-					var rf = ReadValueFunc(et);
+					var rf = d.ReadValueFunc(et);
 					var rank = t.GetArrayRank();
-					return () => ReadArrayNDim(et, rank, rf);
+					return d => ReadArrayNDim(d, et, rank, rf);
 				}
-				return MakeDelegate(Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadArray), t));
+				return MakeDelegateStatic(Utils.GetPrivateCovariantGenericStatic(d.GetType(), nameof(ReadArray), t));
 			}
-
-			var meta = Meta.Get(t, Options);
+			var meta = Meta.Get(t, d.Options);
 			var sg = meta.Surrogate;
 			if (sg.SurrogateType != null && sg.FuncFrom != null) {
-				var rf = ReadValueFunc(sg.SurrogateType);
-				return () => sg.FuncFrom(rf());
+				var rf = d.ReadValueFunc(sg.SurrogateType);
+				return d => sg.FuncFrom(rf(d));
 			}
-
 			var idict = Utils.GetIDictionary(t);
 			if (idict != null) {
 				var kv = idict.GetGenericArguments();
-				return MakeDelegate(Utils.GetPrivateGeneric(GetType(), nameof(ReadIDictionary), t, kv[0], kv[1]));
+				return MakeDelegateStatic(
+					Utils.GetPrivateGenericStatic(d.GetType(), nameof(ReadIDictionary), t, kv[0], kv[1])
+				);
 			}
-
 			var icoll = Utils.GetICollection(t);
 			if (icoll != null) {
 				var elemType = icoll.GetGenericArguments()[0];
-				return MakeDelegate(Utils.GetPrivateGeneric(GetType(), nameof(ReadCollection), t, elemType));
+				return MakeDelegateStatic(
+					Utils.GetPrivateGenericStatic(d.GetType(), nameof(ReadCollection), t, elemType)
+				);
 			}
-
 			if (t.IsClass || t.IsInterface) {
-				return MakeDelegate(Utils.GetPrivateGeneric(GetType(), nameof(ReadObject), t));
+				return MakeDelegateStatic(Utils.GetPrivateGenericStatic(d.GetType(), nameof(ReadObject), t));
 			}
 			if (Utils.IsStruct(t)) {
-				return MakeDelegate(Utils.GetPrivateGeneric(GetType(), nameof(ReadStruct), t));
+				return MakeDelegateStatic(Utils.GetPrivateGenericStatic(d.GetType(), nameof(ReadStruct), t));
 			}
-
 			throw new NotImplementedException(t.Name);
 		}
 
-		private Action<object> MakeMergerFunc(Type t)
+		private static Action<BinaryDeserializer, object> MakeMergerFunc(BinaryDeserializer d, Type t)
 		{
 			var idict = Utils.GetIDictionary(t);
 			if (idict != null) {
-				return MakeDelegateAction(
-					Utils.GetPrivateCovariantGenericAll(GetType(), nameof(ReadIntoDictionaryNG), idict)
+				return MakeDelegateActionStatic(
+					Utils.GetPrivateCovariantGenericAllStatic(d.GetType(), nameof(ReadIntoDictionaryNG), idict)
 				);
 			}
-
 			var icoll = Utils.GetICollection(t);
 			if (icoll != null) {
-				return MakeDelegateAction(
-					Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadIntoCollectionNG), icoll)
+				return MakeDelegateActionStatic(
+					Utils.GetPrivateCovariantGenericStatic(d.GetType(), nameof(ReadIntoCollectionNG), icoll)
 				);
 			}
-
 			if ((t.IsClass || t.IsInterface || Utils.IsStruct(t)) && t != typeof(object)) {
-				return MakeDelegateAction(Utils.GetPrivateGeneric(GetType(), nameof(ReadIntoObject), t));
+				return MakeDelegateActionStatic(Utils.GetPrivateGenericStatic(d.GetType(), nameof(ReadIntoObject), t));
 			}
-
-			throw Error("Unable to merge field of type {0}", t);
+			throw d.Error("Unable to merge field of type {0}", t);
 		}
 
 		public override object FromReaderInt()
@@ -929,8 +983,7 @@ namespace Yuzu.Binary
 			if (BinaryOptions.AutoSignature) {
 				CheckSignature();
 			}
-
-			return ReadAny();
+			return ReadAny(this);
 		}
 
 		public override object FromReaderInt(object obj)
@@ -939,16 +992,13 @@ namespace Yuzu.Binary
 			if (expectedType == typeof(object)) {
 				throw Error("Unable to read into untyped object");
 			}
-
 			if (BinaryOptions.AutoSignature) {
 				CheckSignature();
 			}
-
-			if (!ReadCompatibleType(expectedType)) {
+			if (!ReadCompatibleType(this, expectedType)) {
 				throw Error("Incompatible type to read into {0}", expectedType.Name);
 			}
-
-			MergeValueFunc(expectedType)(obj);
+			MergeValueFunc(expectedType)(this, obj);
 			return obj;
 		}
 
@@ -957,16 +1007,13 @@ namespace Yuzu.Binary
 			if (BinaryOptions.AutoSignature) {
 				CheckSignature();
 			}
-
 			if (typeof(T) == typeof(object)) {
-				return (T)ReadAny();
+				return (T)ReadAny(this);
 			}
-
-			if (!ReadCompatibleType(typeof(T))) {
+			if (!ReadCompatibleType(this, typeof(T))) {
 				throw Error("Incompatible type to read into {0}", typeof(T));
 			}
-
-			return (T)ReadValueFunc(typeof(T))();
+			return (T)ReadValueFunc(typeof(T))(this);
 		}
 
 		// If possible, preserves stream position if signature is absent.
@@ -976,23 +1023,19 @@ namespace Yuzu.Binary
 			if (s.Length == 0) {
 				return true;
 			}
-
 			if (!Reader.BaseStream.CanSeek) {
 				return s.Equals(Reader.ReadBytes(s.Length));
 			}
-
 			var pos = Reader.BaseStream.Position;
 			if (Reader.BaseStream.Length - pos < s.Length) {
 				return false;
 			}
-
 			foreach (var b in s) {
 				if (b != Reader.ReadByte()) {
 					Reader.BaseStream.Position = pos;
 					return false;
 				}
 			}
-
 			return true;
 		}
 
@@ -1001,6 +1044,44 @@ namespace Yuzu.Binary
 			if (!IsValidSignature()) {
 				throw Error("Signature not found");
 			}
+		}
+
+		internal static ReaderClassDef ReadCachedClassDef(
+			System.IO.BinaryReader reader, int expectedIndex, System.IO.MemoryStream ms
+		) {
+			var classId = reader.ReadInt16();
+			if (classId != -expectedIndex - 1) {
+				throw AbstractReaderDeserializer.Error(
+					new YuzuPosition(reader.BaseStream.Position), $"Invalid class id {classId}."
+				);
+			}
+			if (classId >= 0) {
+				throw new YuzuException("Cached class def can't be non negative.");
+			}
+			var classDefBeginPosition = ms.Position;
+			// skip class def type name
+			var typeName = reader.ReadString();
+			// field count declared for class def
+			var theirCount = reader.ReadInt16();
+			while (theirCount-- > 0) {
+				// skip field name
+				reader.ReadString();
+				// skip field type
+				ReadType(reader);
+			}
+			var classDefAfterEndPosition = ms.Position;
+			ms.Position = classDefBeginPosition;
+			return new ReaderClassDef {
+				CompletionRecord = new CompletionRecord {
+					TypeName = typeName,
+					Buffer = reader.ReadBytes((int)(classDefAfterEndPosition - classDefBeginPosition)),
+				},
+			};
+		}
+
+		public void UseYuzuCache(YuzuCache yuzuCache)
+		{
+			externalClassDefs = yuzuCache.ReaderCache;
 		}
 	}
 }

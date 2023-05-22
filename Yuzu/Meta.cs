@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -561,7 +561,12 @@ namespace Yuzu.Metadata
 		}
 
 		private static readonly Func<Tuple<Type, CommonOptions>, Meta> makeMeta = key => new Meta(key.Item1, key.Item2);
-		public static Meta Get(Type t, CommonOptions options) => cache.GetOrAdd(Tuple.Create(t, options), makeMeta);
+
+		private static volatile int msInGet = 0;
+		public static Meta Get(Type t, CommonOptions options)
+		{
+			return cache.GetOrAdd(new TypeOptions { Type = t, Options = options, }, makeMeta);
+		}
 
 		public static Type GetTypeByReadAlias(string alias, CommonOptions options)
 		{
