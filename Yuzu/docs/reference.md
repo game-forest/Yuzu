@@ -426,12 +426,6 @@ Default value is `YB01`.
 If `true`, `Signature` must be present in front of every serialized stream, or an error will be thrown.
 Default value is `false`.
 
-#### `Unordered`
-
-If `true`, deserialization accepts fields in arbitrary order.
-This mode is slow and not supported by generated deserializers. Use for compatibility only.
-Default value is `false`.
-
 ## Meta overrides
 
 Class `MetaOptions` provides an API for specifying Yuzu attributes at runtime.

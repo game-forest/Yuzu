@@ -553,39 +553,6 @@ namespace Yuzu.Binary
 			}
 		}
 
-		private static void InitClassDefUnordered(BinaryDeserializer d, ReaderClassDef def, string typeName)
-		{
-			var theirCount = d.Reader.ReadInt16();
-			int ourIndex = 0;
-			int requiredCountActual = 0;
-			for (int theirIndex = 0; theirIndex < theirCount; ++theirIndex) {
-				var theirName = d.Reader.ReadString();
-				if (def.Meta.TagToItem.TryGetValue(theirName, out Meta.Item yi)) {
-					if (!ReadCompatibleType(d, yi.Type)) {
-						throw d.Error($"Incompatible type for field {theirName}, expected {yi.Type}");
-					}
-					def.Fields.Add(new ReaderClassDef.FieldDef {
-						Name = theirName,
-						OurIndex = def.Meta.Items.IndexOf(yi) + 1,
-						Type = yi.Type,
-						ReadFunc = d.MakeReadOrMergeFunc(yi),
-					});
-					ourIndex += 1;
-					if (!yi.IsOptional) {
-						requiredCountActual += 1;
-					}
-				} else {
-					AddUnknownFieldDef(d, def, theirName, typeName);
-				}
-			}
-			if (requiredCountActual != def.Meta.RequiredCount) {
-				throw d.Error(
-					$"Expected {def.Meta.RequiredCount} required field(s), " +
-					$"but found {requiredCountActual} for class {typeName}"
-				);
-			}
-		}
-
 		private static ReaderClassDef GetClassDef(BinaryDeserializer d, short classId)
 		{
 			if (classId < 0) {
@@ -618,11 +585,7 @@ namespace Yuzu.Binary
 				Meta = Meta.Get(classType, d.Options),
 			};
 			d.PrepareReaders(result);
-			if (d.BinaryOptions.Unordered) {
-				InitClassDefUnordered(d, result, typeName);
-			} else {
-				InitClassDef(d, result, typeName);
-			}
+			InitClassDef(d, result, typeName);
 			d.internalClassDefs.Add(result);
 			return result;
 		}
@@ -643,11 +606,7 @@ namespace Yuzu.Binary
 				}
 				classDef.Meta = Meta.Get(classType, d.Options);
 				d.PrepareReaders(classDef);
-				if (d.BinaryOptions.Unordered) {
-					InitClassDefUnordered(d, classDef, typeName);
-				} else {
-					InitClassDef(d, classDef, typeName);
-				}
+				InitClassDef(d, classDef, typeName);
 				classDef.CompletionRecord = null;
 			} catch (System.Exception e) {
 				exception = e;

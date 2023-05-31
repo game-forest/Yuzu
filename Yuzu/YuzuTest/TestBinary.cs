@@ -461,23 +461,6 @@ namespace YuzuTest.Binary
 		}
 
 		[TestMethod]
-		public void TestUnordered()
-		{
-			var bd = new BinaryDeserializer();
-			bd.Options.AllowUnknownFields = true;
-			bd.BinaryOptions.Unordered = true;
-
-			var v1 = bd.FromBytes<SampleOrder>(SX(
-				"20 01 00 " + XS("SampleOrder") + " 02 00 " +
-				XS("StarterPackOfferEndTime", RoughType.Int) + " " +
-				XS("StartGoldInitialized", RoughType.Bool) +
-				" 01 00 0B 00 00 00 02 00 01 00 00"
-			));
-			Assert.AreEqual(11, v1.StarterPackOfferEndTime);
-			Assert.IsTrue(v1.StartGoldInitialized);
-		}
-
-		[TestMethod]
 		public void TestClassNames()
 		{
 			var bs = new BinarySerializer();
