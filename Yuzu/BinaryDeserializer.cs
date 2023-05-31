@@ -556,13 +556,13 @@ namespace Yuzu.Binary
 		private static void InitClassDefUnordered(BinaryDeserializer d, ReaderClassDef def, string typeName)
 		{
 			var theirCount = d.Reader.ReadInt16();
-			int ourIndex = 0, requiredCountActiual = 0;
+			int ourIndex = 0;
+			int requiredCountActual = 0;
 			for (int theirIndex = 0; theirIndex < theirCount; ++theirIndex) {
 				var theirName = d.Reader.ReadString();
 				if (def.Meta.TagToItem.TryGetValue(theirName, out Meta.Item yi)) {
 					if (!ReadCompatibleType(d, yi.Type)) {
-						throw d.Error(
-							"Incompatible type for field {0}, expected {1}", theirName, yi.Type);
+						throw d.Error($"Incompatible type for field {theirName}, expected {yi.Type}");
 					}
 					def.Fields.Add(new ReaderClassDef.FieldDef {
 						Name = theirName,
@@ -572,18 +572,16 @@ namespace Yuzu.Binary
 					});
 					ourIndex += 1;
 					if (!yi.IsOptional) {
-						requiredCountActiual += 1;
+						requiredCountActual += 1;
 					}
 				} else {
 					AddUnknownFieldDef(d, def, theirName, typeName);
 				}
 			}
-			if (requiredCountActiual != def.Meta.RequiredCount) {
+			if (requiredCountActual != def.Meta.RequiredCount) {
 				throw d.Error(
-					"Expected {0} required field(s), but found {1} for class {2}",
-					def.Meta.RequiredCount,
-					requiredCountActiual,
-					typeName
+					$"Expected {def.Meta.RequiredCount} required field(s), " +
+					$"but found {requiredCountActual} for class {typeName}"
 				);
 			}
 		}
