@@ -8,6 +8,17 @@ using System.Text.RegularExpressions;
 
 namespace Yuzu.Util
 {
+	public static class Public
+	{
+		public enum YuzuInterfaceKind
+		{
+			ICollection,
+			IEnumerable,
+		}
+
+		public static Func<Type, YuzuInterfaceKind, Type> InterfaceAmbiguityResolver;
+	}
+
 	internal static class Utils
 	{
 		public static object[] ZeroObjects = new object[] { };
@@ -44,24 +55,69 @@ namespace Yuzu.Util
 			t.Namespace == "System" ? t.IsValueType :
 			t.IsClass || t.IsValueType ? null : (bool?)false;
 
+		private static Dictionary<Type, Type> collectionInterfaceForType = new Dictionary<Type, Type>();
+
 		public static Type GetICollection(Type t)
 		{
 			if (t.Name == "ICollection`1") return t;
+			if (collectionInterfaceForType.TryGetValue(t, out var r)) {
+				return r;
+			}
 			try {
 				return t.GetInterface("ICollection`1");
 			} catch (AmbiguousMatchException) {
-				throw new YuzuException("Multiple ICollection interfaces for type " + t.Name);
+				var a = t.GetCustomAttribute<YuzuUseCollectionInterface>();
+				Type iCollectionType = null;
+				if (a != null) {
+					iCollectionType = a.ICollectionType;
+				} else if (Public.InterfaceAmbiguityResolver != null) {
+					iCollectionType =
+						Public.InterfaceAmbiguityResolver(t, Public.YuzuInterfaceKind.ICollection);
+				}
+				if (iCollectionType != null) {
+					if (iCollectionType.Name != "ICollection`1") {
+						throw new YuzuException($"Invalid ICollection`1 type '{iCollectionType.Name}`.");
+					}
+					collectionInterfaceForType.Add(t, iCollectionType);
+					return iCollectionType;
+				}
+				throw new YuzuException(
+					$"Multiple ICollection`1 interfaces for type '{t.Name}'. " +
+					$"Use '{nameof(YuzuUseCollectionInterface)}' to resolve ambiguity."
+				);
 			}
 		}
+
+		private static Dictionary<Type, Type> enumerableInterfaceForType = new Dictionary<Type, Type>();
 
 		public static Type GetIEnumerable(Type t)
 		{
 			if (t.Name == "IEnumerable`1") return t;
+			if (enumerableInterfaceForType.TryGetValue(t, out var r)) {
+				return r;
+			}
 			try {
 				return t.GetInterface("IEnumerable`1");
-			}
-			catch (AmbiguousMatchException) {
-				throw new YuzuException("Multiple IEnumerable interfaces for type " + t.Name);
+			} catch (AmbiguousMatchException) {
+				var a = t.GetCustomAttribute<YuzuUseEnumerableInterface>();
+				Type iEnumerableType = null;
+				if (a != null) {
+					iEnumerableType = a.IEnumerableType;
+				} else if (Public.InterfaceAmbiguityResolver != null) {
+					iEnumerableType =
+						Public.InterfaceAmbiguityResolver(t, Public.YuzuInterfaceKind.IEnumerable);
+				}
+				if (iEnumerableType != null) {
+					if (iEnumerableType.Name != "IEnumerable`1") {
+						throw new YuzuException($"Invalid IEnumerable`1 type '{iEnumerableType.Name}`.");
+					}
+					enumerableInterfaceForType.Add(t, iEnumerableType);
+					return iEnumerableType;
+				}
+				throw new YuzuException(
+					$"Multiple IEnumerable`1 interfaces for type '{t.Name}'. " +
+					$"Use '{nameof(YuzuUseEnumerableInterface)}' to resolve ambiguity."
+				);
 			}
 		}
 

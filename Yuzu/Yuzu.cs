@@ -182,6 +182,28 @@ namespace Yuzu
 	[AttributeUsage(AttributeTargets.Method)]
 	public class YuzuFromSurrogate : Attribute { }
 
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+	public class YuzuUseCollectionInterface : Attribute
+	{
+		public Type ICollectionType;
+
+		public YuzuUseCollectionInterface(Type iCollectionType)
+		{
+			ICollectionType = iCollectionType;
+		}
+	}
+
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+	public class YuzuUseEnumerableInterface : Attribute
+	{
+		public Type IEnumerableType;
+
+		public YuzuUseEnumerableInterface(Type iEnumerableType)
+		{
+			IEnumerableType = iEnumerableType;
+		}
+	}
+
 	public enum TagMode
 	{
 		Aliases = 0,
