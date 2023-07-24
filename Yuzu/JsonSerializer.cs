@@ -841,7 +841,7 @@ namespace Yuzu.Json
 			try {
 				depth += 1;
 				var isFirst = true;
-				if (ReferenceResolver != null) {
+				if (meta.SerializeByReference && ReferenceResolver != null) {
 					var reference = ReferenceResolver.GetReference(obj, out var alreadyExists);
 					if (alreadyExists) {
 						WriteName(JsonOptions.ReferenceTag, ref isFirst);

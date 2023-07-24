@@ -432,36 +432,43 @@ namespace Yuzu.Binary
 			def.Meta.AfterSerialization.Run(obj);
 		}
 
-		private ClassDef WriteClassId(object obj)
+		private ClassDef GetClassDef(object obj, out bool isNew)
 		{
 			var t = obj.GetType();
-			if (classIdCache.TryGetValue(t, out ClassDef result)) {
-				writer.Write(result.Id);
-				var g = result.Meta.GetUnknownStorage;
-				if (g == null)
-					return result;
-				var i = g(obj).Internal;
-				// If we have unknown fields, their definition must be present in the first serialized object,
-				// but not necessariliy in subsequent ones.
-				if (i != null && i != result.ReaderDef)
-					throw new YuzuException("Conflictiing reader class definitions for unknown storage of " + t.Name);
-				return result;
-			}
-
-			result = new ClassDef { Id = (short)(classIdCache.Count + unknownClassIdCache.Count + 1) };
-			result.Meta = Meta.Get(t, Options);
-			classIdCache[t] = result;
-			if (result.Meta.GetUnknownStorage == null)
-				PrepareClassDefFields(result);
-			else {
-				result.ReaderDef = result.Meta.GetUnknownStorage(obj).Internal as ReaderClassDef;
-				if (result.ReaderDef == null)
+			isNew = !classIdCache.TryGetValue(t, out var result);
+			if (isNew) {
+				result = new ClassDef { Id = (short)(classIdCache.Count + unknownClassIdCache.Count + 1) };
+				result.Meta = Meta.Get(t, Options);
+				classIdCache[t] = result;
+				if (result.Meta.GetUnknownStorage == null)
 					PrepareClassDefFields(result);
-				else
-					PrepareClassDefFieldsUnknown(result);
+				else {
+					result.ReaderDef = result.Meta.GetUnknownStorage(obj).Internal as ReaderClassDef;
+					if (result.ReaderDef == null)
+						PrepareClassDefFields(result);
+					else
+						PrepareClassDefFieldsUnknown(result);
+				}
+			} else {
+				var g = result.Meta.GetUnknownStorage;
+				if (g != null) {
+					var i = g(obj).Internal;
+					// If we have unknown fields, their definition must be present in the first serialized object,
+					// but not necessariliy in subsequent ones.
+					if (i != null && i != result.ReaderDef)
+						throw new YuzuException("Conflictiing reader class definitions for unknown storage of " + t.Name);
+				}
 			}
-			WriteClassDefFields(result, result.Meta.WriteAlias ?? TypeSerializer.Serialize(result.Meta.Type));
 			return result;
+		}
+
+		private void WriteClassId(ClassDef d, bool isNew)
+		{
+			if (isNew) {
+				WriteClassDefFields(d, d.Meta.WriteAlias ?? TypeSerializer.Serialize(d.Meta.Type));
+			} else {
+				writer.Write(d.Id);
+			}
 		}
 
 		// Unknown class lacking binary-specific field descriptions.
@@ -541,7 +548,9 @@ namespace Yuzu.Binary
 			if (obj == null) {
 				writer.Write((short)0);
 				return;
-			} else if (ReferenceResolver != null) {
+			}
+			var def = GetClassDef(obj, out var isNewDef);
+			if (def.Meta.SerializeByReference && ReferenceResolver != null) {
 				var reference = ReferenceResolver.GetReference(obj, out var alreadyExists);
 				if (alreadyExists) {
 					writer.Write((short)BinarySerializeOptions.ReferenceTag);
@@ -551,7 +560,8 @@ namespace Yuzu.Binary
 				writer.Write(BinarySerializeOptions.IdTag);
 				GetWriteFunc(ReferenceResolver.ReferenceType)(reference);
 			}
-			WriteFields(WriteClassId(obj), obj);
+			WriteClassId(def, isNewDef);
+			WriteFields(def, obj);
 		}
 
 		private void WriteObjectUnknown(object obj)
@@ -560,7 +570,8 @@ namespace Yuzu.Binary
 				writer.Write((short)0);
 				return;
 			}
-			var def = WriteClassId(obj);
+			var def = GetClassDef(obj, out var isNewDef);
+			WriteClassId(def, isNewDef);
 			var storage = def.Meta.GetUnknownStorage(obj);
 			var storageIndex = new BoxedInt();
 			objStack.Push(obj);
@@ -586,7 +597,8 @@ namespace Yuzu.Binary
 				writer.Write((short)0);
 				return;
 			}
-			var def = WriteClassId(obj);
+			var def = GetClassDef(obj, out var isNewDef);
+			WriteClassId(def, isNewDef);
 			def.Meta.BeforeSerialization.Run(obj);
 			objStack.Push(obj);
 			try {
