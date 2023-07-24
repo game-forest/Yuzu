@@ -12,13 +12,20 @@ namespace Yuzu.Binary
 	{
 		public static BinaryDeserializer Instance = new();
 
+		private Func<object> referenceReadFunc;
+
 		public BinarySerializeOptions BinaryOptions = new();
 
 		public IReferenceResolver ReferenceResolver { get; set; }
 
 		public BinaryDeserializer() { InitReaders(); }
 
-		public override void Initialize() {}
+		protected override void Initialize()
+		{
+			if (ReferenceResolver != null) {
+				referenceReadFunc = ReadValueFunc(ReferenceResolver.ReferenceType);
+			}
+		}
 
 		private object ReadSByte() => Reader.ReadSByte();
 		private object ReadByte() => Reader.ReadByte();
@@ -514,7 +521,7 @@ namespace Yuzu.Binary
 			object reference = null;
 			if (classId == BinarySerializeOptions.IdTag) {
 				EnsureReferenceResolver();
-				reference = ReadValueFunc(ReferenceResolver.ReferenceType)();
+				reference = referenceReadFunc();
 				classId = Reader.ReadInt16();
 			}
 			if (classId == BinarySerializeOptions.ReferenceTag) {
@@ -536,7 +543,7 @@ namespace Yuzu.Binary
 			object reference = null;
 			if (classId == BinarySerializeOptions.IdTag) {
 				EnsureReferenceResolver();
-				reference = ReadValueFunc(ReferenceResolver.ReferenceType)();
+				reference = referenceReadFunc();
 				classId = Reader.ReadInt16();
 			}
 			if (classId == BinarySerializeOptions.ReferenceTag) {
@@ -566,12 +573,12 @@ namespace Yuzu.Binary
 			object objectId = null;
 			if (classId == BinarySerializeOptions.IdTag) {
 				EnsureReferenceResolver();
-				objectId = ReadValueFunc(ReferenceResolver.ReferenceType)();
+				objectId = referenceReadFunc();
 				classId = Reader.ReadInt16();
 			}
 			if (classId == BinarySerializeOptions.ReferenceTag) {
 				EnsureReferenceResolver();
-				var reference = ReadValueFunc(ReferenceResolver.ReferenceType)();
+				var reference = referenceReadFunc();
 				return ReferenceResolver.ResolveReference(reference);
 			}
 			var def = GetClassDef(classId);
@@ -594,12 +601,12 @@ namespace Yuzu.Binary
 			object objectId = null;
 			if (classId == BinarySerializeOptions.IdTag) {
 				EnsureReferenceResolver();
-				objectId = ReadValueFunc(ReferenceResolver.ReferenceType)();
+				objectId = referenceReadFunc();
 				classId = Reader.ReadInt16();
 			}
 			if (classId == BinarySerializeOptions.ReferenceTag) {
 				EnsureReferenceResolver();
-				var reference = ReadValueFunc(ReferenceResolver.ReferenceType)();
+				var reference = referenceReadFunc();
 				return ReferenceResolver.ResolveReference(reference);
 			}
 			var def = GetClassDef(classId);

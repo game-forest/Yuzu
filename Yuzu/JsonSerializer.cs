@@ -88,6 +88,8 @@ namespace Yuzu.Json
 
 	public class JsonSerializer : AbstractWriterSerializer
 	{
+		private Action<object> referenceWriteFunc;
+
 		public JsonSerializeOptions JsonOptions = new();
 
 		public JsonSerializer() { InitWriters(); }
@@ -99,6 +101,13 @@ namespace Yuzu.Json
 		private Dictionary<string, byte[]> strCache = new();
 
 		public IReferenceResolver ReferenceResolver { get; set; }
+
+		protected override void Initialize()
+		{
+			if (ReferenceResolver != null) {
+				referenceWriteFunc = GetWriteFunc(ReferenceResolver.ReferenceType);
+			}
+		}
 
 		private byte[] StrToBytesCached(string s)
 		{
@@ -845,12 +854,12 @@ namespace Yuzu.Json
 					var reference = ReferenceResolver.GetReference(obj, out var alreadyExists);
 					if (alreadyExists) {
 						WriteName(JsonOptions.ReferenceTag, ref isFirst);
-						GetWriteFunc(ReferenceResolver.ReferenceType)(reference);
+						referenceWriteFunc(reference);
 						WriteFieldSeparator();
 						return;
 					}
 					WriteName(JsonOptions.IdTag, ref isFirst);
-					GetWriteFunc(ReferenceResolver.ReferenceType)(reference);
+					referenceWriteFunc(reference);
 				}
 				meta.BeforeSerialization.Run(obj);
 				if (
