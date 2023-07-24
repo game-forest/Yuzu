@@ -98,7 +98,7 @@ namespace Yuzu.Json
 
 		private Dictionary<string, byte[]> strCache = new();
 
-		public ISerializerReferenceResolver ReferenceResolver { get; set; }
+		public IReferenceResolver ReferenceResolver { get; set; }
 
 		private byte[] StrToBytesCached(string s)
 		{
@@ -837,23 +837,20 @@ namespace Yuzu.Json
 			}
 			writer.Write((byte)'{');
 			WriteFieldSeparator();
-			var owner = objStack.Count > 0 ? objStack.Peek() : null;
 			objStack.Push(obj);
 			try {
 				depth += 1;
 				var isFirst = true;
-				if (
-					ReferenceResolver != null &&
-					ReferenceResolver.TryGetReference(obj, owner, out var reference, out var writeObject)
-				) {
-					if (!writeObject) {
+				if (ReferenceResolver != null) {
+					var reference = ReferenceResolver.GetReference(obj, out var alreadyExists);
+					if (alreadyExists) {
 						WriteName(JsonOptions.ReferenceTag, ref isFirst);
-						GetWriteFunc(ReferenceResolver.ReferenceType())(reference);
+						GetWriteFunc(ReferenceResolver.ReferenceType)(reference);
 						WriteFieldSeparator();
 						return;
 					}
 					WriteName(JsonOptions.IdTag, ref isFirst);
-					GetWriteFunc(ReferenceResolver.ReferenceType())(reference);
+					GetWriteFunc(ReferenceResolver.ReferenceType)(reference);
 				}
 				meta.BeforeSerialization.Run(obj);
 				if (
@@ -982,19 +979,15 @@ namespace Yuzu.Json
 
 		protected override void ToWriter(object obj)
 		{
-			try {
-				if (obj == null) {
-					writer.Write(nullBytes);
-					return;
-				}
-				var t = obj.GetType();
-				if (JsonOptions.SaveClass.HasFlag(JsonSaveClass.UnknownPrimitive) && !IsUserObject(t)) {
-					WriteTypedPrimitive(obj, t);
-				} else {
-					GetWriteFunc(t)(obj);
-				}
-			} finally {
-				ReferenceResolver?.Clear();
+			if (obj == null) {
+				writer.Write(nullBytes);
+				return;
+			}
+			var t = obj.GetType();
+			if (JsonOptions.SaveClass.HasFlag(JsonSaveClass.UnknownPrimitive) && !IsUserObject(t)) {
+				WriteTypedPrimitive(obj, t);
+			} else {
+				GetWriteFunc(t)(obj);
 			}
 		}
 	}

@@ -366,7 +366,7 @@ namespace Yuzu.Binary
 				GenerateReaderBody(meta);
 			} else {
 				cw.Put("if (id != null) {\n");
-				cw.Put("d.ReferenceResolver?.AddObject(id, result);\n");
+				cw.Put("d.ReferenceResolver?.AddReference(id, result);\n");
 				cw.Put("}\n");
 				cw.Put("{0}(d, def, result);\n", readerName);
 			}

@@ -309,11 +309,13 @@ namespace Yuzu.Clone
 			cw.GenerateActionList(meta.BeforeSerialization, "s");
 			if (!GenerateSurrogateCloner(meta)) {
 				cw.Put("object r = null;\n");
-				cw.Put("if (cl.ReferenceResolver != null && cl.ReferenceResolver.TryGetReference(src, out r, out bool nr) && !nr)\n");
-				cw.PutInd("return ({0})cl.ReferenceResolver.GetObject(r);\n", Utils.GetTypeSpec(t));
+				cw.Put("if (cl.ReferenceResolver != null) {\n");
+				cw.Put("r = cl.ReferenceResolver.GetReference(src, out var alreadyExists);\n");
+				cw.Put("if (alreadyExists)\n");
+				cw.PutInd("return ({0})cl.ReferenceResolver.ResolveReference(r);\n", Utils.GetTypeSpec(t));
 				cw.Put("var result = {0};\n", GenerateFactoryCall(meta));
 				cw.Put("if (r != null)\n");
-				cw.PutInd("cl.ReferenceResolver.AddObject(r, result);\n");
+				cw.PutInd("cl.ReferenceResolver.AddReference(r, result);\n");
 				cw.GenerateActionList(meta.BeforeDeserialization);
 				GenerateClonerBody(meta);
 			}
