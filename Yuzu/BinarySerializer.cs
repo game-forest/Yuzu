@@ -12,7 +12,7 @@ namespace Yuzu.Binary
 	{
 		public BinarySerializeOptions BinaryOptions = new ();
 
-		public ISerializerReferenceResolver ReferenceResolver { get; set; }
+		public IReferenceResolver ReferenceResolver { get; set; }
 
 		protected void WriteSByte(object obj) => writer.Write((sbyte)obj);
 		protected void WriteByte(object obj) => writer.Write((byte)obj);
@@ -541,18 +541,15 @@ namespace Yuzu.Binary
 			if (obj == null) {
 				writer.Write((short)0);
 				return;
-			} else if (
-				 ReferenceResolver != null &&
-				 ReferenceResolver.TryGetReference(obj, null, out var reference, out var writeObject)
-			) {
-				if (writeObject) {
-					writer.Write(BinarySerializeOptions.IdTag);
-					GetWriteFunc(ReferenceResolver.ReferenceType())(reference);
-				} else {
+			} else if (ReferenceResolver != null) {
+				var reference = ReferenceResolver.GetReference(obj, out var alreadyExists);
+				if (alreadyExists) {
 					writer.Write((short)BinarySerializeOptions.ReferenceTag);
-					GetWriteFunc(ReferenceResolver.ReferenceType())(reference);
+					GetWriteFunc(ReferenceResolver.ReferenceType)(reference);
 					return;
 				}
+				writer.Write(BinarySerializeOptions.IdTag);
+				GetWriteFunc(ReferenceResolver.ReferenceType)(reference);
 			}
 			WriteFields(WriteClassId(obj), obj);
 		}
@@ -727,13 +724,9 @@ namespace Yuzu.Binary
 
 		protected override void ToWriter(object obj)
 		{
-			try {
-				if (BinaryOptions.AutoSignature)
-					WriteSignature();
-				WriteAny(obj);
-			} finally {
-				ReferenceResolver?.Clear();
-			}
+			if (BinaryOptions.AutoSignature)
+				WriteSignature();
+			WriteAny(obj);
 		}
 
 		public void WriteSignature() { writer.Write(BinaryOptions.Signature); }

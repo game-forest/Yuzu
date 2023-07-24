@@ -31,7 +31,7 @@ namespace Yuzu.Clone
 		private readonly ConcurrentDictionary<Type, Func<object, object>> clonerCache = [];
 		private readonly ConcurrentDictionary<Type, Action<object, object>> mergerCache = [];
 
-		public IClonerReferenceResolver ReferenceResolver;
+		public IReferenceResolver ReferenceResolver;
 
 		public Cloner() { }
 
@@ -265,21 +265,13 @@ namespace Yuzu.Clone
 
 		public override object DeepObject(object src)
 		{
-			try {
-				var result = src == null ? null : GetCloner(src.GetType())(src);
-				return result;
-			} finally {
-				ReferenceResolver?.Clear();
-			}
+			var result = src == null ? null : GetCloner(src.GetType())(src);
+			return result;
 		}
 
 		public override void MergeObject(object dst, object src)
 		{
-			try {
-				GetMerger(src.GetType())(dst, src);
-			} finally {
-				ReferenceResolver?.Clear();
-			}
+			GetMerger(src.GetType())(dst, src);
 		}
 	}
 }

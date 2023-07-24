@@ -1,81 +1,61 @@
 using System;
-using System.Collections.Generic;
 
 namespace Yuzu
 {
-	public interface IDeserializerReferenceResolver
+	public interface IReferenceResolver
 	{
 		/// <summary>
 		/// Returns a reference instance type.
 		/// </summary>
-		Type ReferenceType();
+		Type ReferenceType { get; }
 
 		/// <summary>
 		/// Returns an object for the given reference or throws an exception.
 		/// </summary>
-		object GetObject(object reference);
-
-		/// <summary>
-		/// Returns an object for the given reference if it is already registered with AddObject().
-		/// Called from JsonDeserializer since Json supports forward references.
-		/// </summary>
-		bool TryGetObject(object reference, out object obj);
+		object ResolveReference(object reference);
 
 		/// <summary>
 		/// Registers a newly deserialized object.
 		/// Called right after the object factory method.
 		/// </summary>
-		void AddObject(object reference, object obj);
-
-		/// <summary>
-		/// Called when deserialization is done.
-		/// </summary>
-		void Clear();
-	}
-
-	public interface ISerializerReferenceResolver
-	{
-		/// <summary>
-		/// Returns a reference instance type.
-		/// </summary>
-		Type ReferenceType();
+		void AddReference(object reference, object obj);
 
 		/// <summary>
 		/// Returns a reference instance for the given object.
 		/// owner is the object that contains a reference to the given object.
 		/// This context is necessary to implement a flat Json hierarchy.
-		/// writeObject denotes that the object must be serialized, otherwise the reference is serialized.
+		/// alreadyExists denotes that the reference must be serialized, otherwise the object is serialized.
 		/// </summary>
-		bool TryGetReference(object obj, object owner, out object reference, out bool writeObject);
-
-		/// <summary>
-		/// Called when serialization is done.
-		/// </summary>
-		void Clear();
+		object GetReference(object obj, out bool alreadyExists);
 	}
 
-	public interface IClonerReferenceResolver
+	public abstract class ReferenceResolver<TReference> : IReferenceResolver
 	{
-		/// <summary>
-		/// Returns a reference instance for the given source object.
-		/// newReference denotes that the reference has just been created.
-		/// </summary>
-		bool TryGetReference(object source, out object reference, out bool newReference);
+		Type IReferenceResolver.ReferenceType => typeof(TReference);
 
 		/// <summary>
-		/// Returns an clone for the given reference or throws an exception.
+		/// Returns an object for the given reference or throws an exception.
 		/// </summary>
-		object GetObject(object reference);
+		public abstract object ResolveReference(TReference reference);
 
-		// <summary>
-		/// Registers a newly cloned object.
+		/// <summary>
+		/// Registers a newly deserialized object.
 		/// Called right after the object factory method.
 		/// </summary>
-		void AddObject(object reference, object clone);
+		public abstract void AddReference(TReference reference, object obj);
 
 		/// <summary>
-		/// Called when the clone is done.
+		/// Returns a reference instance for the given object.
+		/// owner is the object that contains a reference to the given object.
+		/// This context is necessary to implement a flat Json hierarchy.
+		/// alreadyExists denotes that the reference must be serialized, otherwise the object is serialized.
 		/// </summary>
-		void Clear();
+		public abstract TReference GetReference(object obj, out bool alreadyExists);
+
+		object IReferenceResolver.ResolveReference(object reference) => ResolveReference((TReference)reference);
+
+		void IReferenceResolver.AddReference(object reference, object obj) => AddReference((TReference)reference, obj);
+
+		object IReferenceResolver.GetReference(object obj, out bool alreadyExists) => GetReference(obj, out alreadyExists);
 	}
 }

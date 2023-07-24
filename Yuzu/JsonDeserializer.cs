@@ -12,16 +12,10 @@ namespace Yuzu.Json
 {
 	public class JsonDeserializer : AbstractReaderDeserializer
 	{
-		class UnresolvedReference
-		{
-			public object Reference { get; set; }
-		}
-
 		public static JsonDeserializer Instance = new ();
 		public JsonSerializeOptions JsonOptions = new ();
 
-		private readonly List<Action> afterDeserializationActions = new List<Action>();
-		public IDeserializerReferenceResolver ReferenceResolver { get; set; }
+		public IReferenceResolver ReferenceResolver { get; set; }
 
 		private char? buf;
 
@@ -485,26 +479,10 @@ namespace Yuzu.Json
 				return;
 			}
 			var rf = ReadValueFunc(typeof(T));
-			List<object> unresolvedTail = null;
 			do {
 				var v = rf();
-				if (v is UnresolvedReference ur || unresolvedTail != null) {
-					(unresolvedTail ??= new List<object>()).Add(v);
-				} else {
-					list.Add((T)v);
-				}
+				list.Add((T)v);
 			} while (Require(']', ',') == ',');
-			if (unresolvedTail != null) {
-				afterDeserializationActions.Add(() => {
-					foreach (var v in unresolvedTail) {
-						if (v is UnresolvedReference ur) {
-							list.Add((T)ReferenceResolver.GetObject(ur.Reference));
-						} else {
-							list.Add((T)v);
-						}
-					}
-				});
-			}
 		}
 
 		protected void ReadIntoCollectionNG<T>(object list) => ReadIntoCollection((ICollection<T>)list);
@@ -557,25 +535,13 @@ namespace Yuzu.Json
 				throw new YuzuAssert("Unable to find key parser for type: " + typeof(K).Name);
 
 			var rf = ReadValueFunc(typeof(V));
-			List<(K, UnresolvedReference)> unresolvedItems = null;
 			do {
 				var key = RequireString();
 				Require(':');
 				var k = (K)rk(key);
 				var v = rf();
-				if (v is UnresolvedReference ur) {
-					(unresolvedItems ??= new List<(K, UnresolvedReference)>()).Add((k, ur));
-				} else {
-					dict.Add(k, (V)v);
-				}
+				dict.Add(k, (V)v);
 			} while (Require('}', ',') == ',');
-			if (unresolvedItems != null) {
-				afterDeserializationActions.Add(() => {
-					foreach (var (k, v) in unresolvedItems) {
-						dict.Add(k, (V)ReferenceResolver.GetObject(v.Reference));
-					}
-				});
-			}
 		}
 
 		protected void ReadIntoDictionaryNG<K, V>(object dict) => ReadIntoDictionary((IDictionary<K, V>)dict);
@@ -626,9 +592,6 @@ namespace Yuzu.Json
 				do {
 					if (dim == n - 1) {
 						var v = readElemFunc();
-						if (v is UnresolvedReference) {
-							throw new NotImplementedException();
-						}
 						flatArray.Add(v);
 					} else
 						readRecursive(dim + 1);
@@ -677,9 +640,6 @@ namespace Yuzu.Json
 			for (int i = 0; i < array.Length; ++i) {
 				Require(',');
 				var v = rf();
-				if (v is UnresolvedReference) {
-					throw new NotImplementedException();
-				}
 				array[i] = (T)v;
 			}
 			Require(']');
@@ -729,30 +689,23 @@ namespace Yuzu.Json
 					var name = GetNextName(first: true);
 					if (name == JsonOptions.ReferenceTag) {
 						EnsureReferenceResolver();
-						var r = ReadValueFunc(ReferenceResolver.ReferenceType())();
+						var r = ReadValueFunc(ReferenceResolver.ReferenceType)();
 						Require('}');
-						return ReferenceResolver.TryGetObject(r, out var o)
-							? o : new UnresolvedReference { Reference = r };
+						return ReferenceResolver.ResolveReference(r);
 					}
 					if (name == JsonOptions.IdTag) {
 						EnsureReferenceResolver();
-						id = ReadValueFunc(ReferenceResolver.ReferenceType())();
+						id = ReadValueFunc(ReferenceResolver.ReferenceType)();
 						name = GetNextName(first: false);
 					}
 					if (Options.DeserializeAsUnknown || name != JsonOptions.ClassTag) {
 						var any = new Dictionary<string, object>();
 						if (id != null) {
-							ReferenceResolver.AddObject(id, any);
+							ReferenceResolver.AddReference(id, any);
 						}
 						if (name != null) {
 							var val = ReadAnyObject();
-							if (val is UnresolvedReference ur) {
-								afterDeserializationActions.Add(() => {
-									any.Add(name, ReferenceResolver.GetObject(ur.Reference));
-								});
-							} else {
-								any.Add(name, val);
-							}
+							any.Add(name, val);
 							if (Require(',', '}') == ',')
 								ReadIntoDictionary(any);
 						}
@@ -763,7 +716,7 @@ namespace Yuzu.Json
 					if (t == null) {
 						var result = new YuzuUnknown { ClassTag = typeName };
 						if (id != null) {
-							ReferenceResolver.AddObject(id, result);
+							ReferenceResolver.AddReference(id, result);
 						}
 						if (Require(',', '}') == ',')
 							ReadIntoDictionary(result.Fields);
@@ -1044,16 +997,7 @@ namespace Yuzu.Json
 		{
 			if (yi.SetValue != null) {
 				var v = ReadValueFunc(yi.Type)();
-				if (v is UnresolvedReference ur) {
-					afterDeserializationActions.Add(
-						() => yi.SetValue(
-							obj,
-							ReferenceResolver.GetObject(ur.Reference)
-						)
-					);
-				} else {
-					yi.SetValue(obj, v);
-				}
+				yi.SetValue(obj, v);
 			} else {
 				MergeValueFunc(yi.Type)(yi.GetValue(obj));
 			}
@@ -1116,37 +1060,36 @@ namespace Yuzu.Json
 					Require("ull");
 					return null;
 				case '{':
+					object obj;
 					object id = null;
-					object instance = null;
 					var name = GetNextName(first: true);
 					if (name == JsonOptions.ReferenceTag) {
-						var r = ReadValueFunc(ReferenceResolver.ReferenceType())();
+						var r = ReadValueFunc(ReferenceResolver.ReferenceType)();
 						Require('}');
-						return ReferenceResolver.TryGetObject(r, out var o) 
-							? o : new UnresolvedReference { Reference = r };
+						return ReferenceResolver.ResolveReference(r);
 					}
 					if (name == JsonOptions.IdTag) {
-						id = ReadValueFunc(ReferenceResolver.ReferenceType())();
+						id = ReadValueFunc(ReferenceResolver.ReferenceType)();
 						name = GetNextName(first: false);
 					}
 					if (name != JsonOptions.ClassTag) {
 						var meta = Meta.Get(typeof(T), Options);
-						var obj = CreateAndRegisterObject(meta, id);
+						obj = CreateAndRegisterObject(meta, id);
 						return ReadFields(obj, name);
 					}
 					var typeName = RequireUnescapedString();
 					var t = FindType(typeName);
 					if (typeof(T).IsAssignableFrom(t)) {
 						var meta = Meta.Get(t, Options);
-						instance = CreateAndRegisterObject(meta, id);						
-						return ReadFields(instance, GetNextName(first: false));
+						obj = CreateAndRegisterObject(meta, id);						
+						return ReadFields(obj, GetNextName(first: false));
 					}
-					instance = Activator.CreateInstance(t);
+					obj = GetSurrogate<T>(t).FuncFrom(
+						ReadFields(Activator.CreateInstance(t), GetNextName(first: false)));
 					if (id != null) {
-						ReferenceResolver.AddObject(id, instance);
+						ReferenceResolver.AddReference(id, obj);
 					}
-					return GetSurrogate<T>(t).FuncFrom(
-						ReadFields(instance, GetNextName(first: false)));
+					return obj;
 				case '[': {
 					var meta = Meta.Get(typeof(T), Options);
 					return ReadFieldsCompact(meta.Factory());
@@ -1169,7 +1112,7 @@ namespace Yuzu.Json
 		{
 			var obj = meta.Factory();
 			if (id != null) {
-				ReferenceResolver?.AddObject(id, obj);
+				ReferenceResolver?.AddReference(id, obj);
 			}
 			return obj;
 		}
@@ -1204,13 +1147,12 @@ namespace Yuzu.Json
 			object id = null;
 			var name = GetNextName(first: true);
 			if (name == JsonOptions.ReferenceTag) {
-				var r = ReadValueFunc(ReferenceResolver.ReferenceType())();
+				var r = ReadValueFunc(ReferenceResolver.ReferenceType)();
 				Require('}');
-				return ReferenceResolver.TryGetObject(r, out var o)
-					? o : new UnresolvedReference { Reference = r };
+				return ReferenceResolver.ResolveReference(r);
 			}
 			if (name == JsonOptions.IdTag) {
-				id = ReadValueFunc(ReferenceResolver.ReferenceType())();
+				id = ReadValueFunc(ReferenceResolver.ReferenceType)();
 				name = GetNextName(first: false);
 			}
 			CheckClassTag(name);
@@ -1246,15 +1188,7 @@ namespace Yuzu.Json
 
 		private T FromReaderIntHelper<T>(Func<T> f)
 		{
-			try {
-				return f();
-			} finally {
-				foreach (var a in afterDeserializationActions) {
-					a();
-				}
-				afterDeserializationActions.Clear();
-				ReferenceResolver?.Clear();
-			}
+			return f();
 		}
 
 		public override object FromReaderInt(object obj)
