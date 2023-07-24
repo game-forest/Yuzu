@@ -97,7 +97,7 @@ namespace Yuzu.Clone
 			if (src.GetType() != meta.Type)
 				return cl.DeepObject(src);
 			object reference = null;
-			if (referenceResolver != null) {
+			if (meta.SerializeByReference && referenceResolver != null) {
 				reference = referenceResolver.GetReference(src, out var alreadyExists);
 				if (alreadyExists) {
 					return referenceResolver.ResolveReference(reference);
@@ -118,7 +118,7 @@ namespace Yuzu.Clone
 			if (src.GetType() != meta.Type)
 				return cl.DeepObject(src);
 			object reference = null;
-			if (referenceResolver != null) {
+			if (meta.SerializeByReference && referenceResolver != null) {
 				reference = referenceResolver.GetReference(src, out var alreadyExists);
 				if (alreadyExists) {
 					return referenceResolver.ResolveReference(reference);
@@ -144,7 +144,7 @@ namespace Yuzu.Clone
 				return cl.DeepObject(src);
 			meta.BeforeSerialization.Run(src);
 			object reference = null;
-			if (referenceResolver != null) {
+			if (meta.SerializeByReference && referenceResolver != null) {
 				reference = referenceResolver.GetReference(src, out var alreadyExists);
 				if (alreadyExists) {
 					return referenceResolver.ResolveReference(reference);

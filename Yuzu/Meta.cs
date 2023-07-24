@@ -71,6 +71,7 @@ namespace Yuzu.Metadata
 		public readonly List<Item> Items = new ();
 		public readonly bool IsCompact;
 		public bool IsCopyable;
+		public bool SerializeByReference;
 		public object Default { get; private set; }
 		public YuzuItemKind Must = YuzuItemKind.None;
 		public YuzuItemKind AllKind = YuzuItemKind.None;
@@ -496,6 +497,8 @@ namespace Yuzu.Metadata
 				IsCopyable = true;
 			else if (HasAnyTrigger())
 				IsCopyable = false;
+
+			SerializeByReference = over.HasAttr(Options.SerializeByReferenceAttribute);
 		}
 
 		private static Func<Tuple<Type, CommonOptions>, Meta> MakeMeta = key => new Meta(key.Item1, key.Item2);

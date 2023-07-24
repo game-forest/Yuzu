@@ -205,6 +205,9 @@ namespace Yuzu
 		}
 	}
 
+	[AttributeUsage(AttributeTargets.Class)]
+	public class YuzuSerializeByReference : Attribute { }
+
 	public enum TagMode
 	{
 		Aliases = 0,
@@ -301,6 +304,7 @@ namespace Yuzu
 		public Type SurrogateIfAttribute = typeof(YuzuSurrogateIf);
 		public Type ToSurrogateAttribute = typeof(YuzuToSurrogate);
 		public Type FromSurrogateAttribute = typeof(YuzuFromSurrogate);
+		public Type SerializeByReferenceAttribute = typeof(YuzuSerializeByReference);
 
 		public Func<Attribute, string> GetAlias = attr => (attr as YuzuField).Alias;
 		public Func<Attribute, Type, Func<object, object, bool>> GetSerializeCondition =
