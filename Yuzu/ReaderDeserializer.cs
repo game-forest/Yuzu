@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -13,7 +13,7 @@ namespace Yuzu.Deserializer
 	{
 		public BinaryReader Reader;
 
-		public virtual void Initialize() { }
+		protected virtual void Initialize() { }
 		public abstract object FromReaderInt();
 		public abstract object FromReaderInt(object obj);
 		public abstract T FromReaderInt<T>();

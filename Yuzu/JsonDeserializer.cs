@@ -12,6 +12,8 @@ namespace Yuzu.Json
 {
 	public class JsonDeserializer : AbstractReaderDeserializer
 	{
+		private Func<object> referenceReadFunc;
+
 		public static JsonDeserializer Instance = new ();
 		public JsonSerializeOptions JsonOptions = new ();
 
@@ -19,11 +21,15 @@ namespace Yuzu.Json
 
 		private char? buf;
 
-		public override void Initialize()
+		protected override void Initialize()
 		{
 			buf = null;
 			if (JsonOptions.BOM && Reader.PeekChar() == '\uFEFF')
 				Reader.ReadChar();
+
+			if (ReferenceResolver != null) {
+				referenceReadFunc = ReadValueFunc(ReferenceResolver.ReferenceType);
+			}
 		}
 
 		private char Next()
@@ -689,13 +695,13 @@ namespace Yuzu.Json
 					var name = GetNextName(first: true);
 					if (name == JsonOptions.ReferenceTag) {
 						EnsureReferenceResolver();
-						var r = ReadValueFunc(ReferenceResolver.ReferenceType)();
+						var r = referenceReadFunc();
 						Require('}');
 						return ReferenceResolver.ResolveReference(r);
 					}
 					if (name == JsonOptions.IdTag) {
 						EnsureReferenceResolver();
-						id = ReadValueFunc(ReferenceResolver.ReferenceType)();
+						id = referenceReadFunc();
 						name = GetNextName(first: false);
 					}
 					if (Options.DeserializeAsUnknown || name != JsonOptions.ClassTag) {
@@ -1064,12 +1070,12 @@ namespace Yuzu.Json
 					object id = null;
 					var name = GetNextName(first: true);
 					if (name == JsonOptions.ReferenceTag) {
-						var r = ReadValueFunc(ReferenceResolver.ReferenceType)();
+						var r = referenceReadFunc();
 						Require('}');
 						return ReferenceResolver.ResolveReference(r);
 					}
 					if (name == JsonOptions.IdTag) {
-						id = ReadValueFunc(ReferenceResolver.ReferenceType)();
+						id = referenceReadFunc();
 						name = GetNextName(first: false);
 					}
 					if (name != JsonOptions.ClassTag) {
@@ -1147,12 +1153,12 @@ namespace Yuzu.Json
 			object id = null;
 			var name = GetNextName(first: true);
 			if (name == JsonOptions.ReferenceTag) {
-				var r = ReadValueFunc(ReferenceResolver.ReferenceType)();
+				var r = referenceReadFunc();
 				Require('}');
 				return ReferenceResolver.ResolveReference(r);
 			}
 			if (name == JsonOptions.IdTag) {
-				id = ReadValueFunc(ReferenceResolver.ReferenceType)();
+				id = referenceReadFunc();
 				name = GetNextName(first: false);
 			}
 			CheckClassTag(name);

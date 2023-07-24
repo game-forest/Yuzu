@@ -469,11 +469,14 @@ namespace Yuzu
 	{
 		protected BinaryWriter writer;
 
+		protected virtual void Initialize() { }
+
 		protected abstract void ToWriter(object obj);
 
 		public override void ToWriter(object obj, BinaryWriter writer)
 		{
 			this.writer = writer;
+			Initialize();
 			ToWriter(obj);
 		}
 
