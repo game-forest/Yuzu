@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Yuzu;
@@ -178,10 +178,19 @@ namespace YuzuTest
 			},
 		};
 
+		private class ReferenceEqualityComparer : IEqualityComparer<object>
+		{
+			public static readonly ReferenceEqualityComparer Instance = new ReferenceEqualityComparer();
+
+			public new bool Equals(object x, object y) => ReferenceEquals(x, y);
+
+			public int GetHashCode(object obj) => RuntimeHelpers.GetHashCode(obj);
+		}
+
 		private class ReferenceResolver : ReferenceResolver<int>
 		{
 			private readonly List<object> referenceToObject = new List<object>();
-			private readonly Dictionary<object, int> objectToReference = new Dictionary<object, int>();
+			private readonly Dictionary<object, int> objectToReference = new Dictionary<object, int>(ReferenceEqualityComparer.Instance);
 
 			public override int GetReference(object obj, out bool alreadyExists)
 			{
