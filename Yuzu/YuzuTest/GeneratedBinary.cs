@@ -27,7 +27,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.Sample1();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__Sample1(d, def, result);
 			return result;
@@ -54,7 +54,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.Sample2();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__Sample2(d, def, result);
 			return result;
@@ -84,7 +84,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.Sample3();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__Sample3(d, def, result);
 			return result;
@@ -111,7 +111,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleEnumMemberTyped();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleEnumMemberTyped(d, def, result);
 			return result;
@@ -134,7 +134,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.Sample4();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__Sample4(d, def, result);
 			return result;
@@ -156,7 +156,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleDecimal();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleDecimal(d, def, result);
 			return result;
@@ -178,7 +178,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleNullable();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleNullable(d, def, result);
 			return result;
@@ -200,7 +200,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleObj();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleObj(d, def, result);
 			return result;
@@ -236,7 +236,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleDict();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleDict(d, def, result);
 			return result;
@@ -269,7 +269,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleSortedDict();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleSortedDict(d, def, result);
 			return result;
@@ -324,7 +324,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleDictKeys();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleDictKeys(d, def, result);
 			return result;
@@ -347,7 +347,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleMemberI();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleMemberI(d, def, result);
 			return result;
@@ -378,7 +378,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleArray();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleArray(d, def, result);
 			return result;
@@ -416,7 +416,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleArrayOfArray();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleArrayOfArray(d, def, result);
 			return result;
@@ -441,7 +441,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleArrayNDim();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleArrayNDim(d, def, result);
 			return result;
@@ -463,7 +463,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleBase();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleBase(d, def, result);
 			return result;
@@ -488,7 +488,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleDerivedA();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleDerivedA(d, def, result);
 			return result;
@@ -513,7 +513,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleDerivedB();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleDerivedB(d, def, result);
 			return result;
@@ -553,7 +553,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleMatrix();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleMatrix(d, def, result);
 			return result;
@@ -590,7 +590,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleRect();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleRect(d, def, result);
 			return result;
@@ -612,7 +612,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleGuid();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleGuid(d, def, result);
 			return result;
@@ -646,7 +646,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleDefault();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleDefault(d, def, result);
 			return result;
@@ -664,7 +664,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.Color();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__Color(d, def, result);
 			return result;
@@ -695,7 +695,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleClassList();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleClassList(d, def, result);
 			return result;
@@ -729,7 +729,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleSmallTypes();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleSmallTypes(d, def, result);
 			return result;
@@ -746,7 +746,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleWithNullFieldCompact();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleWithNullFieldCompact(d, def, result);
 			return result;
@@ -769,7 +769,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleNested.NestedClass();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleNested__NestedClass(d, def, result);
 			return result;
@@ -806,7 +806,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleNested();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleNested(d, def, result);
 			return result;
@@ -847,7 +847,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SamplePerson();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SamplePerson(d, def, result);
 			return result;
@@ -869,7 +869,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleInterfaceField();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleInterfaceField(d, def, result);
 			return result;
@@ -895,7 +895,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleInterfacedGeneric<string>();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleInterfacedGeneric_String(d, def, result);
 			return result;
@@ -917,7 +917,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleConcrete();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleConcrete(d, def, result);
 			return result;
@@ -974,7 +974,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleWithCollection();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleWithCollection(d, def, result);
 			return result;
@@ -1000,7 +1000,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleAfter2();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleAfter2(d, def, result);
 			return result;
@@ -1023,7 +1023,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleAfterSerialization();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleAfterSerialization(d, def, result);
 			return result;
@@ -1047,7 +1047,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleBeforeDeserialization();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleBeforeDeserialization(d, def, result);
 			return result;
@@ -1090,7 +1090,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleMerge();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleMerge(d, def, result);
 			return result;
@@ -1118,7 +1118,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleAssemblyDerivedR();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleAssemblyDerivedR(d, def, result);
 			return result;
@@ -1160,7 +1160,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleAoS.S();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleAoS__S(d, def, result);
 			return result;
@@ -1191,7 +1191,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleAoS();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleAoS(d, def, result);
 			return result;
@@ -1226,7 +1226,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleAliasMany();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleAliasMany(d, def, result);
 			return result;
@@ -1248,7 +1248,7 @@ namespace YuzuGenBin
 		{
 			var result = global::YuzuTest.SamplePrivateConstructor.Make();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SamplePrivateConstructor(d, def, result);
 			return result;
@@ -1271,7 +1271,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTestAssembly.SampleAssemblyBase();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTestAssembly__SampleAssemblyBase(d, def, result);
 			return result;
@@ -1298,7 +1298,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTestAssembly.SampleAssemblyDerivedQ();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTestAssembly__SampleAssemblyDerivedQ(d, def, result);
 			return result;
@@ -1320,7 +1320,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest2.SampleNamespace();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest2__SampleNamespace(d, def, result);
 			return result;
@@ -1339,7 +1339,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleExplicitCollection<int>();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleExplicitCollection_Int32(d, def, result);
 			return result;
@@ -1372,7 +1372,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.TestReferences.Node();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__TestReferences__Node(d, def, result);
 			return result;
@@ -1412,7 +1412,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.TestReferences.Employee();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__TestReferences__Employee(d, def, result);
 			return result;

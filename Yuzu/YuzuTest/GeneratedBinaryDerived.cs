@@ -43,7 +43,7 @@ namespace YuzuGenBin
 		{
 			var result = new global::YuzuTest.SampleMergeNonPrimitive();
 			if (id != null) {
-				d.ReferenceResolver?.AddObject(id, result);
+				d.ReferenceResolver?.AddReference(id, result);
 			}
 			Read_YuzuTest__SampleMergeNonPrimitive(d, def, result);
 			return result;
