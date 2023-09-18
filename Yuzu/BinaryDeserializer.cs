@@ -568,6 +568,7 @@ namespace Yuzu.Binary
 						);
 					}
 				}
+				Console.WriteLine("[classid] hit");
 				return r;
 			}
 			if (classId < d.internalClassDefs.Count) {
@@ -576,6 +577,7 @@ namespace Yuzu.Binary
 			if (classId > d.internalClassDefs.Count) {
 				throw d.Error("Bad classId: {0}", classId);
 			}
+			Console.WriteLine("[classid] miss");
 			var typeName = d.Reader.ReadString();
 			var classType = Meta.GetTypeByReadAlias(typeName, d.Options) ?? TypeSerializer.Deserialize(typeName);
 			if (classType == null) {
