@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,8 +26,7 @@ namespace Yuzu.Json
 			GetWrapperNamespace() + "." + t.Namespace + "." +
 			Utils.GetMangledTypeName(t) + "_JsonDeserializer";
 
-		private static Dictionary<string, JsonDeserializerGenBase> deserializerCache =
-			new Dictionary<string, JsonDeserializerGenBase>();
+		private static Dictionary<string, JsonDeserializerGenBase> deserializerCache = new ();
 
 		private JsonDeserializerGenBase MakeDeserializer(string className)
 		{
@@ -79,16 +78,18 @@ namespace Yuzu.Json
 			return FromReaderIntGenerated();
 		}
 
-		public T DefaultFactory<T>() where T : new() => new T();
-		public T FromReaderTyped<T>(BinaryReader reader) where T : new() =>
-			FromReaderTypedFactory(reader, DefaultFactory<T>);
+		public T DefaultFactory<T>() where T : new() => new ();
+		public T FromReaderTyped<T>(BinaryReader reader) where T : new()
+		{
+			return FromReaderTypedFactory(reader, DefaultFactory<T>);
+		}
 
 		public T FromReaderTypedFactory<T>(BinaryReader reader, Func<T> factory)
 		{
 			Reader = reader;
 			KillBuf();
 			var ch = RequireBracketOrNull();
-			if (ch == 'n') return default(T);
+			if (ch == 'n') return default;
 			if (ch == '[') return (T)ReadFieldsCompact(factory());
 			var name = GetNextName(true);
 			if (name != JsonOptions.ClassTag) return (T)ReadFields(factory(), name);
@@ -113,9 +114,9 @@ namespace Yuzu.Json
 
 	public class JsonDeserializerGenerator : JsonDeserializerGenBase, IGenerator
 	{
-		public static new JsonDeserializerGenerator Instance = new JsonDeserializerGenerator();
+		public static new JsonDeserializerGenerator Instance = new ();
 
-		private CodeWriter cw = new CodeWriter();
+		private CodeWriter cw = new ();
 		private string wrapperNameSpace = "";
 		private string lastNameSpace = "";
 
@@ -221,7 +222,7 @@ namespace Yuzu.Json
 			cw.PutEndBlock();
 		}
 
-		private static Dictionary<Type, string> simpleValueReader = new Dictionary<Type, string>() {
+		private static Dictionary<Type, string> simpleValueReader = new () {
 			{ typeof(sbyte), "checked((sbyte)RequireInt())" },
 			{ typeof(byte), "checked((byte)RequireUInt())" },
 			{ typeof(short), "checked((short)RequireInt())" },

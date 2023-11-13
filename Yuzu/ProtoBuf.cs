@@ -21,7 +21,7 @@ namespace Yuzu.Protobuf
 
 	public class ProtobufSerializer : AbstractWriterSerializer
 	{
-		public ProtobufSerializeOptions ProtobufOptions = new ProtobufSerializeOptions();
+		public ProtobufSerializeOptions ProtobufOptions = new ();
 
 		private void WriteVarint(long value)
 		{
@@ -71,7 +71,7 @@ namespace Yuzu.Protobuf
 
 	public class ProtobufDeserializer : AbstractReaderDeserializer
 	{
-		public ProtobufDeserializeOptions ProtobufOptions = new ProtobufDeserializeOptions();
+		public ProtobufDeserializeOptions ProtobufOptions = new ();
 
 		private long ReadVarint()
 		{

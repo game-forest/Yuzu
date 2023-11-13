@@ -10,9 +10,9 @@ namespace Yuzu.Binary
 {
 	public class BinaryDeserializer : AbstractReaderDeserializer
 	{
-		public static BinaryDeserializer Instance = new BinaryDeserializer();
+		public static BinaryDeserializer Instance = new ();
 
-		public BinarySerializeOptions BinaryOptions = new BinarySerializeOptions();
+		public BinarySerializeOptions BinaryOptions = new ();
 
 		public BinaryDeserializer() { InitReaders(); }
 
@@ -39,9 +39,9 @@ namespace Yuzu.Binary
 			var t = new TimeSpan(Reader.ReadInt64());
 			return new DateTimeOffset(d, t);
 		}
-		private TimeSpan ReadTimeSpan() => new TimeSpan(Reader.ReadInt64());
+		private TimeSpan ReadTimeSpan() => new(Reader.ReadInt64());
 
-		private Guid ReadGuid() => new Guid(Reader.ReadBytes(16));
+		private Guid ReadGuid() => new(Reader.ReadBytes(16));
 
 		private object ReadString()
 		{
@@ -310,7 +310,7 @@ namespace Yuzu.Binary
 		protected Action<T> ReadAction<T>() => GetAction<T>(Reader.ReadString());
 
 		// Zeroth element corresponds to 'null'.
-		private List<ReaderClassDef> classDefs = new List<ReaderClassDef> { new ReaderClassDef() };
+		private List<ReaderClassDef> classDefs = new () { new ReaderClassDef() };
 
 		protected virtual void PrepareReaders(ReaderClassDef def) => def.ReadFields = ReadFields;
 
@@ -611,7 +611,7 @@ namespace Yuzu.Binary
 		}
 
 		private Dictionary<Type, Func<object>> readerCache;
-		private Dictionary<Type, Action<object>> mergerCache = new Dictionary<Type, Action<object>>();
+		private Dictionary<Type, Action<object>> mergerCache = new ();
 
 		private Func<object> ReadValueFunc(Type t)
 		{

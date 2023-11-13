@@ -389,7 +389,7 @@ namespace Yuzu.Grisu
         {
             Debug.Assert(Value > 0.0);
             DiyFp v = AsDiyFp;
-            DiyFp m_plus = new DiyFp((v.F << 1) + 1, v.E - 1);
+            DiyFp m_plus = new((v.F << 1) + 1, v.E - 1);
             m_plus.Normalize();
             DiyFp m_minus = LowerBoundaryIsCloser() ?
                 new DiyFp((v.F << 2) - 1, v.E - 2) :

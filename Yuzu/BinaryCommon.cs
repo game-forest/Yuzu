@@ -79,7 +79,7 @@ namespace Yuzu.Binary
 		public const int EOF = short.MaxValue;
 		public Action<BinaryDeserializer, ReaderClassDef, object> ReadFields;
 		public Func<BinaryDeserializer, ReaderClassDef, object> Make;
-		public List<FieldDef> Fields = new List<FieldDef> { new FieldDef { OurIndex = EOF } };
+		public List<FieldDef> Fields = new () { new FieldDef { OurIndex = EOF } };
 	}
 
 	internal class Record { }

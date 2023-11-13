@@ -71,7 +71,7 @@ namespace Yuzu.Grisu
             if (decimal_rep == null)
                 decimal_rep = ts_decimal_rep = new byte[kBase10MaximalLength + 1];
 
-            GrisuDouble v = new GrisuDouble(value);
+            GrisuDouble v = new(value);
             DiyFp w = v.AsNormalizedDiyFp();
             // boundary_minus and boundary_plus are the boundaries between v and its
             // closest floating-point neighbors. Any number strictly between
@@ -116,7 +116,7 @@ namespace Yuzu.Grisu
             if (decimal_rep == null)
                 decimal_rep = ts_decimal_rep = new byte[kBase10MaximalLength + 1];
 
-            GrisuDouble v = new GrisuDouble((double)value);
+            GrisuDouble v = new((double)value);
             DiyFp w = v.AsNormalizedDiyFp();
             // boundary_minus and boundary_plus are the boundaries between v and its
             // closest floating-point neighbors. Any number strictly between
@@ -310,8 +310,8 @@ namespace Yuzu.Grisu
             // interval. Later we will weed out representations that lie outside the safe
             // interval and thus _might_ lie outside the correct interval.
             ulong unit = 1;
-            DiyFp too_low = new DiyFp(low.F - unit, low.E);
-            DiyFp too_high = new DiyFp(high.F + unit, high.E);
+            DiyFp too_low = new(low.F - unit, low.E);
+            DiyFp too_high = new(high.F + unit, high.E);
             // too_low and too_high are guaranteed to lie outside the interval we want the
             // generated number in.
             DiyFp unsafe_interval = DiyFp.Minus(ref too_high, ref too_low);
@@ -322,7 +322,7 @@ namespace Yuzu.Grisu
             // such that:   too_low < buffer * 10^kappa < too_high
             // We use too_high for the digit_generation and stop as soon as possible.
             // If we stop early we effectively round down.
-            DiyFp one = new DiyFp((ulong)(1) << -w.E, w.E);
+            DiyFp one = new((ulong)(1) << -w.E, w.E);
             // Division by one is a shift.
             uint integrals = (uint)(too_high.F >> -one.E);
             // Modulo by one is an and.

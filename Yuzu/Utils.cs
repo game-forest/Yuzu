@@ -55,7 +55,7 @@ namespace Yuzu.Util
 			t.Namespace == "System" ? t.IsValueType :
 			t.IsClass || t.IsValueType ? null : (bool?)false;
 
-		private static Dictionary<Type, Type> collectionInterfaceForType = new Dictionary<Type, Type>();
+		private static Dictionary<Type, Type> collectionInterfaceForType = new ();
 
 		public static Type GetICollection(Type t)
 		{
@@ -88,7 +88,7 @@ namespace Yuzu.Util
 			}
 		}
 
-		private static Dictionary<Type, Type> enumerableInterfaceForType = new Dictionary<Type, Type>();
+		private static Dictionary<Type, Type> enumerableInterfaceForType = new ();
 
 		public static Type GetIEnumerable(Type t)
 		{
@@ -167,7 +167,7 @@ namespace Yuzu.Util
 				DeclaringTypes(t.DeclaringType, separator) + t.DeclaringType.Name + separator;
 		}
 
-		private static Dictionary<Type, string> knownTypes = new Dictionary<Type, string> {
+		private static Dictionary<Type, string> knownTypes = new () {
 			{ typeof(byte),  "byte" },
 			{ typeof(sbyte), "sbyte" },
 			{ typeof(short), "short" },
@@ -220,8 +220,8 @@ namespace Yuzu.Util
 
 	public static class TypeSerializer
 	{
-		private static LinkedList<Assembly> assembliesLru = new LinkedList<Assembly>();
-		private static ConcurrentDictionary<string, Type> cache = new ConcurrentDictionary<string, Type>();
+		private static LinkedList<Assembly> assembliesLru = new ();
+		private static ConcurrentDictionary<string, Type> cache = new ();
 
 		static TypeSerializer()
 		{
@@ -252,7 +252,7 @@ namespace Yuzu.Util
 		}
 
 
-		private static Regex extendedAssemblyInfo = new Regex(
+		private static Regex extendedAssemblyInfo = new(
 			@", Version=\d+.\d+.\d+.\d+, Culture=neutral, PublicKeyToken=[a-z0-9]+", RegexOptions.Compiled);
 
 		public static bool Compatibility = false;
@@ -360,7 +360,7 @@ namespace Yuzu.Util
 
 	internal class NullYuzuUnknownStorage : YuzuUnknownStorage
 	{
-		internal static NullYuzuUnknownStorage Instance = new NullYuzuUnknownStorage();
+		internal static NullYuzuUnknownStorage Instance = new ();
 		public override void Add(string name, object value) { }
 	}
 
@@ -377,7 +377,7 @@ namespace Yuzu.Util
 			public Action<object> Run;
 		}
 
-		internal List<MethodAction> Actions = new List<MethodAction>();
+		internal List<MethodAction> Actions = new ();
 
 		public void MaybeAdd(MethodInfo m, Type attr)
 		{

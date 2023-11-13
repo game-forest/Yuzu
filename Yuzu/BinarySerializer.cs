@@ -10,7 +10,7 @@ namespace Yuzu.Binary
 {
 	public class BinarySerializer : AbstractWriterSerializer
 	{
-		public BinarySerializeOptions BinaryOptions = new BinarySerializeOptions();
+		public BinarySerializeOptions BinaryOptions = new ();
 
 		protected void WriteSByte(object obj) => writer.Write((sbyte)obj);
 		protected void WriteByte(object obj) => writer.Write((byte)obj);
@@ -188,7 +188,7 @@ namespace Yuzu.Binary
 			}
 		}
 
-		private Stack<object> objStack = new Stack<object>();
+		private Stack<object> objStack = new ();
 
 		private void WriteAction(object obj)
 		{
@@ -320,10 +320,10 @@ namespace Yuzu.Binary
 			public short Id;
 			internal Meta Meta;
 			internal ReaderClassDef ReaderDef;
-			public List<FieldDef> Fields = new List<FieldDef>();
+			public List<FieldDef> Fields = new ();
 		}
-		private Dictionary<Type, ClassDef> classIdCache = new Dictionary<Type, ClassDef>();
-		private Dictionary<string, ClassDef> unknownClassIdCache = new Dictionary<string, ClassDef>();
+		private Dictionary<Type, ClassDef> classIdCache = new ();
+		private Dictionary<string, ClassDef> unknownClassIdCache = new ();
 
 		public void ClearClassIds() { classIdCache.Clear(); }
 

@@ -25,12 +25,10 @@ namespace Yuzu.Clone
 
 	public class Cloner : AbstractCloner
 	{
-		public static Cloner Instance = new Cloner();
+		public static Cloner Instance = new ();
 
-		private Dictionary<Type, Func<object, object>> clonerCache =
-			new Dictionary<Type, Func<object, object>>();
-		private Dictionary<Type, Action<object, object>> mergerCache =
-			new Dictionary<Type, Action<object, object>>();
+		private Dictionary<Type, Func<object, object>> clonerCache = new ();
+		private Dictionary<Type, Action<object, object>> mergerCache = new ();
 
 		public Cloner() { }
 
