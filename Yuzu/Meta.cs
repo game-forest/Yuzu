@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -304,13 +304,30 @@ namespace Yuzu.Metadata
 		{
 			var attrs = Options.GetItem(m);
 			if (attrs.HasAttr(Options.SerializeItemIfAttribute)) {
-				if (SerializeItemIf != null)
-					throw Error("Duplicate SerializeItemIf");
-				if (Utils.GetIEnumerable(Type) == null)
+				if (Utils.GetIEnumerable(Type) == null) {
 					throw Error("SerializeItemIf may only be used inside of IEnumerable");
-				SerializeItemIf = Options.GetSerializeItemCondition(m);
-				SerializeItemIfMethod = m;
+				}
+				if (m.IsStatic) {
+					SerializeItemIf = Options.GetSerializeItemCondition(m);
+				} else {
+					if (SerializeItemIfMethod != null) {
+						throw Error("Duplicate SerializeItemIf");
+					}
+					var staticGeneratedMethod = m.DeclaringType.GetMethod($"Yuzu_{m.Name}_Static");
+					if (
+						staticGeneratedMethod == null
+						|| !Options.GetItem(staticGeneratedMethod).HasAttr(Options.SerializeItemIfAttribute)
+					) {
+						throw new YuzuException(
+							$"Non-static method {m.Name} with {nameof(SerializeItemIf)} " +
+							$"attribute doesn't have corresponding generated static method. " +
+							"Make sure YuzuGenerator project is included."
+						);
+					}
+					SerializeItemIfMethod = m;
+				}
 			}
+
 			BeforeSerialization.MaybeAdd(m, Options.BeforeSerializationAttribute);
 			AfterSerialization.MaybeAdd(m, Options.AfterSerializationAttribute);
 			BeforeDeserialization.MaybeAdd(m, Options.BeforeDeserializationAttribute);

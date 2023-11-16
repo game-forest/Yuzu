@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -69,17 +69,20 @@ namespace Yuzu
 	public class YuzuSerializeIf : YuzuSerializeCondition
 	{
 		public readonly string Method;
-		public YuzuSerializeIf(string method) { Method = method; }
+		public YuzuSerializeIf(string method) {
+			Method = method;
+		}
 
 		public override Func<object, object, bool> MakeChecker(Type tObj)
 		{
-			var fn = tObj.GetMethod(Method);
-			if (fn == null)
+			var methodInfo = tObj.GetMethod(
+				$"Yuzu_{Method}_Static",
+				BindingFlags.FlattenHierarchy | BindingFlags.Static | BindingFlags.Public
+			);
+			if (methodInfo == null || !methodInfo.IsStatic) {
 				throw new YuzuException();
-			var p = Expression.Parameter(typeof(object));
-			var pf = Expression.Parameter(typeof(object));
-			var e = Expression.Call(Expression.Convert(p, tObj), fn);
-			return Expression.Lambda<Func<object, object, bool>>(e, p, pf).Compile();
+			}
+			return (Func<object, object, bool>)Delegate.CreateDelegate(typeof(Func<object, object, bool>), methodInfo);
 		}
 		public override MethodInfo GetMethod(Type t) => t.GetMethod(Method);
 	}
@@ -89,12 +92,10 @@ namespace Yuzu
 	{
 		internal static Func<object, int, object, bool> MakeChecker(MethodInfo m)
 		{
-			var pObj = Expression.Parameter(typeof(object));
-			var pIndex = Expression.Parameter(typeof(int));
-			var pItem = Expression.Parameter(typeof(object));
-			var e = Expression.Call(Expression.Convert(pObj, m.DeclaringType), m, pIndex, pItem);
-			return Expression.Lambda<Func<object, int, object, bool>>(
-				e, pObj, pIndex, pItem).Compile();
+			if (!m.IsStatic) {
+				throw new InvalidOperationException();
+			}
+			return (Func<object, int, object, bool>)Delegate.CreateDelegate(typeof(Func<object, int, object, bool>), m);
 		}
 	}
 

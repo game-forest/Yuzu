@@ -10,7 +10,9 @@
   <ItemGroup>
     <None Remove=".git" />
     <None Remove="Yuzu\YuzuTest\**" />
+    <None Remove="YuzuGenerator\**" />
     <Compile Remove="Yuzu\YuzuTest\**" />
+    <Compile Remove="YuzuGenerator\**" />
   </ItemGroup>
 
 </Project>

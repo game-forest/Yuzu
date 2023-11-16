@@ -28,6 +28,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Yuzu.csproj" />
     <ProjectReference Include="AssemblyTest\AssemblyTest.csproj" />
+    <ProjectReference Include="..\..\YuzuGenerator\YuzuGenerator.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

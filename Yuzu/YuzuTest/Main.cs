@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -86,22 +86,29 @@ namespace YuzuTest
 	{
 		private static void Gen(string fileName, IGenerator g, Action<IGenerator> fill)
 		{
-			using (var ms = new MemoryStream())
-			using (var sw = new StreamWriter(ms)) {
-				g.GenWriter = sw;
-				g.GenerateHeader();
-				fill(g);
-				g.GenerateFooter();
-				sw.Flush();
-				ms.WriteTo(new FileStream(fileName, FileMode.Create));
-			}
+			using var ms = new MemoryStream();
+			using var sw = new StreamWriter(ms);
+			g.GenWriter = sw;
+			g.GenerateHeader();
+			fill(g);
+			g.GenerateFooter();
+			sw.Flush();
+			using var file = new FileStream(fileName, FileMode.Create);
+			ms.WriteTo(file);
 		}
 
 		public static void Main()
 		{
+			var path = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+			while (!File.Exists(Path.Combine(path, "YuzuTest.csproj"))) {
+				path = Path.GetDirectoryName(path);
+				if (path == null) {
+					throw new InvalidOperationException("Can't find directory with YuzuTest.csproj");
+				}
+			}
 			var jd = JsonDeserializerGenerator.Instance;
 			jd.Options.TagMode = TagMode.Names;
-			Gen(@"..\..\GeneratedJson.cs", jd, g => {
+			Gen(Path.Combine(path, "GeneratedJson.cs"), jd, g => {
 				var js = g as JsonDeserializerGenerator;
 				jd.Generate<Sample1>();
 				jd.Generate<Sample2>();
@@ -169,7 +176,7 @@ namespace YuzuTest
 
 			var bdg = new BinaryDeserializerGenerator();
 			bdg.SafetyChecks = true;
-			Gen(@"..\..\GeneratedBinary.cs", bdg, bd => {
+			Gen(Path.Combine(path, "GeneratedBinary.cs"), bdg, bd => {
 				bd.Generate<Sample1>();
 				bd.Generate<Sample2>();
 				bd.Generate<Sample3>();
@@ -222,13 +229,15 @@ namespace YuzuTest
 				bd.Generate<SampleExplicitCollection<int>>();
 			});
 			var bdg1 = new BinaryDeserializerGenerator(
-				className: "BinaryDeserializerGenDerived", baseClassName: "BinaryDeserializerGen");
-			Gen(@"..\..\GeneratedBinaryDerived.cs", bdg1, bd => {
+				className: "BinaryDeserializerGenDerived",
+				baseClassName: "BinaryDeserializerGen"
+			);
+			Gen(Path.Combine(path, "GeneratedBinaryDerived.cs"), bdg1, bd => {
 				bd.Generate<SampleMergeNonPrimitive>();
 			});
 			var cg = new ClonerGenerator();
 			bdg.SafetyChecks = true;
-			Gen(@"..\..\GeneratedCloner.cs", cg, cd => {
+			Gen(Path.Combine(path, "GeneratedCloner.cs"), cg, cd => {
 				cd.Generate<Sample1>();
 				cd.Generate<Sample2>();
 				cd.Generate<Sample3>();
@@ -267,14 +276,18 @@ namespace YuzuTest
 				cd.Generate<SampleDerivedB>();
 				cd.Generate<SampleSealed>();
 				cd.Generate<SampleSerializeIf>();
+				cd.Generate<SampleSerializeIfOnField>();
 				cd.Generate<SampleCollection<int>>();
 				cd.Generate<SampleCollection<Sample1>>();
 				cd.Generate<SampleWithCollectionMerge>();
 				cd.Generate<SampleExplicitCollection<int>>();
 			});
 			var cg1 = new ClonerGenerator(
-				className: "ClonerGenDerived", baseClassName: "ClonerGen", parentGen: cg);
-			Gen(@"..\..\GeneratedClonerDerived.cs", cg1, cd => {
+				className: "ClonerGenDerived",
+				baseClassName: "ClonerGen",
+				parentGen: cg
+			);
+			Gen(Path.Combine(path, "GeneratedClonerDerived.cs"), cg1, cd => {
 				cd.Generate<SampleClonerGenDerived>();
 			});
 		}

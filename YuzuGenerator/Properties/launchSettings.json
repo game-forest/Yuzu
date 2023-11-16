@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DebugYuzuTest": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\Yuzu\\YuzuTest\\YuzuTest.csproj"
+    }
+  }
+}

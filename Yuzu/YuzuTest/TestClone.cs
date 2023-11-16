@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -579,6 +579,18 @@ namespace YuzuTest
 			});
 			TestGen(cl => {
 				var src = new SampleSerializeIf { X = 7, Y = new Sample1 { X = 7 } };
+				var dst = cl.Deep(src);
+				Assert.AreNotEqual(src, dst);
+				Assert.AreEqual(src.X, dst.X);
+				Assert.IsNull(dst.Y);
+			});
+			TestGen(cl => {
+				var src = new SampleSerializeIfOnField {
+					X = 7,
+					Y = new Sample1 { X = 7 },
+					W = new Sample1 { X = 7 },
+					Z = new Sample1 { X = 7 }
+				};
 				var dst = cl.Deep(src);
 				Assert.AreNotEqual(src, dst);
 				Assert.AreEqual(src.X, dst.X);
