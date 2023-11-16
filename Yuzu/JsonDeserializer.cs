@@ -12,8 +12,8 @@ namespace Yuzu.Json
 {
 	public class JsonDeserializer : AbstractReaderDeserializer
 	{
-		public static JsonDeserializer Instance = new JsonDeserializer();
-		public JsonSerializeOptions JsonOptions = new JsonSerializeOptions();
+		public static JsonDeserializer Instance = new ();
+		public JsonSerializeOptions JsonOptions = new ();
 
 		private char? buf;
 
@@ -122,7 +122,7 @@ namespace Yuzu.Json
 		}
 
 		// Optimization: avoid re-creating StringBuilder.
-		private StringBuilder sb = new StringBuilder();
+		private StringBuilder sb = new ();
 
 		protected string RequireUnescapedString()
 		{
@@ -493,7 +493,7 @@ namespace Yuzu.Json
 			return list;
 		}
 
-		protected static Dictionary<Type, Func<string, object>> keyParsers = new Dictionary<Type, Func<string, object>> {
+		protected static Dictionary<Type, Func<string, object>> keyParsers = new () {
 			{ typeof(int), s => int.Parse(s) },
 			{ typeof(uint), s => uint.Parse(s) },
 			{ typeof(long), s => long.Parse(s) },
@@ -730,8 +730,8 @@ namespace Yuzu.Json
 		private object RequireTimeSpanObj() => RequireTimeSpan();
 		private object RequireGuidObj() => RequireGuid();
 
-		private Dictionary<Type, Func<object>> readerCache = new Dictionary<Type, Func<object>>();
-		private Dictionary<Type, Action<object>> mergerCache = new Dictionary<Type, Action<object>>();
+		private Dictionary<Type, Func<object>> readerCache = new ();
+		private Dictionary<Type, Action<object>> mergerCache = new ();
 		private int jsonOptionsGeneration = 0;
 
 		private Func<object> ReadValueFunc(Type t)

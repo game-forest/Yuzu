@@ -21,3 +21,11 @@ push_to_github:
     - git branch -D $env:CI_BUILD_REF_NAME; if ($?) { } else { echo "branch doesn't exist" }
     - git checkout --track origin/$env:CI_BUILD_REF_NAME
     - git push --force github $env:CI_BUILD_REF_NAME
+
+run_tests:
+    stage: test
+    tags:
+        - win
+    script:
+        - chcp 65001
+        - dotnet test Yuzu\YuzuTest\YuzuTest.csproj -c Release

@@ -16,8 +16,7 @@ namespace Yuzu.Metadata
 			Both = 3,
 		}
 
-		private static ConcurrentDictionary<Tuple<Type, MetaOptions>, State> surrogateTypes =
-			new ConcurrentDictionary<Tuple<Type, MetaOptions>, State>();
+		private static ConcurrentDictionary<Tuple<Type, MetaOptions>, State> surrogateTypes = new ();
 
 		private MethodInfo methodIf;
 		public MethodInfo MethodTo;

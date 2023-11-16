@@ -11,8 +11,7 @@ namespace Yuzu.Clone
 
 	public class ClonerGenBase : Cloner
 	{
-		protected static Dictionary<Type, Func<Cloner, object, object>> clonerCache =
-			new Dictionary<Type, Func<Cloner, object, object>>();
+		protected static Dictionary<Type, Func<Cloner, object, object>> clonerCache = new ();
 		public ClonerGenBase(): base(clonerCache) { }
 
 		public static object ValueCopyCloner(Cloner cl, object src) => src;
@@ -20,13 +19,13 @@ namespace Yuzu.Clone
 
 	public class ClonerGenerator : IGenerator
 	{
-		private CodeWriter cw = new CodeWriter();
+		private CodeWriter cw = new ();
 		private string wrapperNameSpace;
 		private CommonOptions options;
 		private string className;
 		private string baseClassName;
 		private ClonerGenerator parentGen;
-		private Dictionary<Type, string> generatedCloners = new Dictionary<Type, string>();
+		private Dictionary<Type, string> generatedCloners = new ();
 
 		public string LineSeparator { get { return cw.LineSeparator; } set { cw.LineSeparator = value; } }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -69,17 +69,20 @@ namespace Yuzu
 	public class YuzuSerializeIf : YuzuSerializeCondition
 	{
 		public readonly string Method;
-		public YuzuSerializeIf(string method) { Method = method; }
+		public YuzuSerializeIf(string method) {
+			Method = method;
+		}
 
 		public override Func<object, object, bool> MakeChecker(Type tObj)
 		{
-			var fn = tObj.GetMethod(Method);
-			if (fn == null)
+			var methodInfo = tObj.GetMethod(
+				$"Yuzu_{Method}_Static",
+				BindingFlags.FlattenHierarchy | BindingFlags.Static | BindingFlags.Public
+			);
+			if (methodInfo == null || !methodInfo.IsStatic) {
 				throw new YuzuException();
-			var p = Expression.Parameter(typeof(object));
-			var pf = Expression.Parameter(typeof(object));
-			var e = Expression.Call(Expression.Convert(p, tObj), fn);
-			return Expression.Lambda<Func<object, object, bool>>(e, p, pf).Compile();
+			}
+			return (Func<object, object, bool>)Delegate.CreateDelegate(typeof(Func<object, object, bool>), methodInfo);
 		}
 		public override MethodInfo GetMethod(Type t) => t.GetMethod(Method);
 	}
@@ -89,12 +92,10 @@ namespace Yuzu
 	{
 		internal static Func<object, int, object, bool> MakeChecker(MethodInfo m)
 		{
-			var pObj = Expression.Parameter(typeof(object));
-			var pIndex = Expression.Parameter(typeof(int));
-			var pItem = Expression.Parameter(typeof(object));
-			var e = Expression.Call(Expression.Convert(pObj, m.DeclaringType), m, pIndex, pItem);
-			return Expression.Lambda<Func<object, int, object, bool>>(
-				e, pObj, pIndex, pItem).Compile();
+			if (!m.IsStatic) {
+				throw new InvalidOperationException();
+			}
+			return (Func<object, int, object, bool>)Delegate.CreateDelegate(typeof(Func<object, int, object, bool>), m);
 		}
 	}
 
@@ -214,8 +215,8 @@ namespace Yuzu
 	public class MetaItemOverride
 	{
 		public MemberInfo Info;
-		public ConcurrentBag<Attribute> Attributes = new ConcurrentBag<Attribute>();
-		public ConcurrentBag<Type> NegatedAttributes = new ConcurrentBag<Type>();
+		public ConcurrentBag<Attribute> Attributes = new ();
+		public ConcurrentBag<Type> NegatedAttributes = new ();
 
 		public MetaItemOverride AddAttr(Attribute attr)
 		{
@@ -242,8 +243,7 @@ namespace Yuzu
 
 	public class MetaOverride: MetaItemOverride {
 		public Type TypeInfo() => Info as Type;
-		public ConcurrentDictionary<string, MetaItemOverride> Items =
-			new ConcurrentDictionary<string, MetaItemOverride>();
+		public ConcurrentDictionary<string, MetaItemOverride> Items = new ();
 
 		public new MetaOverride AddAttr(Attribute attr)
 		{
@@ -277,7 +277,7 @@ namespace Yuzu
 
 	public class MetaOptions
 	{
-		public static MetaOptions Default = new MetaOptions();
+		public static MetaOptions Default = new ();
 
 		public Type RequiredAttribute = typeof(YuzuRequired);
 		public Type OptionalAttribute = typeof(YuzuOptional);
@@ -317,8 +317,7 @@ namespace Yuzu
 		public Func<Attribute, IEnumerable<string>> GetReadAliases = attr => (attr as YuzuAlias).ReadAliases;
 		public Func<Attribute, string> GetWriteAlias = attr => (attr as YuzuAlias).WriteAlias;
 
-		private ConcurrentDictionary<Type, MetaOverride> overrides =
-			new ConcurrentDictionary<Type, MetaOverride>();
+		private ConcurrentDictionary<Type, MetaOverride> overrides = new ();
 
 		public MetaOptions AddOverride(Type t, Action<MetaOverride> after = null)
 		{
@@ -377,7 +376,7 @@ namespace Yuzu
 	public class YuzuUnknown: DynamicObject
 	{
 		public string ClassTag;
-		public SortedDictionary<string, object> Fields = new SortedDictionary<string, object>();
+		public SortedDictionary<string, object> Fields = new ();
 
 		public static dynamic Dyn(object obj)
 		{
@@ -408,7 +407,7 @@ namespace Yuzu
 			public object Value;
 			static public int Comparer(Item i1, Item i2) { return String.CompareOrdinal(i1.Name, i2.Name); }
 		}
-		public List<Item> Fields = new List<Item>();
+		public List<Item> Fields = new ();
 		public bool IsOrdered { get; private set; }
 		internal object Internal;
 
@@ -443,7 +442,7 @@ namespace Yuzu
 
 	public abstract class AbstractSerializer
 	{
-		public CommonOptions Options = new CommonOptions();
+		public CommonOptions Options = new ();
 		public abstract void ToWriter(object obj, BinaryWriter writer);
 		public abstract string ToString(object obj);
 		public abstract byte[] ToBytes(object obj);
@@ -527,7 +526,7 @@ namespace Yuzu
 
 	public abstract class AbstractDeserializer
 	{
-		public CommonOptions Options = new CommonOptions();
+		public CommonOptions Options = new ();
 
 		public abstract object FromReader(object obj, BinaryReader reader);
 		public abstract object FromString(object obj, string source);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -317,7 +317,7 @@ namespace YuzuTest.Json
 			Assert.AreEqual("{\n\"F\":1E-20,\n\"D\":-3.1415E+100\n}", result2);
 			js.JsonOptions.FloatingPointFormat = "F";
 			var result3 = js.ToString(v);
-			Assert.AreEqual("{\n\"F\":0.00,\n\"D\":-31415" + new string('0', 96) + ".00\n}", result3);
+			Assert.AreEqual("{\n\"F\":0.00,\n\"D\":-31414999999999998355854201642015795681729265923880988006102093628628873801398257955664637236621606912.00\n}", result3);
 		}
 
 		[TestMethod]
@@ -346,6 +346,19 @@ namespace YuzuTest.Json
 			Assert.IsTrue(double.IsNegativeInfinity(w2.D));
 
 			Assert.AreEqual("Infinity", js.ToString(Double.PositiveInfinity));
+		}
+
+		[TestMethod]
+		public void TestBadDoubleJson()
+		{
+			var d = BitConverter.ToDouble(new byte[] { 48, 249, 184, 21, 152, 124, 220, 63 }, 0);
+			var l0 = new List<double> { d };
+			var js = new JsonSerializer();
+			js.JsonOptions.Indent = "";
+			js.JsonOptions.FieldSeparator = "";
+			var r = js.ToString(l0);
+			var l1 = (new JsonDeserializer()).FromString<List<double>>(r);
+			Assert.AreEqual(l0[0], l1[0]);
 		}
 
 		[TestMethod]

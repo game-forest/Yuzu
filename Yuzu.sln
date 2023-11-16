@@ -1,19 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33620.401
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yuzu", "Yuzu.Win.csproj", "{DDD2DFE9-CED2-4CEA-ADF0-5A6865865A46}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YuzuTest", "Yuzu\YuzuTest\YuzuTest.csproj", "{494055CB-A368-4FC2-AD19-8986C23A6D51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YuzuTest", "Yuzu\YuzuTest\YuzuTest.csproj", "{494055CB-A368-4FC2-AD19-8986C23A6D51}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3DFBE19B-53F5-414B-AC2A-717A0B872E3F} = {3DFBE19B-53F5-414B-AC2A-717A0B872E3F}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssemblyTest", "Yuzu\YuzuTest\AssemblyTest\AssemblyTest.csproj", "{3DFBE19B-53F5-414B-AC2A-717A0B872E3F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{DDD2DFE9-CED2-4CEA-ADF0-5A6865865A46} = {DDD2DFE9-CED2-4CEA-ADF0-5A6865865A46}
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AssemblyTest", "Yuzu\YuzuTest\AssemblyTest\AssemblyTest.csproj", "{3DFBE19B-53F5-414B-AC2A-717A0B872E3F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yuzu", "Yuzu.csproj", "{242E8A12-AF66-41AA-8B5B-C47203EC456A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YuzuGenerator", "YuzuGenerator\YuzuGenerator.csproj", "{5736F621-2F36-4F18-A1EE-9A708CEC1779}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,10 +20,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DDD2DFE9-CED2-4CEA-ADF0-5A6865865A46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DDD2DFE9-CED2-4CEA-ADF0-5A6865865A46}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DDD2DFE9-CED2-4CEA-ADF0-5A6865865A46}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DDD2DFE9-CED2-4CEA-ADF0-5A6865865A46}.Release|Any CPU.Build.0 = Release|Any CPU
 		{494055CB-A368-4FC2-AD19-8986C23A6D51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{494055CB-A368-4FC2-AD19-8986C23A6D51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{494055CB-A368-4FC2-AD19-8986C23A6D51}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,8 +28,19 @@ Global
 		{3DFBE19B-53F5-414B-AC2A-717A0B872E3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DFBE19B-53F5-414B-AC2A-717A0B872E3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DFBE19B-53F5-414B-AC2A-717A0B872E3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{242E8A12-AF66-41AA-8B5B-C47203EC456A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{242E8A12-AF66-41AA-8B5B-C47203EC456A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{242E8A12-AF66-41AA-8B5B-C47203EC456A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{242E8A12-AF66-41AA-8B5B-C47203EC456A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5736F621-2F36-4F18-A1EE-9A708CEC1779}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5736F621-2F36-4F18-A1EE-9A708CEC1779}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5736F621-2F36-4F18-A1EE-9A708CEC1779}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5736F621-2F36-4F18-A1EE-9A708CEC1779}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5BC00E2E-E133-4AAA-B5C5-FA4B1EF8BCE1}
 	EndGlobalSection
 EndGlobal

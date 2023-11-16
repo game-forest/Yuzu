@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -364,6 +364,17 @@ namespace YuzuTest.Binary
 			var w2 = bd.FromBytes<SampleFloat>(result2);
 			Assert.IsTrue(float.IsPositiveInfinity(w2.F));
 			Assert.IsTrue(double.IsNegativeInfinity(w2.D));
+		}
+
+		[TestMethod]
+		public void TestBadDoubleBinary()
+		{
+			double d = BitConverter.ToDouble(new byte[] { 48, 249, 184, 21, 152, 124, 220, 63 }, 0);
+			var l0 = new List<double> { d };
+			var bs = new BinarySerializer();
+			var r = bs.ToString(l0);
+			var l1 = (new BinaryDeserializer()).FromString<List<double>>(r);
+			Assert.AreEqual(l0[0], l1[0]);
 		}
 
 		[TestMethod]

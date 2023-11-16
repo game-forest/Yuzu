@@ -83,7 +83,7 @@ namespace Yuzu.Json
 
 	public class JsonSerializer : AbstractWriterSerializer
 	{
-		public JsonSerializeOptions JsonOptions = new JsonSerializeOptions();
+		public JsonSerializeOptions JsonOptions = new ();
 
 		public JsonSerializer() { InitWriters(); }
 
@@ -91,7 +91,7 @@ namespace Yuzu.Json
 
 		private byte[] nullBytes = new byte[] { (byte)'n', (byte)'u', (byte)'l', (byte)'l' };
 
-		private Dictionary<string, byte[]> strCache = new Dictionary<string, byte[]>();
+		private Dictionary<string, byte[]> strCache = new ();
 		private byte[] StrToBytesCached(string s)
 		{
 			if (!strCache.TryGetValue(s, out byte[] b)) {
@@ -450,7 +450,7 @@ namespace Yuzu.Json
 				GetWriteFunc(t)(obj);
 		}
 
-		private Stack<object> objStack = new Stack<object>();
+		private Stack<object> objStack = new ();
 
 		private void WriteAction(object obj)
 		{
@@ -508,7 +508,7 @@ namespace Yuzu.Json
 			return r != Meta.FoundNonPrimitive && r <= JsonOptions.MaxOnelineFields;
 		}
 
-		private Dictionary<Type, Action<object>> writerCache = new Dictionary<Type, Action<object>>();
+		private Dictionary<Type, Action<object>> writerCache = new ();
 		private int jsonOptionsGeneration = 0;
 
 		private void InitWriters()

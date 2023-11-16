@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using ProtoBuf;
@@ -9,7 +9,7 @@ using Yuzu.Metadata;
 namespace YuzuTest.Metadata
 {
 	[TestClass]
-	public class TestMeta
+	public partial class TestMeta
 	{
 		[TestMethod]
 		public void TestAttributes()
@@ -272,15 +272,15 @@ namespace YuzuTest.Metadata
 			XAssert.Throws<YuzuException>(() => Meta.Get(typeof(EmptyReadAlias), opt), "Empty");
 		}
 
-		internal class SampleItemIfScalar
+		internal partial class SampleItemIfScalar
 		{
 			[YuzuMember]
 			public int X = 1;
 			[YuzuSerializeItemIf]
-			public bool Func() => true;
+			public bool Func(int index, object item) => true;
 		}
 
-		internal class SampleItemIfDup: List<int>
+		internal partial class SampleItemIfDup : List<int>
 		{
 			[YuzuSerializeItemIf]
 			public bool Func1(int index, object item) => true;

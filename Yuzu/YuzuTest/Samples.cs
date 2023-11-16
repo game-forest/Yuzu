@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -60,7 +60,7 @@ namespace YuzuTest
 		public string Y = "zzz";
 	}
 
-	public class Sample2
+	public partial class Sample2
 	{
 		[YuzuRequired]
 		public int X { get; set; }
@@ -72,7 +72,7 @@ namespace YuzuTest
 		public bool SaveYIf() => X.ToString() != Y;
 	}
 
-	public class SampleSerializeIf
+	public partial class SampleSerializeIf
 	{
 		[YuzuRequired]
 		public int X { get; set; }
@@ -80,6 +80,22 @@ namespace YuzuTest
 		[YuzuOptional]
 		[YuzuSerializeIf(nameof(SaveYIf))]
 		public Sample1 Y { get; set; }
+
+		public bool SaveYIf() => X != Y.X;
+	}
+
+	public partial class SampleSerializeIfOnField
+	{
+		[YuzuRequired]
+		public int X { get; set; }
+
+		[YuzuOptional]
+		[YuzuSerializeIf(nameof(SaveYIf))]
+		public Sample1 Y;
+
+		[YuzuOptional]
+		[YuzuSerializeIf(nameof(SaveYIf))]
+		public Sample1 Z, W;
 
 		public bool SaveYIf() => X != Y.X;
 	}
@@ -597,7 +613,7 @@ namespace YuzuTest
 		public int XX;
 	}
 
-	public class SampleCollection<T> : ICollection<T>
+	public partial class SampleCollection<T> : ICollection<T>
 	{
 		private List<T> impl = new List<T>();
 		public int Count { get { return impl.Count; } }

@@ -513,6 +513,26 @@ namespace YuzuGenClone
 			return result;
 		}
 
+		protected static global::YuzuTest.SampleSerializeIfOnField Clone_YuzuTest__SampleSerializeIfOnField(Cloner cl, object src)
+		{
+			if (src == null) return null;
+			if (src.GetType() != typeof(global::YuzuTest.SampleSerializeIfOnField))
+				return (global::YuzuTest.SampleSerializeIfOnField)cl.DeepObject(src);
+			var s = (global::YuzuTest.SampleSerializeIfOnField)src;
+			var result = new global::YuzuTest.SampleSerializeIfOnField();
+			if (s.SaveYIf()) {
+				result.W = Clone_YuzuTest__Sample1(cl, s.W);
+			}
+			result.X = s.X;
+			if (s.SaveYIf()) {
+				result.Y = Clone_YuzuTest__Sample1(cl, s.Y);
+			}
+			if (s.SaveYIf()) {
+				result.Z = Clone_YuzuTest__Sample1(cl, s.Z);
+			}
+			return result;
+		}
+
 		protected static global::YuzuTest.SampleStructWithClass Clone_YuzuTest__SampleStructWithClass(Cloner cl, object src)
 		{
 			var s = (global::YuzuTest.SampleStructWithClass)src;
@@ -614,6 +634,7 @@ namespace YuzuGenClone
 			clonerCache[typeof(global::YuzuTest.SampleRect)] = Clone_YuzuTest__SampleRect;
 			clonerCache[typeof(global::YuzuTest.SampleSealed)] = Clone_YuzuTest__SampleSealed;
 			clonerCache[typeof(global::YuzuTest.SampleSerializeIf)] = Clone_YuzuTest__SampleSerializeIf;
+			clonerCache[typeof(global::YuzuTest.SampleSerializeIfOnField)] = Clone_YuzuTest__SampleSerializeIfOnField;
 			clonerCache[typeof(global::YuzuTest.SampleStructWithClass)] = Clone_YuzuTest__SampleStructWithClass_obj;
 			clonerCache[typeof(global::YuzuTest.SampleSurrogateColor)] = Clone_YuzuTest__SampleSurrogateColor;
 			clonerCache[typeof(global::YuzuTest.SampleWithCollectionMerge)] = Clone_YuzuTest__SampleWithCollectionMerge;

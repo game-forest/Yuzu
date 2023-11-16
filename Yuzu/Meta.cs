@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,10 +13,8 @@ namespace Yuzu.Metadata
 
 	public class Meta
 	{
-		private static ConcurrentDictionary<Tuple<Type, CommonOptions>, Meta> cache =
-			new ConcurrentDictionary<Tuple<Type, CommonOptions>, Meta>();
-		private static ConcurrentDictionary<CommonOptions, AliasCacheType> readAliasCache =
-			new ConcurrentDictionary<CommonOptions, AliasCacheType>();
+		private static ConcurrentDictionary<Tuple<Type, CommonOptions>, Meta> cache = new ();
+		private static ConcurrentDictionary<CommonOptions, AliasCacheType> readAliasCache = new ();
 
 		public class Item : IComparable<Item>
 		{
@@ -70,7 +68,7 @@ namespace Yuzu.Metadata
 
 		public readonly Type Type;
 		private MetaOptions Options;
-		public readonly List<Item> Items = new List<Item>();
+		public readonly List<Item> Items = new ();
 		public readonly bool IsCompact;
 		public bool IsCopyable;
 		public object Default { get; private set; }
@@ -88,13 +86,13 @@ namespace Yuzu.Metadata
 		public MethodInfo FactoryMethod;
 		public Func<object> Factory;
 
-		public Dictionary<string, Item> TagToItem = new Dictionary<string, Item>();
+		public Dictionary<string, Item> TagToItem = new ();
 		public Func<object, YuzuUnknownStorage> GetUnknownStorage;
 
-		public ActionList BeforeSerialization = new ActionList();
-		public ActionList AfterSerialization = new ActionList();
-		public ActionList BeforeDeserialization = new ActionList();
-		public ActionList AfterDeserialization = new ActionList();
+		public ActionList BeforeSerialization = new ();
+		public ActionList AfterSerialization = new ();
+		public ActionList BeforeDeserialization = new ();
+		public ActionList AfterDeserialization = new ();
 
 #if !iOS // Apple forbids code generation.
 		private static Action<object, object> SetterGenericHelper<TTarget, TParam>(MethodInfo m)
@@ -304,13 +302,30 @@ namespace Yuzu.Metadata
 		{
 			var attrs = Options.GetItem(m);
 			if (attrs.HasAttr(Options.SerializeItemIfAttribute)) {
-				if (SerializeItemIf != null)
-					throw Error("Duplicate SerializeItemIf");
-				if (Utils.GetIEnumerable(Type) == null)
+				if (Utils.GetIEnumerable(Type) == null) {
 					throw Error("SerializeItemIf may only be used inside of IEnumerable");
-				SerializeItemIf = Options.GetSerializeItemCondition(m);
-				SerializeItemIfMethod = m;
+				}
+				if (m.IsStatic) {
+					SerializeItemIf = Options.GetSerializeItemCondition(m);
+				} else {
+					if (SerializeItemIfMethod != null) {
+						throw Error("Duplicate SerializeItemIf");
+					}
+					var staticGeneratedMethod = m.DeclaringType.GetMethod($"Yuzu_{m.Name}_Static");
+					if (
+						staticGeneratedMethod == null
+						|| !Options.GetItem(staticGeneratedMethod).HasAttr(Options.SerializeItemIfAttribute)
+					) {
+						throw new YuzuException(
+							$"Non-static method {m.Name} with {nameof(SerializeItemIf)} " +
+							$"attribute doesn't have corresponding generated static method. " +
+							"Make sure YuzuGenerator project is included."
+						);
+					}
+					SerializeItemIfMethod = m;
+				}
 			}
+
 			BeforeSerialization.MaybeAdd(m, Options.BeforeSerializationAttribute);
 			AfterSerialization.MaybeAdd(m, Options.AfterSerializationAttribute);
 			BeforeDeserialization.MaybeAdd(m, Options.BeforeDeserializationAttribute);
@@ -493,10 +508,10 @@ namespace Yuzu.Metadata
 			return readAliases.TryGetValue(alias, out Type result) ? result : null;
 		}
 
-		internal static Meta Unknown = new Meta(typeof(YuzuUnknown));
+		internal static Meta Unknown = new(typeof(YuzuUnknown));
 
 		private YuzuException Error(string format, params object[] args) =>
-			new YuzuException("In type '" + Type.FullName + "': " + String.Format(format, args));
+			new("In type '" + Type.FullName + "': " + String.Format(format, args));
 
 		private static bool HasItems(Type t, MetaOptions options)
 		{
