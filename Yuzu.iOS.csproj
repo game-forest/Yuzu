@@ -5,7 +5,7 @@
     <AssemblyName>Yuzu</AssemblyName>
     <DefineConstants>$(DefineConstants);iOS</DefineConstants>
     <RootNamespace>Yuzu</RootNamespace>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
