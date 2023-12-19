@@ -55,7 +55,7 @@ namespace Yuzu.Util
 			t.Namespace == "System" ? t.IsValueType :
 			t.IsClass || t.IsValueType ? null : (bool?)false;
 
-		private static Dictionary<Type, Type> collectionInterfaceForType = new ();
+		private static ConcurrentDictionary<Type, Type> collectionInterfaceForType = new ();
 
 		public static Type GetICollection(Type t)
 		{
@@ -78,7 +78,7 @@ namespace Yuzu.Util
 					if (iCollectionType.Name != "ICollection`1") {
 						throw new YuzuException($"Invalid ICollection`1 type '{iCollectionType.Name}`.");
 					}
-					collectionInterfaceForType.Add(t, iCollectionType);
+					collectionInterfaceForType.TryAdd(t, iCollectionType);
 					return iCollectionType;
 				}
 				throw new YuzuException(
@@ -88,7 +88,7 @@ namespace Yuzu.Util
 			}
 		}
 
-		private static Dictionary<Type, Type> enumerableInterfaceForType = new ();
+		private static ConcurrentDictionary<Type, Type> enumerableInterfaceForType = new ();
 
 		public static Type GetIEnumerable(Type t)
 		{
@@ -111,7 +111,7 @@ namespace Yuzu.Util
 					if (iEnumerableType.Name != "IEnumerable`1") {
 						throw new YuzuException($"Invalid IEnumerable`1 type '{iEnumerableType.Name}`.");
 					}
-					enumerableInterfaceForType.Add(t, iEnumerableType);
+					enumerableInterfaceForType.TryAdd(t, iEnumerableType);
 					return iEnumerableType;
 				}
 				throw new YuzuException(
