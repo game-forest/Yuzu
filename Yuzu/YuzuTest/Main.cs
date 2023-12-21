@@ -172,6 +172,9 @@ namespace YuzuTest
 				jd.Generate<YuzuTestAssembly.SampleAssemblyBase>();
 				jd.Generate<YuzuTestAssembly.SampleAssemblyDerivedQ>();
 				jd.Generate<YuzuTest2.SampleNamespace>();
+				jd.Generate<A.B.C.D.E.Sample2Struct>();
+				jd.Generate<A.B.C.D.E.SampleSerializeIfStruct>();
+				jd.Generate<A.B.C.D.E.SampleSerializeIfOnFieldStruct>();
 			});
 
 			var bdg = new BinaryDeserializerGenerator();
@@ -227,6 +230,9 @@ namespace YuzuTest
 				bd.Generate<YuzuTestAssembly.SampleAssemblyDerivedQ>();
 				bd.Generate<YuzuTest2.SampleNamespace>();
 				bd.Generate<SampleExplicitCollection<int>>();
+				bd.Generate<A.B.C.D.E.Sample2Struct>();
+				bd.Generate<A.B.C.D.E.SampleSerializeIfStruct>();
+				bd.Generate<A.B.C.D.E.SampleSerializeIfOnFieldStruct>();
 			});
 			var bdg1 = new BinaryDeserializerGenerator(
 				className: "BinaryDeserializerGenDerived",
@@ -281,6 +287,9 @@ namespace YuzuTest
 				cd.Generate<SampleCollection<Sample1>>();
 				cd.Generate<SampleWithCollectionMerge>();
 				cd.Generate<SampleExplicitCollection<int>>();
+				cd.Generate<A.B.C.D.E.Sample2Struct>();
+				cd.Generate<A.B.C.D.E.SampleSerializeIfStruct>();
+				cd.Generate<A.B.C.D.E.SampleSerializeIfOnFieldStruct>();
 			});
 			var cg1 = new ClonerGenerator(
 				className: "ClonerGenDerived",

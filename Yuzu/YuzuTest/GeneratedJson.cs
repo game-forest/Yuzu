@@ -2157,3 +2157,114 @@ namespace YuzuGen.YuzuTest2
 	}
 
 }
+
+namespace YuzuGen.YuzuTest
+{
+	class A__B__C__D__E__Sample2Struct_JsonDeserializer : JsonDeserializerGenBase
+	{
+		public static new A__B__C__D__E__Sample2Struct_JsonDeserializer Instance = new A__B__C__D__E__Sample2Struct_JsonDeserializer();
+
+		public A__B__C__D__E__Sample2Struct_JsonDeserializer()
+		{
+			JsonOptions.EnumAsString = true;
+		}
+
+		public override object FromReaderInt()
+		{
+			return FromReaderTyped<global::YuzuTest.A.B.C.D.E.Sample2Struct>(Reader);
+		}
+
+		public override object FromReaderIntPartial(string name)
+		{
+			return ReadFields(new global::YuzuTest.A.B.C.D.E.Sample2Struct(), name);
+		}
+
+		protected override object ReadFields(object obj, string name)
+		{
+			var result = (global::YuzuTest.A.B.C.D.E.Sample2Struct)obj;
+			if ("X" != name) throw new YuzuException("X!=" + name);
+			result.X = RequireInt();
+			name = GetNextName(false);
+			if ("Y" == name) {
+				result.Y = RequireString();
+				name = GetNextName(false);
+			}
+			return result;
+		}
+	}
+
+	class A__B__C__D__E__SampleSerializeIfStruct_JsonDeserializer : JsonDeserializerGenBase
+	{
+		public static new A__B__C__D__E__SampleSerializeIfStruct_JsonDeserializer Instance = new A__B__C__D__E__SampleSerializeIfStruct_JsonDeserializer();
+
+		public A__B__C__D__E__SampleSerializeIfStruct_JsonDeserializer()
+		{
+			JsonOptions.EnumAsString = true;
+		}
+
+		public override object FromReaderInt()
+		{
+			return FromReaderTyped<global::YuzuTest.A.B.C.D.E.SampleSerializeIfStruct>(Reader);
+		}
+
+		public override object FromReaderIntPartial(string name)
+		{
+			return ReadFields(new global::YuzuTest.A.B.C.D.E.SampleSerializeIfStruct(), name);
+		}
+
+		protected override object ReadFields(object obj, string name)
+		{
+			var result = (global::YuzuTest.A.B.C.D.E.SampleSerializeIfStruct)obj;
+			if ("X" != name) throw new YuzuException("X!=" + name);
+			result.X = RequireInt();
+			name = GetNextName(false);
+			if ("Y" == name) {
+				result.Y = YuzuGen.YuzuTest.Sample1_JsonDeserializer.Instance.FromReaderTyped<global::YuzuTest.Sample1>(Reader);
+				name = GetNextName(false);
+			}
+			return result;
+		}
+	}
+
+	class A__B__C__D__E__SampleSerializeIfOnFieldStruct_JsonDeserializer : JsonDeserializerGenBase
+	{
+		public static new A__B__C__D__E__SampleSerializeIfOnFieldStruct_JsonDeserializer Instance = new A__B__C__D__E__SampleSerializeIfOnFieldStruct_JsonDeserializer();
+
+		public A__B__C__D__E__SampleSerializeIfOnFieldStruct_JsonDeserializer()
+		{
+			JsonOptions.EnumAsString = true;
+		}
+
+		public override object FromReaderInt()
+		{
+			return FromReaderTyped<global::YuzuTest.A.B.C.D.E.SampleSerializeIfOnFieldStruct>(Reader);
+		}
+
+		public override object FromReaderIntPartial(string name)
+		{
+			return ReadFields(new global::YuzuTest.A.B.C.D.E.SampleSerializeIfOnFieldStruct(), name);
+		}
+
+		protected override object ReadFields(object obj, string name)
+		{
+			var result = (global::YuzuTest.A.B.C.D.E.SampleSerializeIfOnFieldStruct)obj;
+			if ("W" == name) {
+				result.W = YuzuGen.YuzuTest.Sample1_JsonDeserializer.Instance.FromReaderTyped<global::YuzuTest.Sample1>(Reader);
+				name = GetNextName(false);
+			}
+			if ("X" != name) throw new YuzuException("X!=" + name);
+			result.X = RequireInt();
+			name = GetNextName(false);
+			if ("Y" == name) {
+				result.Y = YuzuGen.YuzuTest.Sample1_JsonDeserializer.Instance.FromReaderTyped<global::YuzuTest.Sample1>(Reader);
+				name = GetNextName(false);
+			}
+			if ("Z" == name) {
+				result.Z = YuzuGen.YuzuTest.Sample1_JsonDeserializer.Instance.FromReaderTyped<global::YuzuTest.Sample1>(Reader);
+				name = GetNextName(false);
+			}
+			return result;
+		}
+	}
+
+}
