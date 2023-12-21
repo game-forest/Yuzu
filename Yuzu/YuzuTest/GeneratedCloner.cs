@@ -47,6 +47,9 @@ namespace YuzuGenClone
 			return result;
 		}
 
+		private static global::YuzuTest.A.B.C.D.E.Sample2Struct Clone_YuzuTest__A__B__C__D__E__Sample2Struct(Cloner cl, object src) =>
+			(global::YuzuTest.A.B.C.D.E.Sample2Struct)src;
+
 		protected static global::YuzuTest.Sample3 Clone_YuzuTest__Sample3(Cloner cl, object src)
 		{
 			if (src == null) return null;
@@ -533,6 +536,40 @@ namespace YuzuGenClone
 			return result;
 		}
 
+		protected static global::YuzuTest.A.B.C.D.E.SampleSerializeIfOnFieldStruct Clone_YuzuTest__A__B__C__D__E__SampleSerializeIfOnFieldStruct(Cloner cl, object src)
+		{
+			var s = (global::YuzuTest.A.B.C.D.E.SampleSerializeIfOnFieldStruct)src;
+			var result = new global::YuzuTest.A.B.C.D.E.SampleSerializeIfOnFieldStruct();
+			if (s.SaveYIf()) {
+				result.W = Clone_YuzuTest__Sample1(cl, s.W);
+			}
+			result.X = s.X;
+			if (s.SaveYIf()) {
+				result.Y = Clone_YuzuTest__Sample1(cl, s.Y);
+			}
+			if (s.SaveYIf()) {
+				result.Z = Clone_YuzuTest__Sample1(cl, s.Z);
+			}
+			return result;
+		}
+
+		private static object Clone_YuzuTest__A__B__C__D__E__SampleSerializeIfOnFieldStruct_obj(Cloner cl, object src) =>
+			Clone_YuzuTest__A__B__C__D__E__SampleSerializeIfOnFieldStruct(cl, src);
+
+		protected static global::YuzuTest.A.B.C.D.E.SampleSerializeIfStruct Clone_YuzuTest__A__B__C__D__E__SampleSerializeIfStruct(Cloner cl, object src)
+		{
+			var s = (global::YuzuTest.A.B.C.D.E.SampleSerializeIfStruct)src;
+			var result = new global::YuzuTest.A.B.C.D.E.SampleSerializeIfStruct();
+			result.X = s.X;
+			if (s.SaveYIf()) {
+				result.Y = Clone_YuzuTest__Sample1(cl, s.Y);
+			}
+			return result;
+		}
+
+		private static object Clone_YuzuTest__A__B__C__D__E__SampleSerializeIfStruct_obj(Cloner cl, object src) =>
+			Clone_YuzuTest__A__B__C__D__E__SampleSerializeIfStruct(cl, src);
+
 		protected static global::YuzuTest.SampleStructWithClass Clone_YuzuTest__SampleStructWithClass(Cloner cl, object src)
 		{
 			var s = (global::YuzuTest.SampleStructWithClass)src;
@@ -600,6 +637,7 @@ namespace YuzuGenClone
 			clonerCache[typeof(global::YuzuTest.Color)] = Clone_YuzuTest__Color;
 			clonerCache[typeof(global::YuzuTest.Sample1)] = Clone_YuzuTest__Sample1;
 			clonerCache[typeof(global::YuzuTest.Sample2)] = Clone_YuzuTest__Sample2;
+			clonerCache[typeof(global::YuzuTest.A.B.C.D.E.Sample2Struct)] = ValueCopyCloner;
 			clonerCache[typeof(global::YuzuTest.Sample3)] = Clone_YuzuTest__Sample3;
 			clonerCache[typeof(global::YuzuTest.SampleAfter2)] = Clone_YuzuTest__SampleAfter2;
 			clonerCache[typeof(global::YuzuTest.SampleAfterDeserialization)] = Clone_YuzuTest__SampleAfterDeserialization;
@@ -635,6 +673,8 @@ namespace YuzuGenClone
 			clonerCache[typeof(global::YuzuTest.SampleSealed)] = Clone_YuzuTest__SampleSealed;
 			clonerCache[typeof(global::YuzuTest.SampleSerializeIf)] = Clone_YuzuTest__SampleSerializeIf;
 			clonerCache[typeof(global::YuzuTest.SampleSerializeIfOnField)] = Clone_YuzuTest__SampleSerializeIfOnField;
+			clonerCache[typeof(global::YuzuTest.A.B.C.D.E.SampleSerializeIfOnFieldStruct)] = Clone_YuzuTest__A__B__C__D__E__SampleSerializeIfOnFieldStruct_obj;
+			clonerCache[typeof(global::YuzuTest.A.B.C.D.E.SampleSerializeIfStruct)] = Clone_YuzuTest__A__B__C__D__E__SampleSerializeIfStruct_obj;
 			clonerCache[typeof(global::YuzuTest.SampleStructWithClass)] = Clone_YuzuTest__SampleStructWithClass_obj;
 			clonerCache[typeof(global::YuzuTest.SampleSurrogateColor)] = Clone_YuzuTest__SampleSurrogateColor;
 			clonerCache[typeof(global::YuzuTest.SampleWithCollectionMerge)] = Clone_YuzuTest__SampleWithCollectionMerge;

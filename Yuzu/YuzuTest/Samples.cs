@@ -635,6 +635,60 @@ namespace YuzuTest
 			true;
 	}
 
+	public readonly partial record struct A
+	{
+		public partial record class B
+		{
+			public readonly partial record struct C
+			{
+				public static partial class D
+				{
+					public partial interface E {
+						public partial struct Sample2Struct
+						{
+							[YuzuRequired]
+							public int X { get; set; }
+
+							[YuzuOptional]
+							[YuzuSerializeIf(nameof(SaveYIf))]
+							public string Y { get; set; }
+
+							public bool SaveYIf() => X.ToString() != Y;
+						}
+
+						public partial struct SampleSerializeIfStruct
+						{
+							[YuzuRequired]
+							public int X { get; set; }
+
+							[YuzuOptional]
+							[YuzuSerializeIf(nameof(SaveYIf))]
+							public Sample1 Y { get; set; }
+
+							public bool SaveYIf() => X != Y.X;
+						}
+
+						public partial struct SampleSerializeIfOnFieldStruct
+						{
+							[YuzuRequired]
+							public int X { get; set; }
+
+							[YuzuOptional]
+							[YuzuSerializeIf(nameof(SaveYIf))]
+							public Sample1 Y;
+
+							[YuzuOptional]
+							[YuzuSerializeIf(nameof(SaveYIf))]
+							public Sample1 Z, W;
+
+							public bool SaveYIf() => X != Y.X;
+						}
+					}
+				}
+			}
+		}
+	}
+
 	public class SampleExplicitCollection<T> : ICollection<T>
 	{
 		private List<T> impl = new List<T>();

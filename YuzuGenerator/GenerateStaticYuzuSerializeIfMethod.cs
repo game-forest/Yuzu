@@ -78,7 +78,15 @@ namespace SourceGenerator
 							| SymbolDisplayGenericsOptions.IncludeVariance
 							| SymbolDisplayGenericsOptions.IncludeTypeConstraints
 						));
-						P($"{accessibiliy.ToString().ToLower()} partial class {className}");
+						var typeKind = ct.TypeKind.ToString().ToLower();
+						if (typeKind == "structure") typeKind = "struct";
+						var recordString = ct.IsRecord ? "record " : "";
+						var staticString = ct.IsStatic ? "static " : "";
+						var readonlyString = ct.IsReadOnly ? "readonly " : "";
+						P(
+							$"{accessibiliy.ToString().ToLower()} " +
+							$"{staticString}{readonlyString}partial {recordString}{typeKind} {className}"
+						);
 						P("{");
 						indentLevel++;
 					}
