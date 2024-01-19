@@ -14,6 +14,8 @@ namespace Yuzu.Clone
 	{
 		public CommonOptions Options;
 
+		public IReferenceResolver ReferenceResolver;
+
 		public abstract object ShallowObject(object src);
 		public virtual T Shallow<T>(T src) => (T)ShallowObject(src);
 

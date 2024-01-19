@@ -100,8 +100,6 @@ namespace Yuzu.Json
 
 		private Dictionary<string, byte[]> strCache = new();
 
-		public IReferenceResolver ReferenceResolver { get; set; }
-
 		protected override void Initialize()
 		{
 			if (ReferenceResolver != null) {

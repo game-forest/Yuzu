@@ -17,8 +17,6 @@ namespace Yuzu.Json
 		public static JsonDeserializer Instance = new();
 		public JsonSerializeOptions JsonOptions = new();
 
-		public IReferenceResolver ReferenceResolver { get; set; }
-
 		private char? buf;
 
 		protected override void Initialize()
