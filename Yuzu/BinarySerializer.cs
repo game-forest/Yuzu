@@ -14,8 +14,6 @@ namespace Yuzu.Binary
 
 		private Action<object> referenceWriteFunc;
 
-		public IReferenceResolver ReferenceResolver { get; set; }
-
 		protected override void Initialize()
 		{
 			if (ReferenceResolver != null) {

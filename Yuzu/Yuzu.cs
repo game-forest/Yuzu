@@ -448,6 +448,9 @@ namespace Yuzu
 	public abstract class AbstractSerializer
 	{
 		public CommonOptions Options = new ();
+
+		public IReferenceResolver ReferenceResolver;
+
 		public abstract void ToWriter(object obj, BinaryWriter writer);
 		public abstract string ToString(object obj);
 		public abstract byte[] ToBytes(object obj);
@@ -535,6 +538,8 @@ namespace Yuzu
 	public abstract class AbstractDeserializer
 	{
 		public CommonOptions Options = new ();
+
+		public IReferenceResolver ReferenceResolver;
 
 		public abstract object FromReader(object obj, BinaryReader reader);
 		public abstract object FromString(object obj, string source);
