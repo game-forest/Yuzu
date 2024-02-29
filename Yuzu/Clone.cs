@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 using Yuzu.CloneUtil;
@@ -27,15 +28,15 @@ namespace Yuzu.Clone
 	{
 		public static Cloner Instance = new ();
 
-		private Dictionary<Type, Func<object, object>> clonerCache = new ();
-		private Dictionary<Type, Action<object, object>> mergerCache = new ();
+		private readonly ConcurrentDictionary<Type, Func<object, object>> clonerCache = [];
+		private readonly ConcurrentDictionary<Type, Action<object, object>> mergerCache = [];
 
 		public Cloner() { }
 
 		protected Cloner(IDictionary<Type, Func<Cloner, object, object>> initClonerCache)
 		{
 			foreach (var kv in initClonerCache)
-				clonerCache.Add(kv.Key, src => kv.Value(this, src));
+				clonerCache.TryAdd(kv.Key, src => kv.Value(this, src));
 		}
 
 		public override object ShallowObject(object src)
@@ -63,7 +64,7 @@ namespace Yuzu.Clone
 		{
 			if (!clonerCache.TryGetValue(t, out Func<object, object> cloner)) {
 				cloner = MakeCloner(t);
-				clonerCache.Add(t, cloner);
+				clonerCache.TryAdd(t, cloner);
 			}
 			return cloner;
 		}
@@ -73,7 +74,7 @@ namespace Yuzu.Clone
 		{
 			if (!mergerCache.TryGetValue(t, out Action<object, object> merger)) {
 				merger = MakeMerger(t);
-				mergerCache.Add(t, merger);
+				mergerCache.TryAdd(t, merger);
 			}
 			return merger;
 		}
