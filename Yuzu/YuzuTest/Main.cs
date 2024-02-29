@@ -125,6 +125,7 @@ namespace YuzuTest
 				jd.Generate<SampleObj>();
 				jd.Generate<SampleDict>();
 				jd.Generate<SampleSortedDict>();
+				jd.Generate<SampleSortedDictOfClass>();
 				jd.Generate<SampleDictKeys>();
 				jd.Generate<ISampleMember>();
 				jd.Generate<SampleMemberI>();
