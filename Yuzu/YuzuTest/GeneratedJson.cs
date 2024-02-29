@@ -433,6 +433,50 @@ namespace YuzuGen.YuzuTest
 		}
 	}
 
+	class SampleSortedDictOfClass_JsonDeserializer : JsonDeserializerGenBase
+	{
+		public static new SampleSortedDictOfClass_JsonDeserializer Instance = new SampleSortedDictOfClass_JsonDeserializer();
+
+		public SampleSortedDictOfClass_JsonDeserializer()
+		{
+			Options.TagMode = TagMode.Names;
+			JsonOptions.EnumAsString = true;
+		}
+
+		public override object FromReaderInt()
+		{
+			return FromReaderTyped<global::YuzuTest.SampleSortedDictOfClass>(Reader);
+		}
+
+		public override object FromReaderIntPartial(string name)
+		{
+			return ReadFields(new global::YuzuTest.SampleSortedDictOfClass(), name);
+		}
+
+		protected override object ReadFields(object obj, string name)
+		{
+			var result = (global::YuzuTest.SampleSortedDictOfClass)obj;
+			if ("d" == name) {
+				result.d = RequireOrNull('{') ? null : new global::System.Collections.Generic.SortedDictionary<string, global::YuzuTest.Sample1>();
+				if (result.d != null) {
+					if (SkipSpacesCarefully() == '}') {
+						Require('}');
+					}
+					else {
+						do {
+							var tmp1 = RequireString();
+							Require(':');
+							var tmp2 = YuzuGen.YuzuTest.Sample1_JsonDeserializer.Instance.FromReaderTyped<global::YuzuTest.Sample1>(Reader);
+							result.d.Add(tmp1, tmp2);
+						} while (Require('}', ',') == ',');
+					}
+				}
+				name = GetNextName(false);
+			}
+			return result;
+		}
+	}
+
 	class SampleDictKeys_JsonDeserializer : JsonDeserializerGenBase
 	{
 		public static new SampleDictKeys_JsonDeserializer Instance = new SampleDictKeys_JsonDeserializer();

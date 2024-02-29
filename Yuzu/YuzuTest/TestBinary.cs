@@ -825,6 +825,44 @@ namespace YuzuTest.Binary
 		}
 
 		[TestMethod]
+		public void TestSortedDictionaryOfClass()
+		{
+			var bs = new BinarySerializer();
+
+			var v0 = new SampleSortedDictOfClass {
+				d = new SortedDictionary<string, Sample1> {
+					{ "a", new Sample1() { X = 1, Y = "aaa" } },
+					{ "b", new Sample1() { X = 2, Y = "bbb" } },
+					{ "c", null },
+				}
+			};
+			var result0 = bs.ToBytes(v0);
+			var manualByteString = "20 01 00 "
+				+ XS(typeof(SampleSortedDictOfClass)) + " 01 00 "
+				+ XS("d") + " 22 10 20 01 00 03 00 00 00 "
+				+ XS("a") + " 02 00 "
+				+ XS(typeof(Sample1)) + " 02 00 " +
+				XS(nameof(Sample1.X)) + " 05 "
+				+ XS(nameof(Sample1.Y)) + " 10 01 00 01 00 00 00 02 00 " + XS("aaa") + " 00 00 "
+				+ XS("b") + " 02 00 01 00 02 00 00 00 02 00 " + XS("bbb") + " 00 00 "
+				+ XS("c") + " 00 00 00 00";
+			Assert.AreEqual(
+				manualByteString,
+				XS(result0)
+			);
+
+			CheckDeserializers(bd => {
+				var w0 = bd.FromBytes<SampleSortedDictOfClass>(result0);
+				Assert.AreEqual(v0.d.Count, w0.d.Count);
+				Assert.AreEqual(v0.d["a"].X, w0.d["a"].X);
+				Assert.AreEqual(v0.d["a"].Y, w0.d["a"].Y);
+				Assert.AreEqual(v0.d["b"].X, w0.d["b"].X);
+				Assert.AreEqual(v0.d["b"].Y, w0.d["b"].Y);
+				Assert.AreEqual(v0.d["c"], w0.d["c"]);
+			});
+		}
+
+		[TestMethod]
 		public void TestDictionaryKeys()
 		{
 			var bs = new BinarySerializer();
