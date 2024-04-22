@@ -13,8 +13,7 @@ namespace SourceGenerator
 
 		public void Initialize(IncrementalGeneratorInitializationContext context)
 		{
-			var alreadyGenerated = new HashSet<ISymbol>(SymbolEqualityComparer.Default);
-			var provider1 = context.SyntaxProvider.ForAttributeWithMetadataName(
+			var provider = context.SyntaxProvider.ForAttributeWithMetadataName(
 				SerializeIfAttributeString,
 				(syntaxNode, cancellationToken) => {
 					return syntaxNode is MemberDeclarationSyntax
@@ -44,20 +43,16 @@ namespace SourceGenerator
 					return methodSymbol;
 				}
 			);
+			provider = provider
+				.Where(s => s != null && !s.IsStatic)
+				.Collect()
+				.SelectMany((s, _) => s.Distinct(SymbolEqualityComparer.Default));
 			context.RegisterSourceOutput(
-				provider1,
+				provider,
 				(context, symbol) => {
-					if (symbol == null || symbol.IsStatic) {
-						return;
-					}
 					var containingTypes = new List<INamedTypeSymbol>();
-					if (alreadyGenerated.Contains(symbol)) {
-						return;
-					}
-					alreadyGenerated.Add(symbol);
 					var ct = symbol.ContainingType;
-					while (ct != null)
-					{
+					while (ct != null) {
 						containingTypes.Add(ct);
 						ct = ct.ContainingType;
 					}
@@ -69,8 +64,7 @@ namespace SourceGenerator
 					P($"namespace {cns.ToDisplayString()};");
 					P("");
 					string className = "";
-					for (int i = containingTypes.Count - 1; i >= 0; i--)
-					{
+					for (int i = containingTypes.Count - 1; i >= 0; i--) {
 						ct = containingTypes[i];
 						var accessibiliy = ct.DeclaredAccessibility;
 						className = ct.ToDisplayString(new SymbolDisplayFormat(
@@ -96,8 +90,7 @@ namespace SourceGenerator
 					P($"return (({className})instance).{symbol.Name}();");
 					indentLevel--;
 					P("}");
-					for (int i = containingTypes.Count - 1; i >= 0; i--)
-					{
+					for (int i = containingTypes.Count - 1; i >= 0; i--) {
 						indentLevel--;
 						P("}");
 					}
@@ -105,8 +98,7 @@ namespace SourceGenerator
 					context.AddSource($"{prefix}_{symbol.Name}.g.cs", sb.ToString());
 					void P(string s)
 					{
-						if (indentLevel > 0 || !string.IsNullOrEmpty(s))
-						{
+						if (indentLevel > 0 || !string.IsNullOrEmpty(s)) {
 							sb.Append('\t', indentLevel);
 							sb.Append(s);
 						}
