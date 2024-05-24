@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ using System.Text;
 namespace SourceGenerator;
 
 [Generator]
-public class GenerateStaticYuzuSerializeItemIfMethod : IIncrementalGenerator
+public sealed class GenerateStaticYuzuSerializeItemIfMethod : IIncrementalGenerator
 {
 	private const string SerializeItemIfAttributeString = "Yuzu.YuzuSerializeItemIf";
 
@@ -26,6 +27,21 @@ public class GenerateStaticYuzuSerializeItemIfMethod : IIncrementalGenerator
 	}
 
 	private static void Build(SourceProductionContext context, ISymbol? symbol)
+	{
+		try {
+			BuildImplementation(context, symbol);
+		} catch (OperationCanceledException) {
+			throw;
+		} catch (Exception exception) {
+			Diagnostics.ReportExceptionDiagnostic(
+				context,
+				exception,
+				e => Diagnostics.CreateExceptionDiagnostic(e, null)
+			);
+		}
+	}
+
+	private static void BuildImplementation(SourceProductionContext context, ISymbol? symbol)
 	{
 		if (symbol.IsStatic) {
 			return;
