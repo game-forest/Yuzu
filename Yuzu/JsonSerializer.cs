@@ -991,11 +991,10 @@ namespace Yuzu.Json
 				return;
 			}
 			var t = obj.GetType();
-			if (JsonOptions.SaveClass.HasFlag(JsonSaveClass.UnknownPrimitive) && !IsUserObject(t)) {
+			if (JsonOptions.SaveClass.HasFlag(JsonSaveClass.UnknownPrimitive) && !IsUserObject(t))
 				WriteTypedPrimitive(obj, t);
-			} else {
+			else
 				GetWriteFunc(t)(obj);
-			}
 		}
 	}
 

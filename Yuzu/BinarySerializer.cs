@@ -416,7 +416,6 @@ namespace Yuzu.Binary
 		{
 			writer.Write(def.Id);
 			writer.Write(className);
-			writer.Write(def.Meta.IsCompact);
 			writer.Write((short)def.Fields.Count);
 			foreach (var fd in def.Fields) {
 				writer.Write(fd.Name);
