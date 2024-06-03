@@ -33,8 +33,6 @@ namespace Yuzu.Clone
 		private readonly ConcurrentDictionary<Type, Func<object, object>> clonerCache = [];
 		private readonly ConcurrentDictionary<Type, Action<object, object>> mergerCache = [];
 
-		public IReferenceResolver ReferenceResolver;
-
 		public Cloner() { }
 
 		protected Cloner(IDictionary<Type, Func<Cloner, object, object>> initClonerCache)
@@ -265,15 +263,8 @@ namespace Yuzu.Clone
 			throw new NotImplementedException("Unable to merge type: " + t.FullName);
 		}
 
-		public override object DeepObject(object src)
-		{
-			var result = src == null ? null : GetCloner(src.GetType())(src);
-			return result;
-		}
-
-		public override void MergeObject(object dst, object src)
-		{
-			GetMerger(src.GetType())(dst, src);
-		}
+		public override object DeepObject(object src) =>
+			src == null ? null : GetCloner(src.GetType())(src);
+		public override void MergeObject(object dst, object src) => GetMerger(src.GetType())(dst, src);
 	}
 }

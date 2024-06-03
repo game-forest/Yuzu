@@ -77,17 +77,18 @@ namespace Yuzu.Binary
 			public Action<object> ReadFunc;
 		}
 
-		public Meta Meta;
+		internal Meta Meta;
 		public const int EOF = short.MaxValue;
 		public Action<BinaryDeserializer, ReaderClassDef, object> ReadFields;
-		public Func<BinaryDeserializer, ReaderClassDef, object> Make;
+		public Func<BinaryDeserializer, ReaderClassDef, object, object> Make;
 		public List<FieldDef> Fields = new () { new FieldDef { OurIndex = EOF } };
 	}
 
 	internal class Record { }
 
-	public class YuzuUnknownBinary : YuzuUnknown
+	internal class YuzuUnknownBinary : YuzuUnknown
 	{
 		public ReaderClassDef Def;
 	}
+
 }

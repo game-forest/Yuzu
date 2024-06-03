@@ -24,7 +24,6 @@ namespace Yuzu.Json
 			buf = null;
 			if (JsonOptions.BOM && Reader.PeekChar() == '\uFEFF')
 				Reader.ReadChar();
-
 			if (ReferenceResolver != null) {
 				referenceReadFunc = ReadValueFunc(ReferenceResolver.ReferenceType);
 			}
@@ -484,8 +483,7 @@ namespace Yuzu.Json
 			}
 			var rf = ReadValueFunc(typeof(T));
 			do {
-				var v = rf();
-				list.Add((T)v);
+				list.Add((T)rf());
 			} while (Require(']', ',') == ',');
 		}
 
@@ -542,9 +540,7 @@ namespace Yuzu.Json
 			do {
 				var key = RequireString();
 				Require(':');
-				var k = (K)rk(key);
-				var v = rf();
-				dict.Add(k, (V)v);
+				dict.Add((K)rk(key), (V)rf());
 			} while (Require('}', ',') == ',');
 		}
 
@@ -594,10 +590,9 @@ namespace Yuzu.Json
 				}
 				int count = 0;
 				do {
-					if (dim == n - 1) {
-						var v = readElemFunc();
-						flatArray.Add(v);
-					} else
+					if (dim == n - 1)
+						flatArray.Add(readElemFunc());
+					else
 						readRecursive(dim + 1);
 					++count;
 				} while (Require(']', ',') == ',');
@@ -643,8 +638,7 @@ namespace Yuzu.Json
 			var rf = ReadValueFunc(typeof(T));
 			for (int i = 0; i < array.Length; ++i) {
 				Require(',');
-				var v = rf();
-				array[i] = (T)v;
+				array[i] = (T)rf();
 			}
 			Require(']');
 			return array;
@@ -702,7 +696,7 @@ namespace Yuzu.Json
 						id = referenceReadFunc();
 						name = GetNextName(first: false);
 					}
-					if (Options.DeserializeAsUnknown || name != JsonOptions.ClassTag) {
+					if (name != JsonOptions.ClassTag) {
 						var any = new Dictionary<string, object>();
 						if (id != null) {
 							ReferenceResolver.AddReference(id, any);
@@ -1056,7 +1050,7 @@ namespace Yuzu.Json
 		}
 
 		// T is neither a collection nor a bare object.
-		private object ReadObject<T>() where T: class {
+		private T ReadObject<T>() where T: class {
 			KillBuf();
 			var ch = SkipSpaces();
 			switch (ch) {
@@ -1070,7 +1064,7 @@ namespace Yuzu.Json
 					if (name == JsonOptions.ReferenceTag) {
 						var r = referenceReadFunc();
 						Require('}');
-						return ReferenceResolver.ResolveReference(r);
+						return (T)ReferenceResolver.ResolveReference(r);
 					}
 					if (name == JsonOptions.IdTag) {
 						id = referenceReadFunc();
@@ -1079,36 +1073,36 @@ namespace Yuzu.Json
 					if (name != JsonOptions.ClassTag) {
 						var meta = Meta.Get(typeof(T), Options);
 						obj = CreateAndRegisterObject(meta, id);
-						return ReadFields(obj, name);
+						return (T)ReadFields(obj, name);
 					}
 					var typeName = RequireUnescapedString();
 					var t = FindType(typeName);
 					if (typeof(T).IsAssignableFrom(t)) {
 						var meta = Meta.Get(t, Options);
 						obj = CreateAndRegisterObject(meta, id);						
-						return ReadFields(obj, GetNextName(first: false));
+						return (T)ReadFields(obj, GetNextName(first: false));
 					}
 					obj = GetSurrogate<T>(t).FuncFrom(
 						ReadFields(Activator.CreateInstance(t), GetNextName(first: false)));
 					if (id != null) {
 						ReferenceResolver.AddReference(id, obj);
 					}
-					return obj;
+					return (T)obj;
 				case '[': {
 					var meta = Meta.Get(typeof(T), Options);
-					return ReadFieldsCompact(meta.Factory());
+					return (T)ReadFieldsCompact(meta.Factory());
 				}
 				case '"':
 					PutBack(ch);
-					return GetSurrogate<T>(typeof(string)).FuncFrom(RequireString());
+					return (T)GetSurrogate<T>(typeof(string)).FuncFrom(RequireString());
 				case 't':
 				case 'f':
 					PutBack(ch);
-					return GetSurrogate<T>(typeof(bool)).FuncFrom(RequireBool());
+					return (T)GetSurrogate<T>(typeof(bool)).FuncFrom(RequireBool());
 				default:
 					PutBack(ch);
 					var sg = GetSurrogate<T>(null);
-					return sg.FuncFrom(ReadValueFunc(sg.SurrogateType)()); // TODO: Optimize
+					return (T)sg.FuncFrom(ReadValueFunc(sg.SurrogateType)()); // TODO: Optimize
 			}
 		}
 
@@ -1144,7 +1138,7 @@ namespace Yuzu.Json
 			}
 		}
 
-		private object ReadInterface<T>() where T : class
+		private T ReadInterface<T>() where T : class
 		{
 			KillBuf();
 			if (RequireOrNull('{')) return null;
@@ -1153,7 +1147,7 @@ namespace Yuzu.Json
 			if (name == JsonOptions.ReferenceTag) {
 				var r = referenceReadFunc();
 				Require('}');
-				return ReferenceResolver.ResolveReference(r);
+				return (T)ReferenceResolver.ResolveReference(r);
 			}
 			if (name == JsonOptions.IdTag) {
 				id = referenceReadFunc();
@@ -1165,7 +1159,7 @@ namespace Yuzu.Json
 			if (!typeof(T).IsAssignableFrom(t))
 				throw Error("Expected interface '{0}', but got '{1}'", typeof(T), typeName);
 			var meta = Meta.Get(t, Options);
-			return ReadFields(CreateAndRegisterObject(meta, id), GetNextName(first: false));
+			return (T)ReadFields(CreateAndRegisterObject(meta, id), GetNextName(first: false));
 		}
 
 		private object ReadStruct<T>() where T : new()
