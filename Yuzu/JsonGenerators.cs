@@ -259,7 +259,7 @@ namespace Yuzu.Json
 				return;
 			}
 			if (t == typeof(decimal)) {
-				cw.PutPart(JsonOptions.DecimalAsString ? "RequireDecimalAsString();\n" : "RequireDecimal();\n");
+				cw.PutPart(JsonOptions.NumberAsString || JsonOptions.DecimalAsString ? "RequireDecimalAsString();\n" : "RequireDecimal();\n");
 				return;
 			}
 			if (t.IsEnum) {
