@@ -208,19 +208,33 @@ namespace Yuzu.Json
 		protected uint RequireUInt()
 		{
 			var ch = SkipSpaces();
+			if (JsonOptions.NumberAsString) {
+				if (ch != '"')
+					throw Error("Expected '\"' but found '{0}'", ch);
+				ch = Reader.ReadChar();
+			}
 			uint result = 0;
 			while ('0' <= ch && ch <= '9') {
 				var d = (uint)ch - (uint)'0';
 				checked { result = result * 10 + d; }
 				ch = Reader.ReadChar();
 			}
-			PutBack(ch);
+			if (JsonOptions.NumberAsString) {
+				if (ch != '"')
+					throw Error("Expected '\"' but found '{0}'", ch);
+			} else
+				PutBack(ch);
 			return result;
 		}
 
 		protected int RequireInt()
 		{
 			var ch = SkipSpaces();
+			if (JsonOptions.NumberAsString) {
+				if (ch != '"')
+					throw Error("Expected '\"' but found '{0}'", ch);
+				ch = Reader.ReadChar();
+			}
 			int result = 0;
 			if (ch == '-') {
 				ch = Reader.ReadChar();
@@ -237,14 +251,18 @@ namespace Yuzu.Json
 					ch = Reader.ReadChar();
 				}
 			}
-			PutBack(ch);
+			if (JsonOptions.NumberAsString) {
+				if (ch != '"')
+					throw Error("Expected '\"' but found '{0}'", ch);
+			} else
+				PutBack(ch);
 			return result;
 		}
 
 		protected ulong RequireULong()
 		{
 			var ch = SkipSpaces();
-			if (JsonOptions.Int64AsString) {
+			if (JsonOptions.NumberAsString || JsonOptions.Int64AsString) {
 				if (ch != '"')
 					throw Error("Expected '\"' but found '{0}'", ch);
 				ch = Reader.ReadChar();
@@ -255,7 +273,7 @@ namespace Yuzu.Json
 				checked { result = result * 10 + d; }
 				ch = Reader.ReadChar();
 			}
-			if (JsonOptions.Int64AsString) {
+			if (JsonOptions.NumberAsString || JsonOptions.Int64AsString) {
 				if (ch != '"')
 					throw Error("Expected '\"' but found '{0}'", ch);
 			}
@@ -267,7 +285,7 @@ namespace Yuzu.Json
 		protected long RequireLong()
 		{
 			var ch = SkipSpaces();
-			if (JsonOptions.Int64AsString) {
+			if (JsonOptions.NumberAsString || JsonOptions.Int64AsString) {
 				if (ch != '"')
 					throw Error("Expected '\"' but found '{0}'", ch);
 				ch = Reader.ReadChar();
@@ -283,7 +301,7 @@ namespace Yuzu.Json
 				checked { result = result * 10 + d; }
 				ch = Reader.ReadChar();
 			}
-			if (JsonOptions.Int64AsString) {
+			if (JsonOptions.NumberAsString || JsonOptions.Int64AsString) {
 				if (ch != '"')
 					throw Error("Expected '\"' but found '{0}'", ch);
 			}
@@ -296,21 +314,30 @@ namespace Yuzu.Json
 		{
 			sb.Clear();
 			var ch = SkipSpaces();
+			if (JsonOptions.NumberAsString) {
+				if (ch != '"')
+					throw Error("Expected '\"' but found '{0}'", ch);
+				ch = Reader.ReadChar();
+			}
 			bool neg = ch == '-';
 			if (neg) {
 				sb.Append(ch);
 				ch = Reader.ReadChar();
 			}
 			if (ch == 'N') {
-				Require("aN");
+				Require(JsonOptions.NumberAsString ? "aN\"" : "aN");
 				return float.NaN;
 			}
 			if (ch == 'I') {
-				Require("nfinity");
+				Require(JsonOptions.NumberAsString ? "nfinity\"" : "nfinity");
 				return neg ? float.NegativeInfinity : float.PositiveInfinity;
 			}
 			ch = JsonNumberReader.ReadUnsignedFloat(Reader, sb, ch);
-			PutBack(ch);
+			if (JsonOptions.NumberAsString) {
+				if (ch != '"')
+					throw Error("Expected '\"' but found '{0}'", ch);
+			} else
+				PutBack(ch);
 			return float.Parse(sb.ToString(), CultureInfo.InvariantCulture);
 		}
 
@@ -318,21 +345,30 @@ namespace Yuzu.Json
 		{
 			sb.Clear();
 			var ch = SkipSpaces();
+			if (JsonOptions.NumberAsString) {
+				if (ch != '"')
+					throw Error("Expected '\"' but found '{0}'", ch);
+				ch = Reader.ReadChar();
+			}
 			bool neg = ch == '-';
 			if (neg) {
 				sb.Append(ch);
 				ch = Reader.ReadChar();
 			}
 			if (ch == 'N') {
-				Require("aN");
+				Require(JsonOptions.NumberAsString ? "aN\"" : "aN");
 				return double.NaN;
 			}
 			if (ch == 'I') {
-				Require("nfinity");
+				Require(JsonOptions.NumberAsString ? "nfinity\"" : "nfinity");
 				return neg ? double.NegativeInfinity : double.PositiveInfinity;
 			}
 			ch = JsonNumberReader.ReadUnsignedFloat(Reader, sb, ch);
-			PutBack(ch);
+			if (JsonOptions.NumberAsString) {
+				if (ch != '"')
+					throw Error("Expected '\"' but found '{0}'", ch);
+			} else
+				PutBack(ch);
 			return double.Parse(sb.ToString(), CultureInfo.InvariantCulture);
 		}
 
@@ -354,17 +390,22 @@ namespace Yuzu.Json
 		{
 			sb.Clear();
 			var ch = SkipSpaces();
+			if (JsonOptions.NumberAsString) {
+				if (ch != '"')
+					throw Error("Expected '\"' but found '{0}'", ch);
+				ch = Reader.ReadChar();
+			}
 			bool neg = ch == '-';
 			if (neg) {
 				sb.Append(ch);
 				ch = Reader.ReadChar();
 			}
 			if (ch == 'N') {
-				Require("aN");
+				Require(JsonOptions.NumberAsString ? "aN\"" : "aN");
 				return double.NaN;
 			}
 			if (ch == 'I') {
-				Require("nfinity");
+				Require(JsonOptions.NumberAsString ? "nfinity\"" : "nfinity");
 				return neg ? double.NegativeInfinity : double.PositiveInfinity;
 			}
 			ch = JsonNumberReader.ReadDigits(Reader, sb, ch);
@@ -383,7 +424,11 @@ namespace Yuzu.Json
 				}
 				ch = JsonNumberReader.ReadDigits(Reader, sb, ch);
 			}
-			PutBack(ch);
+			if (JsonOptions.NumberAsString) {
+				if (ch != '"')
+					throw Error("Expected '\"' but found '{0}'", ch);
+			} else
+				PutBack(ch);
 			if (isFloat)
 				return double.Parse(sb.ToString(), CultureInfo.InvariantCulture);
 			if (neg) {
@@ -404,8 +449,10 @@ namespace Yuzu.Json
 			}
 		}
 
-		protected decimal RequireDecimalAsString() =>
-			decimal.Parse(RequireUnescapedString(), CultureInfo.InvariantCulture);
+		protected decimal RequireDecimalAsString()
+		{
+			return decimal.Parse(RequireUnescapedString(), CultureInfo.InvariantCulture);
+		}
 
 		protected DateTime RequireDateTime()
 		{
@@ -799,12 +846,11 @@ namespace Yuzu.Json
 			{
 				if (simpleReaders == null)
 					InitSimpleReaders();
-				Func<object> result;
-				if (simpleReaders.TryGetValue(t, out result))
+				if (simpleReaders.TryGetValue(t, out var result))
 					return result;
 			}
 			if (t == typeof(decimal)) {
-				if (JsonOptions.DecimalAsString)
+				if (JsonOptions.NumberAsString || JsonOptions.DecimalAsString)
 					return RequireDecimalAsStringObj;
 				else
 					return RequireDecimalObj;

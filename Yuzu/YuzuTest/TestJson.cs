@@ -109,6 +109,30 @@ namespace YuzuTest.Json
 		}
 
 		[TestMethod]
+		public void TestLongAsString()
+		{
+			var js = new JsonSerializer();
+			var v1 = new SampleLong { S = -1L << 33, U = 1UL << 33 };
+
+			js.JsonOptions.Indent = "";
+			js.JsonOptions.NumberAsString = true;
+			var result = js.ToString(v1);
+			Assert.AreEqual("{\n\"S\":\"-8589934592\",\n\"U\":\"8589934592\"\n}", result);
+
+			var v2 = new SampleLong();
+			var jd = new JsonDeserializer { JsonOptions = { NumberAsString = true } };
+			jd.FromString(v2, result);
+			Assert.AreEqual(v1.S, v2.S);
+			Assert.AreEqual(v1.U, v2.U);
+
+			v1.S = long.MinValue;
+			v1.U = ulong.MaxValue;
+			jd.FromString(v2, js.ToString(v1));
+			Assert.AreEqual(v1.S, v2.S);
+			Assert.AreEqual(v1.U, v2.U);
+		}
+
+		[TestMethod]
 		public void TestSmallTypes()
 		{
 			var js = new JsonSerializer();
@@ -141,6 +165,38 @@ namespace YuzuTest.Json
 			XAssert.Throws<OverflowException>(() => jd.FromString(v2, result.Replace("2001", "200000")));
 
 			jd.FromString(v2, "{\n\"B\":255,\n\"Ch\":\"Z\",\n\"Sb\":-128,\n\"Sh\":-32768,\n\"USh\":32767\n}");
+			Assert.AreEqual('Z', v2.Ch);
+			Assert.AreEqual(32767, v2.USh);
+			Assert.AreEqual(-32768, v2.Sh);
+			Assert.AreEqual(255, v2.B);
+			Assert.AreEqual(-128, v2.Sb);
+		}
+
+		[TestMethod]
+		public void TestSmallTypesAsString()
+		{
+			var js = new JsonSerializer { JsonOptions = { Indent = "", NumberAsString = true } };
+			var v1 = new SampleSmallTypes { Ch = 'A', Sh = -2000, USh = 2001, B = 198, Sb = -109 };
+
+			var result = js.ToString(v1);
+			Assert.AreEqual("{\n\"B\":\"198\",\n\"Ch\":\"A\",\n\"Sb\":\"-109\",\n\"Sh\":\"-2000\",\n\"USh\":\"2001\"\n}", result);
+
+			var v2 = new SampleSmallTypes();
+			var jd = new JsonDeserializer { JsonOptions = { NumberAsString = true } };
+			jd.FromString(v2, result);
+			Assert.AreEqual(v1.Ch, v2.Ch);
+			Assert.AreEqual(v1.USh, v2.USh);
+			Assert.AreEqual(v1.Sh, v2.Sh);
+			Assert.AreEqual(v1.B, v2.B);
+			Assert.AreEqual(v1.Sb, v2.Sb);
+
+			XAssert.Throws<YuzuException>(() => jd.FromString(v2, result.Replace("A", "ABC")), "ABC");
+			XAssert.Throws<OverflowException>(() => jd.FromString(v2, result.Replace("198", "298")));
+			XAssert.Throws<OverflowException>(() => jd.FromString(v2, result.Replace("109", "209")));
+			XAssert.Throws<OverflowException>(() => jd.FromString(v2, result.Replace("2000", "40000")));
+			XAssert.Throws<OverflowException>(() => jd.FromString(v2, result.Replace("2001", "200000")));
+
+			jd.FromString(v2, "{\n\"B\":\"255\",\n\"Ch\":\"Z\",\n\"Sb\":\"-128\",\n\"Sh\":\"-32768\",\n\"USh\":\"32767\"\n}");
 			Assert.AreEqual('Z', v2.Ch);
 			Assert.AreEqual(32767, v2.USh);
 			Assert.AreEqual(-32768, v2.Sh);
@@ -321,6 +377,34 @@ namespace YuzuTest.Json
 		}
 
 		[TestMethod]
+		public void TestFloatAsString()
+		{
+			var js = new JsonSerializer();
+			js.Options.TagMode = TagMode.Names;
+			js.JsonOptions.NumberAsString = true;
+
+			var v = new SampleFloat { F = 1e-20f, D = -3.1415e100d };
+			js.JsonOptions.Indent = "";
+
+			var result1 = js.ToString(v);
+			Assert.AreEqual("{\n\"F\":\"1E-20\",\n\"D\":\"-3.1415E100\"\n}", result1);
+
+			var w = new SampleFloat();
+			var jd = new JsonDeserializer { JsonOptions = { NumberAsString = true } };
+			jd.Options.TagMode = TagMode.Names;
+			jd.FromString(w, result1);
+			Assert.AreEqual(v.F, w.F);
+			Assert.AreEqual(v.D, w.D);
+
+			js.JsonOptions.FloatingPointFormat = "R";
+			var result2 = js.ToString(v);
+			Assert.AreEqual("{\n\"F\":\"1E-20\",\n\"D\":\"-3.1415E+100\"\n}", result2);
+			js.JsonOptions.FloatingPointFormat = "F";
+			var result3 = js.ToString(v);
+			Assert.AreEqual("{\n\"F\":\"0.00\",\n\"D\":\"-31414999999999998355854201642015795681729265923880988006102093628628873801398257955664637236621606912.00\"\n}", result3);
+		}
+
+		[TestMethod]
 		public void TestFloatInfNan()
 		{
 			var js = new JsonSerializer();
@@ -346,6 +430,34 @@ namespace YuzuTest.Json
 			Assert.IsTrue(double.IsNegativeInfinity(w2.D));
 
 			Assert.AreEqual("Infinity", js.ToString(Double.PositiveInfinity));
+		}
+
+		[TestMethod]
+		public void TestFloatInfNanAsString()
+		{
+			var js = new JsonSerializer { JsonOptions = { Indent = "", NumberAsString = true } };
+			js.Options.TagMode = TagMode.Names;
+			var jd = new JsonDeserializer { JsonOptions = { NumberAsString = true } };
+			jd.Options.TagMode = TagMode.Names;
+
+			var v1 = new SampleFloat { F = float.NaN, D = double.NaN };
+			var result1 = js.ToString(v1);
+			Assert.AreEqual(
+				"{\n\"F\":\"NaN\",\n\"D\":\"NaN\"\n}",
+				result1
+			);
+			var w1 = jd.FromString<SampleFloat>(result1);
+			Assert.IsTrue(float.IsNaN(w1.F));
+			Assert.IsTrue(double.IsNaN(w1.D));
+
+			var v2 = new SampleFloat { F = float.PositiveInfinity, D = double.NegativeInfinity };
+			var result2 = js.ToString(v2);
+			Assert.AreEqual("{\n\"F\":\"Infinity\",\n\"D\":\"-Infinity\"\n}", result2);
+			var w2 = jd.FromString<SampleFloat>(result2);
+			Assert.IsTrue(float.IsPositiveInfinity(w2.F));
+			Assert.IsTrue(double.IsNegativeInfinity(w2.D));
+
+			Assert.AreEqual("\"Infinity\"", js.ToString(Double.PositiveInfinity));
 		}
 
 		[TestMethod]

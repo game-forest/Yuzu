@@ -67,6 +67,9 @@ namespace Yuzu.Json
 		private bool decimalAsString = false;
 		public bool DecimalAsString { get { return decimalAsString; } set { decimalAsString = value; generation++; } }
 
+		private bool numberAsString = false;
+		public bool NumberAsString { get { return numberAsString; } set { numberAsString = value; generation++; } }
+
 		public bool Unordered = false;
 
 		private bool comments = false;
@@ -120,7 +123,21 @@ namespace Yuzu.Json
 		}
 
 		private void WriteInt(object obj) => JsonIntWriter.WriteInt(writer, Convert.ToInt32(obj));
+		private void WriteIntAsString(object obj)
+		{
+			writer.Write((byte)'"');
+			JsonIntWriter.WriteInt(writer, Convert.ToInt32(obj));
+			writer.Write((byte)'"');
+		}
+
 		private void WriteUInt(object obj) => JsonIntWriter.WriteUInt(writer, Convert.ToUInt32(obj));
+		private void WriteUIntAsString(object obj)
+		{
+			writer.Write((byte)'"');
+			JsonIntWriter.WriteUInt(writer, Convert.ToUInt32(obj));
+			writer.Write((byte)'"');
+		}
+
 		private void WriteLong(object obj) => JsonIntWriter.WriteLong(writer, (long)obj);
 		private void WriteULong(object obj) => JsonIntWriter.WriteULong(writer, (ulong)obj);
 
@@ -139,18 +156,50 @@ namespace Yuzu.Json
 		}
 
 		private void WriteDouble(object obj) => DoubleWriter.Write((double)obj, writer);
-		private void WriteDoubleFormat(object obj) =>
+		private void WriteDoubleAsString(object obj)
+		{
+			writer.Write((byte)'"');
+			DoubleWriter.Write((double)obj, writer);
+			writer.Write((byte)'"');
+		}
+
+		private void WriteDoubleFormat(object obj)
+		{
 			WriteStr(((double)obj).ToString(JsonOptions.FloatingPointFormat, CultureInfo.InvariantCulture));
+		}
+
+		private void WriteDoubleFormatAsString(object obj)
+		{
+			writer.Write((byte)'"');
+			WriteStr(((double)obj).ToString(JsonOptions.FloatingPointFormat, CultureInfo.InvariantCulture));
+			writer.Write((byte)'"');
+		}
 
 		private void WriteSingle(object obj) => DoubleWriter.Write((float)obj, writer);
-		private void WriteSingleFormat(object obj) =>
+		private void WriteSingleAsString(object obj)
+		{
+			writer.Write((byte)'"');
+			DoubleWriter.Write((float)obj, writer);
+			writer.Write((byte)'"');
+		}
+
+		private void WriteSingleFormat(object obj)
+		{
 			WriteStr(((float)obj).ToString(JsonOptions.FloatingPointFormat, CultureInfo.InvariantCulture));
+		}
+		private void WriteSingleFormatAsString(object obj)
+		{
+			writer.Write((byte)'"');
+			WriteStr(((float)obj).ToString(JsonOptions.FloatingPointFormat, CultureInfo.InvariantCulture));
+			writer.Write((byte)'"');
+		}
 
-		private void WriteDecimal(object obj) =>
-			WriteStr(((decimal)obj).ToString(CultureInfo.InvariantCulture));
+		private void WriteDecimal(object obj) => WriteStr(((decimal)obj).ToString(CultureInfo.InvariantCulture));
 
-		private void WriteDecimalAsString(object obj) =>
+		private void WriteDecimalAsString(object obj)
+		{
 			WriteUnescapedString(((decimal)obj).ToString(CultureInfo.InvariantCulture));
+		}
 
 		private void WriteUnescapedString(object obj)
 		{
@@ -159,8 +208,7 @@ namespace Yuzu.Json
 			writer.Write((byte)'"');
 		}
 
-		private void WriteChar(object obj) =>
-			JsonStringWriter.WriteEscapedString(writer, obj.ToString());
+		private void WriteChar(object obj) => JsonStringWriter.WriteEscapedString(writer, obj.ToString());
 
 		private void WriteNullableEscapedString(object obj)
 		{
@@ -513,34 +561,52 @@ namespace Yuzu.Json
 
 		private void InitWriters()
 		{
-			writerCache[typeof(sbyte)] = WriteInt;
-			writerCache[typeof(byte)] = WriteUInt;
-			writerCache[typeof(short)] = WriteInt;
-			writerCache[typeof(ushort)] = WriteUInt;
-			writerCache[typeof(int)] = WriteInt;
-			writerCache[typeof(uint)] = WriteUInt;
-			if (JsonOptions.Int64AsString) {
+			if (JsonOptions.NumberAsString) {
+				writerCache[typeof(sbyte)] = WriteIntAsString;
+				writerCache[typeof(byte)] = WriteUIntAsString;
+				writerCache[typeof(short)] = WriteIntAsString;
+				writerCache[typeof(ushort)] = WriteUIntAsString;
+				writerCache[typeof(int)] = WriteIntAsString;
+				writerCache[typeof(uint)] = WriteUIntAsString;
 				writerCache[typeof(long)] = WriteLongAsString;
 				writerCache[typeof(ulong)] = WriteULongAsString;
-			}
-			else {
-				writerCache[typeof(long)] = WriteLong;
-				writerCache[typeof(ulong)] = WriteULong;
+				if (string.IsNullOrEmpty(JsonOptions.FloatingPointFormat)) {
+					writerCache[typeof(double)] = WriteDoubleAsString;
+					writerCache[typeof(float)] = WriteSingleAsString;
+				} else {
+					writerCache[typeof(double)] = WriteDoubleFormatAsString;
+					writerCache[typeof(float)] = WriteSingleFormatAsString;
+				}
+				writerCache[typeof(decimal)] = WriteDecimalAsString;
+			} else {
+				writerCache[typeof(sbyte)] = WriteInt;
+				writerCache[typeof(byte)] = WriteUInt;
+				writerCache[typeof(short)] = WriteInt;
+				writerCache[typeof(ushort)] = WriteUInt;
+				writerCache[typeof(int)] = WriteInt;
+				writerCache[typeof(uint)] = WriteUInt;
+				if (JsonOptions.Int64AsString) {
+					writerCache[typeof(long)] = WriteLongAsString;
+					writerCache[typeof(ulong)] = WriteULongAsString;
+				} else {
+					writerCache[typeof(long)] = WriteLong;
+					writerCache[typeof(ulong)] = WriteULong;
+				}
+				if (string.IsNullOrEmpty(JsonOptions.FloatingPointFormat)) {
+					writerCache[typeof(double)] = WriteDouble;
+					writerCache[typeof(float)] = WriteSingle;
+				} else {
+					writerCache[typeof(double)] = WriteDoubleFormat;
+					writerCache[typeof(float)] = WriteSingleFormat;
+				}
+				if (JsonOptions.DecimalAsString) {
+					writerCache[typeof(decimal)] = WriteDecimalAsString;
+				} else {
+					writerCache[typeof(decimal)] = WriteDecimal;
+				}
 			}
 			writerCache[typeof(bool)] = WriteBool;
 			writerCache[typeof(char)] = WriteChar;
-			if (string.IsNullOrEmpty(JsonOptions.FloatingPointFormat)) {
-				writerCache[typeof(double)] = WriteDouble;
-				writerCache[typeof(float)] = WriteSingle;
-			}
-			else {
-				writerCache[typeof(double)] = WriteDoubleFormat;
-				writerCache[typeof(float)] = WriteSingleFormat;
-			}
-			if (JsonOptions.DecimalAsString)
-				writerCache[typeof(decimal)] = WriteDecimalAsString;
-			else
-				writerCache[typeof(decimal)] = WriteDecimal;
 			writerCache[typeof(DateTime)] = WriteDateTime;
 			writerCache[typeof(DateTimeOffset)] = WriteDateTimeOffset;
 			writerCache[typeof(TimeSpan)] = WriteTimeSpan;
