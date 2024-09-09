@@ -8,7 +8,7 @@ namespace YuzuGen.YuzuTest
 {
 	class Sample1_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new Sample1_JsonDeserializer Instance = new Sample1_JsonDeserializer();
+		public static new Sample1_JsonDeserializer Instance = new();
 
 		public Sample1_JsonDeserializer()
 		{
@@ -41,7 +41,7 @@ namespace YuzuGen.YuzuTest
 
 	class Sample2_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new Sample2_JsonDeserializer Instance = new Sample2_JsonDeserializer();
+		public static new Sample2_JsonDeserializer Instance = new();
 
 		public Sample2_JsonDeserializer()
 		{
@@ -74,7 +74,7 @@ namespace YuzuGen.YuzuTest
 
 	class Sample3_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new Sample3_JsonDeserializer Instance = new Sample3_JsonDeserializer();
+		public static new Sample3_JsonDeserializer Instance = new();
 
 		public Sample3_JsonDeserializer()
 		{
@@ -111,7 +111,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleEnumMemberTyped_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleEnumMemberTyped_JsonDeserializer Instance = new SampleEnumMemberTyped_JsonDeserializer();
+		public static new SampleEnumMemberTyped_JsonDeserializer Instance = new();
 
 		public SampleEnumMemberTyped_JsonDeserializer()
 		{
@@ -145,7 +145,7 @@ namespace YuzuGen.YuzuTest
 
 	class Sample4_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new Sample4_JsonDeserializer Instance = new Sample4_JsonDeserializer();
+		public static new Sample4_JsonDeserializer Instance = new();
 
 		public Sample4_JsonDeserializer()
 		{
@@ -176,7 +176,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleDecimal_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleDecimal_JsonDeserializer Instance = new SampleDecimal_JsonDeserializer();
+		public static new SampleDecimal_JsonDeserializer Instance = new();
 
 		public SampleDecimal_JsonDeserializer()
 		{
@@ -206,7 +206,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleNullable_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleNullable_JsonDeserializer Instance = new SampleNullable_JsonDeserializer();
+		public static new SampleNullable_JsonDeserializer Instance = new();
 
 		public SampleNullable_JsonDeserializer()
 		{
@@ -242,7 +242,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleBool_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleBool_JsonDeserializer Instance = new SampleBool_JsonDeserializer();
+		public static new SampleBool_JsonDeserializer Instance = new();
 
 		public SampleBool_JsonDeserializer()
 		{
@@ -272,7 +272,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleList_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleList_JsonDeserializer Instance = new SampleList_JsonDeserializer();
+		public static new SampleList_JsonDeserializer Instance = new();
 
 		public SampleList_JsonDeserializer()
 		{
@@ -314,7 +314,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleObj_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleObj_JsonDeserializer Instance = new SampleObj_JsonDeserializer();
+		public static new SampleObj_JsonDeserializer Instance = new();
 
 		public SampleObj_JsonDeserializer()
 		{
@@ -344,7 +344,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleDict_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleDict_JsonDeserializer Instance = new SampleDict_JsonDeserializer();
+		public static new SampleDict_JsonDeserializer Instance = new();
 
 		public SampleDict_JsonDeserializer()
 		{
@@ -391,7 +391,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleSortedDict_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleSortedDict_JsonDeserializer Instance = new SampleSortedDict_JsonDeserializer();
+		public static new SampleSortedDict_JsonDeserializer Instance = new();
 
 		public SampleSortedDict_JsonDeserializer()
 		{
@@ -435,7 +435,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleSortedDictOfClass_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleSortedDictOfClass_JsonDeserializer Instance = new SampleSortedDictOfClass_JsonDeserializer();
+		public static new SampleSortedDictOfClass_JsonDeserializer Instance = new();
 
 		public SampleSortedDictOfClass_JsonDeserializer()
 		{
@@ -479,7 +479,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleDictKeys_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleDictKeys_JsonDeserializer Instance = new SampleDictKeys_JsonDeserializer();
+		public static new SampleDictKeys_JsonDeserializer Instance = new();
 
 		public SampleDictKeys_JsonDeserializer()
 		{
@@ -554,7 +554,7 @@ namespace YuzuGen.YuzuTest
 
 	class ISampleMember_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new ISampleMember_JsonDeserializer Instance = new ISampleMember_JsonDeserializer();
+		public static new ISampleMember_JsonDeserializer Instance = new();
 
 		public ISampleMember_JsonDeserializer()
 		{
@@ -585,7 +585,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleMemberI_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleMemberI_JsonDeserializer Instance = new SampleMemberI_JsonDeserializer();
+		public static new SampleMemberI_JsonDeserializer Instance = new();
 
 		public SampleMemberI_JsonDeserializer()
 		{
@@ -620,7 +620,7 @@ namespace YuzuGen.System.Collections.Generic
 {
 	class List_ISampleMember_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new List_ISampleMember_JsonDeserializer Instance = new List_ISampleMember_JsonDeserializer();
+		public static new List_ISampleMember_JsonDeserializer Instance = new();
 
 		public List_ISampleMember_JsonDeserializer()
 		{
@@ -667,7 +667,7 @@ namespace YuzuGen.YuzuTest
 {
 	class SampleArray_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleArray_JsonDeserializer Instance = new SampleArray_JsonDeserializer();
+		public static new SampleArray_JsonDeserializer Instance = new();
 
 		public SampleArray_JsonDeserializer()
 		{
@@ -709,7 +709,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleArrayOfArray_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleArrayOfArray_JsonDeserializer Instance = new SampleArrayOfArray_JsonDeserializer();
+		public static new SampleArrayOfArray_JsonDeserializer Instance = new();
 
 		public SampleArrayOfArray_JsonDeserializer()
 		{
@@ -765,7 +765,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleArrayNDim_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleArrayNDim_JsonDeserializer Instance = new SampleArrayNDim_JsonDeserializer();
+		public static new SampleArrayNDim_JsonDeserializer Instance = new();
 
 		public SampleArrayNDim_JsonDeserializer()
 		{
@@ -798,7 +798,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleBase_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleBase_JsonDeserializer Instance = new SampleBase_JsonDeserializer();
+		public static new SampleBase_JsonDeserializer Instance = new();
 
 		public SampleBase_JsonDeserializer()
 		{
@@ -828,7 +828,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleDerivedA_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleDerivedA_JsonDeserializer Instance = new SampleDerivedA_JsonDeserializer();
+		public static new SampleDerivedA_JsonDeserializer Instance = new();
 
 		public SampleDerivedA_JsonDeserializer()
 		{
@@ -861,7 +861,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleDerivedB_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleDerivedB_JsonDeserializer Instance = new SampleDerivedB_JsonDeserializer();
+		public static new SampleDerivedB_JsonDeserializer Instance = new();
 
 		public SampleDerivedB_JsonDeserializer()
 		{
@@ -894,7 +894,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleMatrix_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleMatrix_JsonDeserializer Instance = new SampleMatrix_JsonDeserializer();
+		public static new SampleMatrix_JsonDeserializer Instance = new();
 
 		public SampleMatrix_JsonDeserializer()
 		{
@@ -946,7 +946,7 @@ namespace YuzuGen.YuzuTest
 
 	class SamplePoint_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SamplePoint_JsonDeserializer Instance = new SamplePoint_JsonDeserializer();
+		public static new SamplePoint_JsonDeserializer Instance = new();
 
 		public SamplePoint_JsonDeserializer()
 		{
@@ -989,7 +989,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleRect_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleRect_JsonDeserializer Instance = new SampleRect_JsonDeserializer();
+		public static new SampleRect_JsonDeserializer Instance = new();
 
 		public SampleRect_JsonDeserializer()
 		{
@@ -1022,7 +1022,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleDate_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleDate_JsonDeserializer Instance = new SampleDate_JsonDeserializer();
+		public static new SampleDate_JsonDeserializer Instance = new();
 
 		public SampleDate_JsonDeserializer()
 		{
@@ -1058,7 +1058,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleGuid_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleGuid_JsonDeserializer Instance = new SampleGuid_JsonDeserializer();
+		public static new SampleGuid_JsonDeserializer Instance = new();
 
 		public SampleGuid_JsonDeserializer()
 		{
@@ -1088,7 +1088,7 @@ namespace YuzuGen.YuzuTest
 
 	class Color_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new Color_JsonDeserializer Instance = new Color_JsonDeserializer();
+		public static new Color_JsonDeserializer Instance = new();
 
 		public Color_JsonDeserializer()
 		{
@@ -1140,7 +1140,7 @@ namespace YuzuGen.System.Collections.Generic
 {
 	class List_List_Int32_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new List_List_Int32_JsonDeserializer Instance = new List_List_Int32_JsonDeserializer();
+		public static new List_List_Int32_JsonDeserializer Instance = new();
 
 		public List_List_Int32_JsonDeserializer()
 		{
@@ -1198,7 +1198,7 @@ namespace YuzuGen.YuzuTest
 {
 	class SampleClassList_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleClassList_JsonDeserializer Instance = new SampleClassList_JsonDeserializer();
+		public static new SampleClassList_JsonDeserializer Instance = new();
 
 		public SampleClassList_JsonDeserializer()
 		{
@@ -1239,7 +1239,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleSmallTypes_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleSmallTypes_JsonDeserializer Instance = new SampleSmallTypes_JsonDeserializer();
+		public static new SampleSmallTypes_JsonDeserializer Instance = new();
 
 		public SampleSmallTypes_JsonDeserializer()
 		{
@@ -1281,7 +1281,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleWithNullFieldCompact_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleWithNullFieldCompact_JsonDeserializer Instance = new SampleWithNullFieldCompact_JsonDeserializer();
+		public static new SampleWithNullFieldCompact_JsonDeserializer Instance = new();
 
 		public SampleWithNullFieldCompact_JsonDeserializer()
 		{
@@ -1319,7 +1319,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleNested__NestedClass_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleNested__NestedClass_JsonDeserializer Instance = new SampleNested__NestedClass_JsonDeserializer();
+		public static new SampleNested__NestedClass_JsonDeserializer Instance = new();
 
 		public SampleNested__NestedClass_JsonDeserializer()
 		{
@@ -1350,7 +1350,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleNested_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleNested_JsonDeserializer Instance = new SampleNested_JsonDeserializer();
+		public static new SampleNested_JsonDeserializer Instance = new();
 
 		public SampleNested_JsonDeserializer()
 		{
@@ -1400,7 +1400,7 @@ namespace YuzuGen.YuzuTest
 
 	class SamplePerson_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SamplePerson_JsonDeserializer Instance = new SamplePerson_JsonDeserializer();
+		public static new SamplePerson_JsonDeserializer Instance = new();
 
 		public SamplePerson_JsonDeserializer()
 		{
@@ -1449,7 +1449,7 @@ namespace YuzuGen.YuzuTest
 
 	class ISample_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new ISample_JsonDeserializer Instance = new ISample_JsonDeserializer();
+		public static new ISample_JsonDeserializer Instance = new();
 
 		public ISample_JsonDeserializer()
 		{
@@ -1475,7 +1475,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleInterfaced_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleInterfaced_JsonDeserializer Instance = new SampleInterfaced_JsonDeserializer();
+		public static new SampleInterfaced_JsonDeserializer Instance = new();
 
 		public SampleInterfaced_JsonDeserializer()
 		{
@@ -1504,7 +1504,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleInterfaceField_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleInterfaceField_JsonDeserializer Instance = new SampleInterfaceField_JsonDeserializer();
+		public static new SampleInterfaceField_JsonDeserializer Instance = new();
 
 		public SampleInterfaceField_JsonDeserializer()
 		{
@@ -1533,7 +1533,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleInterfacedGeneric_String_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleInterfacedGeneric_String_JsonDeserializer Instance = new SampleInterfacedGeneric_String_JsonDeserializer();
+		public static new SampleInterfacedGeneric_String_JsonDeserializer Instance = new();
 
 		public SampleInterfacedGeneric_String_JsonDeserializer()
 		{
@@ -1565,7 +1565,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleAbstract_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleAbstract_JsonDeserializer Instance = new SampleAbstract_JsonDeserializer();
+		public static new SampleAbstract_JsonDeserializer Instance = new();
 
 		public SampleAbstract_JsonDeserializer()
 		{
@@ -1591,7 +1591,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleConcrete_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleConcrete_JsonDeserializer Instance = new SampleConcrete_JsonDeserializer();
+		public static new SampleConcrete_JsonDeserializer Instance = new();
 
 		public SampleConcrete_JsonDeserializer()
 		{
@@ -1620,7 +1620,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleCollection_Int32_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleCollection_Int32_JsonDeserializer Instance = new SampleCollection_Int32_JsonDeserializer();
+		public static new SampleCollection_Int32_JsonDeserializer Instance = new();
 
 		public SampleCollection_Int32_JsonDeserializer()
 		{
@@ -1662,7 +1662,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleExplicitCollection_Int32_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleExplicitCollection_Int32_JsonDeserializer Instance = new SampleExplicitCollection_Int32_JsonDeserializer();
+		public static new SampleExplicitCollection_Int32_JsonDeserializer Instance = new();
 
 		public SampleExplicitCollection_Int32_JsonDeserializer()
 		{
@@ -1704,7 +1704,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleWithCollection_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleWithCollection_JsonDeserializer Instance = new SampleWithCollection_JsonDeserializer();
+		public static new SampleWithCollection_JsonDeserializer Instance = new();
 
 		public SampleWithCollection_JsonDeserializer()
 		{
@@ -1774,7 +1774,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleConcreteCollection_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleConcreteCollection_JsonDeserializer Instance = new SampleConcreteCollection_JsonDeserializer();
+		public static new SampleConcreteCollection_JsonDeserializer Instance = new();
 
 		public SampleConcreteCollection_JsonDeserializer()
 		{
@@ -1816,7 +1816,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleAfter2_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleAfter2_JsonDeserializer Instance = new SampleAfter2_JsonDeserializer();
+		public static new SampleAfter2_JsonDeserializer Instance = new();
 
 		public SampleAfter2_JsonDeserializer()
 		{
@@ -1848,7 +1848,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleAfterSerialization_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleAfterSerialization_JsonDeserializer Instance = new SampleAfterSerialization_JsonDeserializer();
+		public static new SampleAfterSerialization_JsonDeserializer Instance = new();
 
 		public SampleAfterSerialization_JsonDeserializer()
 		{
@@ -1877,7 +1877,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleBeforeDeserialization_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleBeforeDeserialization_JsonDeserializer Instance = new SampleBeforeDeserialization_JsonDeserializer();
+		public static new SampleBeforeDeserialization_JsonDeserializer Instance = new();
 
 		public SampleBeforeDeserialization_JsonDeserializer()
 		{
@@ -1907,7 +1907,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleMerge_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleMerge_JsonDeserializer Instance = new SampleMerge_JsonDeserializer();
+		public static new SampleMerge_JsonDeserializer Instance = new();
 
 		public SampleMerge_JsonDeserializer()
 		{
@@ -1963,7 +1963,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleAssemblyDerivedR_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleAssemblyDerivedR_JsonDeserializer Instance = new SampleAssemblyDerivedR_JsonDeserializer();
+		public static new SampleAssemblyDerivedR_JsonDeserializer Instance = new();
 
 		public SampleAssemblyDerivedR_JsonDeserializer()
 		{
@@ -1997,7 +1997,7 @@ namespace YuzuGen.YuzuTest
 
 	class SampleAliasMany_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleAliasMany_JsonDeserializer Instance = new SampleAliasMany_JsonDeserializer();
+		public static new SampleAliasMany_JsonDeserializer Instance = new();
 
 		public SampleAliasMany_JsonDeserializer()
 		{
@@ -2026,7 +2026,7 @@ namespace YuzuGen.YuzuTest
 
 	class SamplePrivateConstructor_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SamplePrivateConstructor_JsonDeserializer Instance = new SamplePrivateConstructor_JsonDeserializer();
+		public static new SamplePrivateConstructor_JsonDeserializer Instance = new();
 
 		public SamplePrivateConstructor_JsonDeserializer()
 		{
@@ -2059,7 +2059,7 @@ namespace YuzuGen.System.Collections.Generic
 {
 	class List_SampleAssemblyBase_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new List_SampleAssemblyBase_JsonDeserializer Instance = new List_SampleAssemblyBase_JsonDeserializer();
+		public static new List_SampleAssemblyBase_JsonDeserializer Instance = new();
 
 		public List_SampleAssemblyBase_JsonDeserializer()
 		{
@@ -2105,7 +2105,7 @@ namespace YuzuGen.YuzuTestAssembly
 {
 	class SampleAssemblyBase_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleAssemblyBase_JsonDeserializer Instance = new SampleAssemblyBase_JsonDeserializer();
+		public static new SampleAssemblyBase_JsonDeserializer Instance = new();
 
 		public SampleAssemblyBase_JsonDeserializer()
 		{
@@ -2135,7 +2135,7 @@ namespace YuzuGen.YuzuTestAssembly
 
 	class SampleAssemblyDerivedQ_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleAssemblyDerivedQ_JsonDeserializer Instance = new SampleAssemblyDerivedQ_JsonDeserializer();
+		public static new SampleAssemblyDerivedQ_JsonDeserializer Instance = new();
 
 		public SampleAssemblyDerivedQ_JsonDeserializer()
 		{
@@ -2173,7 +2173,7 @@ namespace YuzuGen.YuzuTest2
 {
 	class SampleNamespace_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new SampleNamespace_JsonDeserializer Instance = new SampleNamespace_JsonDeserializer();
+		public static new SampleNamespace_JsonDeserializer Instance = new();
 
 		public SampleNamespace_JsonDeserializer()
 		{
@@ -2206,7 +2206,7 @@ namespace YuzuGen.YuzuTest
 {
 	class A__B__C__D__E__Sample2Struct_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new A__B__C__D__E__Sample2Struct_JsonDeserializer Instance = new A__B__C__D__E__Sample2Struct_JsonDeserializer();
+		public static new A__B__C__D__E__Sample2Struct_JsonDeserializer Instance = new();
 
 		public A__B__C__D__E__Sample2Struct_JsonDeserializer()
 		{
@@ -2239,7 +2239,7 @@ namespace YuzuGen.YuzuTest
 
 	class A__B__C__D__E__SampleSerializeIfStruct_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new A__B__C__D__E__SampleSerializeIfStruct_JsonDeserializer Instance = new A__B__C__D__E__SampleSerializeIfStruct_JsonDeserializer();
+		public static new A__B__C__D__E__SampleSerializeIfStruct_JsonDeserializer Instance = new();
 
 		public A__B__C__D__E__SampleSerializeIfStruct_JsonDeserializer()
 		{
@@ -2272,7 +2272,7 @@ namespace YuzuGen.YuzuTest
 
 	class A__B__C__D__E__SampleSerializeIfOnFieldStruct_JsonDeserializer : JsonDeserializerGenBase
 	{
-		public static new A__B__C__D__E__SampleSerializeIfOnFieldStruct_JsonDeserializer Instance = new A__B__C__D__E__SampleSerializeIfOnFieldStruct_JsonDeserializer();
+		public static new A__B__C__D__E__SampleSerializeIfOnFieldStruct_JsonDeserializer Instance = new();
 
 		public A__B__C__D__E__SampleSerializeIfOnFieldStruct_JsonDeserializer()
 		{

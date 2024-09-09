@@ -33,7 +33,7 @@ namespace YuzuTest.Json
 
 			var result = js.ToString(v1);
 			Assert.AreEqual("{\n\"X\":345,\n\"Y\":\"test\"\n}", result);
-			Sample1 v2 = new Sample1();
+			Sample1 v2 = new();
 
 			var jd = new JsonDeserializer();
 			jd.FromString(v2, result);
@@ -463,7 +463,7 @@ namespace YuzuTest.Json
 		[TestMethod]
 		public void TestBadDoubleJson()
 		{
-			var d = BitConverter.ToDouble(new byte[] { 48, 249, 184, 21, 152, 124, 220, 63 }, 0);
+			var d = BitConverter.ToDouble([48, 249, 184, 21, 152, 124, 220, 63], 0);
 			var l0 = new List<double> { d };
 			var js = new JsonSerializer();
 			js.JsonOptions.Indent = "";
@@ -707,14 +707,14 @@ namespace YuzuTest.Json
 			var jd = new JsonDeserializer();
 			jd.Options.TagMode = TagMode.Names;
 
-			var v0 = new SampleList { E = new List<string> { "a", "b", "c" } };
+			var v0 = new SampleList { E = ["a", "b", "c"] };
 			var result0 = js.ToString(v0);
 			Assert.AreEqual("{\n\"E\":[\n\"a\",\n\"b\",\n\"c\"\n]\n}", result0);
 			var w0 = new SampleList();
 			jd.FromString(w0, result0);
 			CollectionAssert.AreEqual(v0.E, w0.E);
 
-			var v1 = new SampleTree { Value = 11, Children = new List<SampleTree>() };
+			var v1 = new SampleTree { Value = 11, Children = [] };
 			Assert.AreEqual("{\n\"Value\":11,\n\"Children\":[]\n}", js.ToString(v1));
 			var w1 = new SampleTree();
 			jd.FromString(w1, js.ToString(v1));
@@ -722,15 +722,15 @@ namespace YuzuTest.Json
 
 			var v2 = new SampleTree {
 				Value = 11,
-				Children = new List<SampleTree> {
+				Children = [
 					new SampleTree {
 						Value = 12,
-						Children = new List<SampleTree>(),
+						Children = [],
 					},
 					new SampleTree {
 						Value = 13,
 					}
-				}
+				]
 			};
 			var result2 = js.ToString(v2);
 			Assert.AreEqual(
@@ -739,7 +739,7 @@ namespace YuzuTest.Json
 				"{\n\"Value\":13,\n\"Children\":null\n}\n" +
 				"]\n}",
 				result2);
-			SampleTree w2 = new SampleTree();
+			SampleTree w2 = new();
 			jd.FromString(w2, result2);
 			Assert.AreEqual(v2.Value, w2.Value);
 			Assert.AreEqual(v2.Children.Count, w2.Children.Count);
@@ -880,10 +880,10 @@ namespace YuzuTest.Json
 			jd.FromString(w0, result0);
 			CollectionAssert.AreEqual(new List<string> { "a", "b", "c", "a", "b", "c" }, w0);
 
-			var v1 = new List<List<int>> { new List<int> { 1, 2 }, new List<int> { 3 } };
+			var v1 = new List<List<int>> { new() { 1, 2 }, new() { 3 } };
 			var result1 = js.ToString(v1);
 			Assert.AreEqual("[\n[\n1,\n2\n],\n[\n3\n]\n]", result1);
-			List<List<int>> w1 = new List<List<int>>();
+			List<List<int>> w1 = [];
 			YuzuGen.System.Collections.Generic.List_List_Int32_JsonDeserializer.Instance.FromString(w1, result1);
 			Assert.AreEqual(v1.Count, w1.Count);
 			CollectionAssert.AreEqual(v1[0], w1[0]);
@@ -922,7 +922,7 @@ namespace YuzuTest.Json
 
 			var v0 = new SampleDict {
 				Value = 3, Children = new Dictionary<string, SampleDict> {
-				{ "a", new SampleDict { Value = 5, Children = new Dictionary<string, SampleDict>() } },
+				{ "a", new SampleDict { Value = 5, Children = [] } },
 				{ "b", new SampleDict { Value = 7 } },
 			}
 			};
@@ -1034,7 +1034,7 @@ namespace YuzuTest.Json
 			js.JsonOptions.Indent = "";
 			var jd = new JsonDeserializer();
 
-			var v0 = new SampleArray { A = new string[] { "a", "b", "c" } };
+			var v0 = new SampleArray { A = ["a", "b", "c"] };
 			var result0 = js.ToString(v0);
 			Assert.AreEqual("{\n\"A\":[\n\"a\",\n\"b\",\n\"c\"\n]\n}", result0);
 			var w0 = new SampleArray();
@@ -1063,7 +1063,7 @@ namespace YuzuTest.Json
 			js.JsonOptions.FieldSeparator = "";
 			var jd = new JsonDeserializer();
 
-			var v0 = new SampleArrayOfArray { A = new int[][] { new int[] { 1, 2, 3 }, new int[] { 4, 5 } } };
+			var v0 = new SampleArrayOfArray { A = [[1, 2, 3], [4, 5]] };
 			var result0 = js.ToString(v0);
 			Assert.AreEqual("{\"A\":[[1,2,3],[4,5]]}", result0);
 			var w0 = new SampleArrayOfArray();
@@ -1129,11 +1129,11 @@ namespace YuzuTest.Json
 			jd.Options.TagMode = TagMode.Names;
 
 			var v = new SampleClassList {
-				E = new List<SampleBase> {
+				E = [
 					new SampleDerivedA(),
 					new SampleDerivedB { FB = 9 },
 					new SampleDerivedB { FB = 8 },
-				}
+				]
 			};
 
 			var result = js.ToString(v);
@@ -1285,8 +1285,9 @@ namespace YuzuTest.Json
 			var w1g = (SampleConcrete)SampleAbstract_JsonDeserializer.Instance.FromString(result1);
 			Assert.AreEqual((v1 as SampleConcrete).XX, w1g.XX);
 
-			var v2 = new List<SampleAbstract>();
-			v2.Add(new SampleConcrete { XX = 51 });
+			var v2 = new List<SampleAbstract> {
+				new SampleConcrete { XX = 51 }
+			};
 
 			var w2 = jd.FromString<List<SampleAbstract>>(js.ToString(v2));
 			Assert.AreEqual(v2.Count, w2.Count);
@@ -2151,21 +2152,21 @@ namespace YuzuTest.Json
 			js.JsonOptions.SaveClass = JsonSaveClass.UnknownOrRoot;
 
 			var v1 = new SampleTree {
-				Value = 1, Children = new List<SampleTree> {
+				Value = 1, Children = [
 					new SampleTree {
 						Value = 11,
 						Children = null
 					},
 					new SampleTree {
 						Value = 12,
-						Children = new List<SampleTree> {
+						Children = [
 							new SampleTree {
 								Value = 121,
 								Children = null
 							},
-						},
+						],
 					},
-				}
+				]
 			};
 			Assert.AreEqual(
 				"{\n" +
@@ -2352,7 +2353,7 @@ namespace YuzuTest.Json
 
 			var s1 = "{\"X\":7,\"Y\":\"привет\"}";
 			var m = new MemoryStream();
-			m.Write(new byte[] { 0xEF, 0xBB, 0xBF }, 0, 3);
+			m.Write([0xEF, 0xBB, 0xBF], 0, 3);
 			var b = Encoding.UTF8.GetBytes(s1);
 			m.Write(b, 0, b.Length);
 
@@ -2422,7 +2423,7 @@ namespace YuzuTest.Json
 				"{\"A\":[[1,2],[3]],\"B\":[]}"), "expected 2, found 1");
 
 			{
-				List<int> list = new List<int>();
+				List<int> list = [];
 				XAssert.Throws<YuzuException>(() => jd.FromString(list, "[\"a\"]"), "'\"'");
 			}
 

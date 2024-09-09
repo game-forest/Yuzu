@@ -26,7 +26,7 @@ namespace Yuzu.Clone
 
 	public class Cloner : AbstractCloner
 	{
-		public static Cloner Instance = new ();
+		public static Cloner Instance = new();
 
 		private readonly ConcurrentDictionary<Type, Func<object, object>> clonerCache = [];
 		private readonly ConcurrentDictionary<Type, Action<object, object>> mergerCache = [];

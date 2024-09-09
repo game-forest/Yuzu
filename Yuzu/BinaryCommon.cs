@@ -8,7 +8,7 @@ namespace Yuzu.Binary
 {
 	public class BinarySerializeOptions
 	{
-		public byte[] Signature = new byte[] { (byte)'Y', (byte)'B', (byte)'0', (byte)'1' };
+		public byte[] Signature = [(byte)'Y', (byte)'B', (byte)'0', (byte)'1'];
 		public bool AutoSignature = false;
 		public bool Unordered = false;
 	}
@@ -49,14 +49,14 @@ namespace Yuzu.Binary
 
 	internal static class RT
 	{
-		public static Type[] roughTypeToType = new Type[] {
+		public static Type[] roughTypeToType = [
 			null,
 			typeof(sbyte), typeof(byte), typeof(short), typeof(ushort),
 			typeof(int), typeof(uint), typeof(long), typeof(ulong),
 			typeof(bool), typeof(char), typeof(float), typeof(double), typeof(decimal),
 			typeof(DateTime), typeof(TimeSpan), typeof(string),
 			typeof(object), null, typeof(DateTimeOffset), typeof(Guid),
-		};
+		];
 
 		public static bool IsRecord(this Type t)
 		{
@@ -79,7 +79,7 @@ namespace Yuzu.Binary
 		public const int EOF = short.MaxValue;
 		public Action<BinaryDeserializer, ReaderClassDef, object> ReadFields;
 		public Func<BinaryDeserializer, ReaderClassDef, object> Make;
-		public List<FieldDef> Fields = new () { new FieldDef { OurIndex = EOF } };
+		public List<FieldDef> Fields = [new FieldDef { OurIndex = EOF }];
 	}
 
 	internal class Record { }

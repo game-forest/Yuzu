@@ -26,7 +26,7 @@ namespace Yuzu.Json
 			GetWrapperNamespace() + "." + t.Namespace + "." +
 			Utils.GetMangledTypeName(t) + "_JsonDeserializer";
 
-		private static Dictionary<string, JsonDeserializerGenBase> deserializerCache = new ();
+		private static Dictionary<string, JsonDeserializerGenBase> deserializerCache = [];
 
 		private JsonDeserializerGenBase MakeDeserializer(string className)
 		{
@@ -78,7 +78,7 @@ namespace Yuzu.Json
 			return FromReaderIntGenerated();
 		}
 
-		public T DefaultFactory<T>() where T : new() => new ();
+		public T DefaultFactory<T>() where T : new() => new();
 		public T FromReaderTyped<T>(BinaryReader reader) where T : new()
 		{
 			return FromReaderTypedFactory(reader, DefaultFactory<T>);
@@ -114,9 +114,9 @@ namespace Yuzu.Json
 
 	public class JsonDeserializerGenerator : JsonDeserializerGenBase, IGenerator
 	{
-		public static new JsonDeserializerGenerator Instance = new ();
+		public static new JsonDeserializerGenerator Instance = new();
 
-		private CodeWriter cw = new ();
+		private CodeWriter cw = new();
 		private string wrapperNameSpace = "";
 		private string lastNameSpace = "";
 
@@ -222,7 +222,7 @@ namespace Yuzu.Json
 			cw.PutEndBlock();
 		}
 
-		private static Dictionary<Type, string> simpleValueReader = new () {
+		private static Dictionary<Type, string> simpleValueReader = new() {
 			{ typeof(sbyte), "checked((sbyte)RequireInt())" },
 			{ typeof(byte), "checked((byte)RequireUInt())" },
 			{ typeof(short), "checked((short)RequireInt())" },
@@ -393,7 +393,7 @@ namespace Yuzu.Json
 			cw.Put("class {0} : JsonDeserializerGenBase\n", deserializerName);
 			cw.Put("{\n");
 
-			cw.Put("public static new {0} Instance = new {0}();\n", deserializerName);
+			cw.Put("public static new {0} Instance = new();\n", deserializerName);
 			cw.Put("\n");
 
 			cw.Put("public {0}()\n", deserializerName);

@@ -12,8 +12,8 @@ namespace Yuzu.Binary
 
 	public class BinaryDeserializerGenBase: BinaryDeserializer
 	{
-		protected static Dictionary<Type, ReadCacheAction> readCache = new ();
-		protected static Dictionary<Type, MakeCacheAction> makeCache = new ();
+		protected static Dictionary<Type, ReadCacheAction> readCache = [];
+		protected static Dictionary<Type, MakeCacheAction> makeCache = [];
 
 		protected override void PrepareReaders(ReaderClassDef def)
 		{
@@ -28,13 +28,13 @@ namespace Yuzu.Binary
 
 	public class BinaryDeserializerGenerator : IGenerator
 	{
-		private CodeWriter cw = new ();
+		private CodeWriter cw = new();
 		private string wrapperNameSpace;
 		private CommonOptions options;
 		private string className;
 		private string baseClassName;
-		private Dictionary<Type, string> generatedReaders = new ();
-		private Dictionary<Type, string> generatedMakers = new ();
+		private Dictionary<Type, string> generatedReaders = [];
+		private Dictionary<Type, string> generatedMakers = [];
 		private string classDefName = typeof(ReaderClassDef).Name;
 
 		public string LineSeparator { get { return cw.LineSeparator; } set { cw.LineSeparator = value; } }
@@ -85,7 +85,7 @@ namespace Yuzu.Binary
 			cw.PutEndBlock(); // Close namespace.
 		}
 
-		private static Dictionary<Type, string> simpleValueReader = new () {
+		private static Dictionary<Type, string> simpleValueReader = new() {
 			{ typeof(sbyte), "d.Reader.ReadSByte()" },
 			{ typeof(byte), "d.Reader.ReadByte()" },
 			{ typeof(short), "d.Reader.ReadInt16()" },
@@ -186,7 +186,7 @@ namespace Yuzu.Binary
 			var idict = Utils.GetIDictionary(t);
 			if (idict != null) {
 				var tempIndexName = PutNullOrCount(t);
-				cw.Put("{0} = new {1}();\n", name, Utils.GetTypeSpec(t));
+				cw.Put("{0} = [];\n", name);
 				GenerateDictionary(t, idict, name, tempIndexName);
 				cw.PutEndBlock();
 				return;
@@ -194,7 +194,7 @@ namespace Yuzu.Binary
 			var icoll = Utils.GetICollection(t);
 			if (icoll != null) {
 				var tempIndexName = PutNullOrCount(t);
-				cw.Put("{0} = new {1}();\n", name, Utils.GetTypeSpec(t));
+				cw.Put("{0} = [];\n", name);
 				GenerateCollection(t, icoll, name, tempIndexName);
 				cw.PutEndBlock();
 				return;

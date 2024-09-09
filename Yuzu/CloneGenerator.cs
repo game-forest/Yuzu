@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +11,7 @@ namespace Yuzu.Clone
 
 	public class ClonerGenBase : Cloner
 	{
-		protected static Dictionary<Type, Func<Cloner, object, object>> clonerCache = new ();
+		protected static Dictionary<Type, Func<Cloner, object, object>> clonerCache = [];
 		public ClonerGenBase(): base(clonerCache) { }
 
 		public static object ValueCopyCloner(Cloner cl, object src) => src;
@@ -19,13 +19,13 @@ namespace Yuzu.Clone
 
 	public class ClonerGenerator : IGenerator
 	{
-		private CodeWriter cw = new ();
+		private CodeWriter cw = new();
 		private string wrapperNameSpace;
 		private CommonOptions options;
 		private string className;
 		private string baseClassName;
 		private ClonerGenerator parentGen;
-		private Dictionary<Type, string> generatedCloners = new ();
+		private Dictionary<Type, string> generatedCloners = [];
 
 		public string LineSeparator { get { return cw.LineSeparator; } set { cw.LineSeparator = value; } }
 
@@ -153,7 +153,7 @@ namespace Yuzu.Clone
 				}
 				else {
 					var rank = yi.Type.GetArrayRank();
-					Func<string, string> allDims = name => 
+					Func<string, string> allDims = name =>
 						string.Join(", ", Enumerable.Range(0, rank).Select(
 						dim => string.Format("s.{0}.{1}({2})", yi.Name, name, dim)));
 					cw.Put("result.{0} = ({1})Array.CreateInstance(typeof({2}),\n",
@@ -181,7 +181,7 @@ namespace Yuzu.Clone
 					var a = idict.GetGenericArguments();
 					cw.Put("if (s.{0} != null) {{\n", yi.Name);
 					if (yi.SetValue != null)
-						cw.Put("result.{0} = new {1}();\n", yi.Name, Utils.GetTypeSpec(yi.Type));
+						cw.Put("result.{0} = [];\n", yi.Name);
 					var itemName = cw.GetTempName();
 					var clonerCallK = GenerateClonerInit(a[0], string.Format("{0}.Key", itemName));
 					var clonerCallV = GenerateClonerInit(a[1], string.Format("{0}.Value", itemName));
@@ -196,7 +196,7 @@ namespace Yuzu.Clone
 				if (icoll != null) {
 					if (yi.SetValue != null) {
 						cw.Put("if (s.{0} != null) {{\n", yi.Name);
-						cw.Put("result.{0} = new {1}();\n", yi.Name, Utils.GetTypeSpec(yi.Type));
+						cw.Put("result.{0} = [];\n", yi.Name);
 					}
 					else
 						cw.Put("if (s.{0} != null && result.{0} != null) {{\n", yi.Name);

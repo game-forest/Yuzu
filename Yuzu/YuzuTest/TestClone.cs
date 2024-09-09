@@ -13,8 +13,8 @@ namespace YuzuTest
 {
 	public class BinaryCloner : AbstractCloner
 	{
-		private BinarySerializer bs = new BinarySerializer();
-		private BinaryDeserializer bd = new BinaryDeserializer();
+		private BinarySerializer bs = new();
+		private BinaryDeserializer bd = new();
 
 		public override object ShallowObject(object src) => throw new NotSupportedException();
 		public override object DeepObject(object src)
@@ -141,7 +141,7 @@ namespace YuzuTest
 				CollectionAssert.AreEqual(src, dst);
 			});
 			TestGen(cl => {
-				var src = new Sample1[] { new Sample1 { X = 33 } };
+				var src = new Sample1[] { new() { X = 33 } };
 				var dst = cl.Deep(src);
 				Assert.AreNotEqual(src[0], dst[0]);
 				Assert.AreEqual(src[0].X, dst[0].X);
@@ -153,7 +153,7 @@ namespace YuzuTest
 				Assert.IsNull(dst.A);
 			});
 			TestGen(cl => {
-				var src = new SampleArrayOfClass { A = new Sample1[] { new Sample1 { X = 33 } } };
+				var src = new SampleArrayOfClass { A = [new() { X = 33 }] };
 				var dst = cl.Deep(src);
 				Assert.AreNotEqual(src, dst);
 				Assert.AreNotEqual(src.A[0], dst.A[0]);
@@ -176,8 +176,7 @@ namespace YuzuTest
 				src.AssertAreEqual(dst);
 			});
 			TestGen(cl => {
-				var src = new List<int>[2, 1] {
-					{ new List<int> { 1, 2 } }, { new List<int> { 3 } } };
+				var src = new List<int>[2, 1] { { [1, 2] }, { [3] } };
 				var dst = cl.Deep(src);
 				Assert.AreNotEqual(src, dst);
 				Assert.AreNotEqual(src[0, 0], dst[0, 0]);
@@ -206,7 +205,7 @@ namespace YuzuTest
 				CollectionAssert.AreEqual(src, dst);
 			});
 			TestGen(cl => {
-				var src = new List<Sample1> { new Sample1 { X = 34 } };
+				var src = new List<Sample1> { new() { X = 34 } };
 				var dst = cl.Deep(src);
 				Assert.AreNotEqual(src, dst);
 				Assert.AreEqual(src.Count, dst.Count);
@@ -214,7 +213,7 @@ namespace YuzuTest
 				Assert.AreEqual(src[0].X, dst[0].X);
 			});
 			TestGen(cl => {
-				var src = new SampleList { E = new List<string> { "sq" } };
+				var src = new SampleList { E = ["sq"] };
 				var dst = cl.Deep(src);
 				Assert.AreNotEqual(src, dst);
 				Assert.AreEqual(src.E.Count, dst.E.Count);
@@ -223,10 +222,10 @@ namespace YuzuTest
 			});
 			TestGen(cl => {
 				var src = new SampleMatrix {
-					M = new List<List<int>> {
-						new List<int>{ 1, 2, 3 },
-						new List<int>{ 4 },
-					}
+					M = [
+						[1, 2, 3],
+						[4],
+					]
 				};
 				var dst = cl.Deep(src);
 				Assert.AreNotEqual(src, dst);
@@ -315,7 +314,7 @@ namespace YuzuTest
 			}, useBinary: false);
 			TestGen(cl => {
 				var src = new SampleItemObj {
-					L = new List<object> { new int[] { 1 }, 2, new Sample1() },
+					L = [new int[] { 1 }, 2, new Sample1()],
 					D = new Dictionary<string, object> { { "abc", 5 } },
 				};
 				var dst = cl.Deep(src);
@@ -450,7 +449,7 @@ namespace YuzuTest
 			TestGen(cl => {
 				var src = new SampleWithCopyableItems {
 					P = new Sample1 { X = 43 },
-					L = new List<int> { 7, 8 }
+					L = [7, 8]
 				};
 				var dst = cl.Deep(src);
 				Assert.AreNotEqual(src, dst);
@@ -508,12 +507,14 @@ namespace YuzuTest
 				Assert.AreEqual(src.M.X, dst.M.X);
 			});
 			TestGen(cl => {
-				var src = new SampleCollection<int>();
-				src.Add(3);
-				src.Add(4);
+				var src = new SampleCollection<int> {
+					3,
+					4
+				};
 				src.Filter = 1;
-				var dst = new SampleCollection<int>();
-				dst.Add(5);
+				var dst = new SampleCollection<int> {
+					5
+				};
 				cl.Merge(dst, src);
 				Assert.AreNotEqual(src, dst);
 				CollectionAssert.AreEqual(new List<int>{ 5, 3 }, dst.ToList());
@@ -544,11 +545,11 @@ namespace YuzuTest
 			});
 			TestGen(cl => {
 				var src = new SampleClassList {
-					E = new List<SampleBase> {
+					E = [
 						new SampleDerivedA(),
 						new SampleDerivedB { FB = 9 },
 						new SampleDerivedB { FB = 8 },
-					}
+					]
 				};
 				var dst = cl.Deep(src);
 				Assert.AreNotEqual(src, dst);

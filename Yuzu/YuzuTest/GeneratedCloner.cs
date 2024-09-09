@@ -282,7 +282,7 @@ namespace YuzuGenClone
 			var result = new global::YuzuTest.SampleDict();
 			result.Value = s.Value;
 			if (s.Children != null) {
-				result.Children = new global::System.Collections.Generic.Dictionary<string, global::YuzuTest.SampleDict>();
+				result.Children = [];
 				foreach (var tmp1 in s.Children)
 					result.Children.Add(tmp1.Key, Clone_YuzuTest__SampleDict(cl, tmp1.Value));
 			}
@@ -297,17 +297,17 @@ namespace YuzuGenClone
 			var s = (global::YuzuTest.SampleDictKeys)src;
 			var result = new global::YuzuTest.SampleDictKeys();
 			if (s.E != null) {
-				result.E = new global::System.Collections.Generic.Dictionary<global::YuzuTest.SampleEnum, int>();
+				result.E = [];
 				foreach (var tmp1 in s.E)
 					result.E.Add(tmp1.Key, tmp1.Value);
 			}
 			if (s.I != null) {
-				result.I = new global::System.Collections.Generic.Dictionary<int, int>();
+				result.I = [];
 				foreach (var tmp2 in s.I)
 					result.I.Add(tmp2.Key, tmp2.Value);
 			}
 			if (s.K != null) {
-				result.K = new global::System.Collections.Generic.Dictionary<global::YuzuTest.SampleKey, int>();
+				result.K = [];
 				var tmp4 = cl.GetCloner<global::YuzuTest.SampleKey>();
 				foreach (var tmp3 in s.K)
 					result.K.Add((global::YuzuTest.SampleKey)tmp4(tmp3.Key), tmp3.Value);
@@ -346,12 +346,12 @@ namespace YuzuGenClone
 			var s = (global::YuzuTest.SampleItemObj)src;
 			var result = new global::YuzuTest.SampleItemObj();
 			if (s.D != null) {
-				result.D = new global::System.Collections.Generic.Dictionary<string, object>();
+				result.D = [];
 				foreach (var tmp1 in s.D)
 					result.D.Add(tmp1.Key, cl.DeepObject(tmp1.Value));
 			}
 			if (s.L != null) {
-				result.L = new global::System.Collections.Generic.List<object>();
+				result.L = [];
 				foreach (var tmp2 in s.L)
 					result.L.Add(cl.DeepObject(tmp2));
 			}
@@ -366,7 +366,7 @@ namespace YuzuGenClone
 			var s = (global::YuzuTest.SampleList)src;
 			var result = new global::YuzuTest.SampleList();
 			if (s.E != null) {
-				result.E = new global::System.Collections.Generic.List<string>();
+				result.E = [];
 				foreach (var tmp1 in s.E)
 					result.E.Add(tmp1);
 			}
@@ -381,7 +381,7 @@ namespace YuzuGenClone
 			var s = (global::YuzuTest.SampleMatrix)src;
 			var result = new global::YuzuTest.SampleMatrix();
 			if (s.M != null) {
-				result.M = new global::System.Collections.Generic.List<global::System.Collections.Generic.List<int>>();
+				result.M = [];
 				var tmp2 = cl.GetCloner<global::System.Collections.Generic.List<int>>();
 				foreach (var tmp1 in s.M)
 					result.M.Add((global::System.Collections.Generic.List<int>)tmp2(tmp1));
@@ -459,7 +459,7 @@ namespace YuzuGenClone
 			result.Name = s.Name;
 			result.Birth = s.Birth;
 			if (s.Children != null) {
-				result.Children = new global::System.Collections.Generic.List<global::YuzuTest.SamplePerson>();
+				result.Children = [];
 				foreach (var tmp1 in s.Children)
 					result.Children.Add(Clone_YuzuTest__SamplePerson(cl, tmp1));
 			}

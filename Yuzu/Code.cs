@@ -13,7 +13,7 @@ namespace Yuzu.Code
 
 	public class CodeConstructSerializer : AbstractStringSerializer
 	{
-		public CodeConstructSerializeOptions CodeConstructOptions = new ();
+		public CodeConstructSerializeOptions CodeConstructOptions = new();
 
 		protected override void ToBuilder(object obj)
 		{
@@ -44,7 +44,7 @@ namespace Yuzu.Code
 
 	public class CodeAssignSerializer : AbstractStringSerializer
 	{
-		public CodeAssignSerializeOptions CodeAssignOptions = new ();
+		public CodeAssignSerializeOptions CodeAssignOptions = new();
 
 		protected override void ToBuilder(object obj)
 		{

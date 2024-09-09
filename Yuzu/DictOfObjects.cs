@@ -7,7 +7,7 @@ namespace Yuzu.DictOfObjects
 {
 	public static class DictOfObjects
 	{
-		public static CommonOptions Options = new ();
+		public static CommonOptions Options = new();
 
 		public static Dictionary<string, object> Pack<T>(T obj) =>
 			Meta.Get(typeof(T), Options).Items.ToDictionary(yi => yi.Name, yi => yi.GetValue(obj));

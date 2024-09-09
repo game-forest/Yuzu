@@ -92,14 +92,14 @@ namespace YuzuTest.Binary
 				XS(RoughType.Record) + " 01 00 " + XS(typeof(Sample1)) + " 02 00 " +
 				XS("X", RoughType.Int, "Y", RoughType.String) +
 				" 01 00 59 01 00 00 02 00 " + XS("test") + " 00 00", XS(result));
-			Sample1 v2 = new Sample1();
+			Sample1 v2 = new();
 
 			var bd = new BinaryDeserializer();
 			bd.FromBytes(v2, result);
 			Assert.AreEqual(v1.X, v2.X);
 			Assert.AreEqual(v1.Y, v2.Y);
 
-			bd.FromBytes(v2, new byte[] { 0x20, 01, 00, 01, 00, 0xE7, 03, 00, 00, 00, 00 });
+			bd.FromBytes(v2, [0x20, 01, 00, 01, 00, 0xE7, 03, 00, 00, 00, 00]);
 			Assert.AreEqual(999, v2.X);
 			Assert.AreEqual(v1.Y, v2.Y);
 
@@ -167,9 +167,9 @@ namespace YuzuTest.Binary
 			Assert.AreEqual(v1.Sb, v2.Sb);
 
 
-			bd.FromBytes(v2, new byte[] {
+			bd.FromBytes(v2, [
 				0x20, 01, 00, 01, 00, 255, 02, 00, 65 + 25, 03, 00, 256 - 128,
-				04, 00, 00, 128, 05, 00, 255, 127, 00, 00 });
+				04, 00, 00, 128, 05, 00, 255, 127, 00, 00 ]);
 			Assert.AreEqual('Z', v2.Ch);
 			Assert.AreEqual(32767, v2.USh);
 			Assert.AreEqual(-32768, v2.Sh);
@@ -369,7 +369,7 @@ namespace YuzuTest.Binary
 		[TestMethod]
 		public void TestBadDoubleBinary()
 		{
-			double d = BitConverter.ToDouble(new byte[] { 48, 249, 184, 21, 152, 124, 220, 63 }, 0);
+			double d = BitConverter.ToDouble([48, 249, 184, 21, 152, 124, 220, 63], 0);
 			var l0 = new List<double> { d };
 			var bs = new BinarySerializer();
 			var r = bs.ToString(l0);
@@ -539,7 +539,7 @@ namespace YuzuTest.Binary
 			var bd = new BinaryDeserializer();
 			bd.Options.TagMode = TagMode.Names;
 
-			var v0 = new SampleList { E = new List<string> { "a", "b", "c" } };
+			var v0 = new SampleList { E = ["a", "b", "c"] };
 			var result0 = bs.ToBytes(v0);
 			Assert.AreEqual(
 				"20 01 00 " + XS(typeof(SampleList)) + " 01 00 " +
@@ -550,7 +550,7 @@ namespace YuzuTest.Binary
 			bd.FromBytes(w0, result0);
 			CollectionAssert.AreEqual(v0.E, w0.E);
 
-			var v1 = new SampleTree { Value = 11, Children = new List<SampleTree>() };
+			var v1 = new SampleTree { Value = 11, Children = [] };
 			var result1 = bs.ToBytes(v1);
 			Assert.AreEqual(
 				"20 02 00 " + XS(typeof(SampleTree)) + " 02 00 " +
@@ -564,15 +564,15 @@ namespace YuzuTest.Binary
 
 			var v2 = new SampleTree {
 				Value = 11,
-				Children = new List<SampleTree> {
+				Children = [
 					new SampleTree {
 						Value = 12,
-						Children = new List<SampleTree>(),
+						Children = [],
 					},
 					new SampleTree {
 						Value = 13,
 					}
-				}
+				]
 			};
 			var result2 = bs.ToBytes(v2);
 			Assert.AreEqual(
@@ -580,7 +580,7 @@ namespace YuzuTest.Binary
 				"02 00 01 00 0C 00 00 00 02 00 00 00 00 00 00 00 " +
 				"02 00 01 00 0D 00 00 00 02 00 FF FF FF FF 00 00 00 00",
 				XS(result2));
-			SampleTree w2 = new SampleTree();
+			SampleTree w2 = new();
 			bd.FromBytes(w2, result2);
 			Assert.AreEqual(v2.Value, w2.Value);
 			Assert.AreEqual(v2.Children.Count, w2.Children.Count);
@@ -606,8 +606,7 @@ namespace YuzuTest.Binary
 			v0.A.Add(new SampleInterfaced { X = 9 });
 			v0.B.Add(7);
 			v0.B.Add(6);
-			v0.C = new SampleCollection<SamplePoint>();
-			v0.C.Add(new SamplePoint { X = 3, Y = 4 });
+			v0.C = [new SamplePoint { X = 3, Y = 4 }];
 			var result0 = bs.ToBytes(v0);
 			Assert.AreEqual(
 				"20 01 00 " + XS(typeof(SampleWithCollection)) + " 03 00 " +
@@ -641,7 +640,7 @@ namespace YuzuTest.Binary
 			var v2 = new SampleConcreteCollection { 2, 5, 4 };
 			var result1 = bs.ToBytes(v2);
 			Assert.AreEqual("21 05 03 00 00 00 02 00 00 00 05 00 00 00 04 00 00 00", XS(result1));
-			SampleConcreteCollection w2 = new SampleConcreteCollection();
+			SampleConcreteCollection w2 = [];
 			bd.FromBytes(w2, result1);
 			CollectionAssert.AreEqual(v2.ToList(), w2.ToList());
 		}
@@ -729,7 +728,7 @@ namespace YuzuTest.Binary
 			var w0 = new List<string>();
 			bd.FromBytes(w0, result0);
 			CollectionAssert.AreEqual(v0, w0);
-			bd.FromBytes(w0, new byte[] { 0x21, 0x10, 0, 0, 0, 0 });
+			bd.FromBytes(w0, [0x21, 0x10, 0, 0, 0, 0]);
 			CollectionAssert.AreEqual(v0, w0);
 			bd.FromBytes(w0, result0);
 			CollectionAssert.AreEqual(new List<string> { "a", "b", "c", "a", "b", "c" }, w0);
@@ -750,7 +749,7 @@ namespace YuzuTest.Binary
 			var w0 = new Dictionary<string, int>();
 			bd.FromBytes(w0, result0);
 			CollectionAssert.AreEqual(v0, w0);
-			bd.FromBytes(w0, new byte[] { 0x22, 0x10, 05, 0, 0, 0, 0 });
+			bd.FromBytes(w0, [0x22, 0x10, 05, 0, 0, 0, 0]);
 			CollectionAssert.AreEqual(v0, w0);
 			bd.FromBytes(w0, SX("22 10 05 01 00 00 00 " + XS("c") + " 03 00 00 00"));
 			CollectionAssert.AreEqual(
@@ -769,7 +768,7 @@ namespace YuzuTest.Binary
 
 			var v0 = new SampleDict {
 				Value = 3, Children = new Dictionary<string, SampleDict> {
-				{ "a", new SampleDict { Value = 5, Children = new Dictionary<string, SampleDict>() } },
+				{ "a", new SampleDict { Value = 5, Children = [] } },
 				{ "b", new SampleDict { Value = 7 } },
 				{ "c", null },
 			}
@@ -903,7 +902,7 @@ namespace YuzuTest.Binary
 			var bd = new BinaryDeserializer();
 			var bdg = new BinaryDeserializerGen();
 
-			var v0 = new SampleArray { A = new string[] { "a", "b", "c" } };
+			var v0 = new SampleArray { A = ["a", "b", "c"] };
 			var result0 = bs.ToBytes(v0);
 			Assert.AreEqual(
 				"20 01 00 " + XS(typeof(SampleArray)) + " 01 00 " + XS("A", RoughType.Sequence) +
@@ -932,7 +931,7 @@ namespace YuzuTest.Binary
 			var bd = new BinaryDeserializer();
 			var bdg = new BinaryDeserializerGen();
 
-			var v0 = new SampleArrayOfArray { A = new int[][] { new int[] { 1, 2, 3 }, new int[] { 4, 5 } } };
+			var v0 = new SampleArrayOfArray { A = [[1, 2, 3], [4, 5]] };
 			var result0 = bs.ToBytes(v0);
 			Assert.AreEqual(
 				"20 01 00 " + XS(typeof(SampleArrayOfArray)) + " 01 00 " + XS("A", RoughType.Sequence) +
@@ -999,7 +998,7 @@ namespace YuzuTest.Binary
 			v1.AssertAreEqual(w1);
 
 			var v2 = new SampleArrayNDim {
-				A = (int[,])Array.CreateInstance(typeof(int), new int[] { 1, 1 }, new int[] { -1, 10 })
+				A = (int[,])Array.CreateInstance(typeof(int), [1, 1], [-1, 10])
 			};
 			v2.A[-1, 10] = 7;
 			var result2 = bs.ToBytes(v2);
@@ -1017,11 +1016,11 @@ namespace YuzuTest.Binary
 			var bs = new BinarySerializer();
 
 			var v = new SampleClassList {
-				E = new List<SampleBase> {
+				E = [
 					new SampleDerivedA(),
 					new SampleDerivedB { FB = 9 },
 					new SampleDerivedB { FB = 8 },
-				}
+				]
 			};
 
 			var result = bs.ToBytes(v);
@@ -1119,8 +1118,8 @@ namespace YuzuTest.Binary
 			AssertEqualSampleStructWithProps(v2, w2g);
 
 			var v3 = new SampleStructWithProps[2] {
-				new SampleStructWithProps { A = 41, P = new SamplePoint { X = 19, Y = 1 } },
-				new SampleStructWithProps { A = 42, P = new SamplePoint { X = 18, Y = 2 } },
+				new() { A = 41, P = new SamplePoint { X = 19, Y = 1 } },
+				new() { A = 42, P = new SamplePoint { X = 18, Y = 2 } },
 			};
 
 			var result3 = bs.ToBytes(v3);
@@ -1159,9 +1158,9 @@ namespace YuzuTest.Binary
 			Assert.IsInstanceOfType(w1g.I, typeof(SampleInterfaced));
 			Assert.AreEqual(34, w1g.I.X);
 
-			var w1n = (SampleInterfaceField)bd.FromBytes(new byte[] { 0x20, 01, 00, 01, 00, 00, 00, 00, 00 });
+			var w1n = (SampleInterfaceField)bd.FromBytes([0x20, 01, 00, 01, 00, 00, 00, 00, 00]);
 			Assert.AreEqual(null, w1n.I);
-			var w1ng = (SampleInterfaceField)bdg.FromBytes(new byte[] { 0x20, 01, 00, 01, 00, 00, 00, 00, 00 });
+			var w1ng = (SampleInterfaceField)bdg.FromBytes([0x20, 01, 00, 01, 00, 00, 00, 00, 00]);
 			Assert.AreEqual(null, w1ng.I);
 
 			var v2 = new List<ISample> { null, new SampleInterfaced { X = 37 } };
@@ -1200,8 +1199,9 @@ namespace YuzuTest.Binary
 			var w1g = (SampleConcrete)(new BinaryDeserializerGen().FromBytes(result1));
 			Assert.AreEqual((v1 as SampleConcrete).XX, w1g.XX);
 
-			var v2 = new List<SampleAbstract>();
-			v2.Add(new SampleConcrete { XX = 51 });
+			var v2 = new List<SampleAbstract> {
+				new SampleConcrete { XX = 51 }
+			};
 
 			var w2 = bd.FromBytes<List<SampleAbstract>>(bs.ToBytes(v2));
 			Assert.AreEqual(v2.Count, w2.Count);
@@ -1319,7 +1319,7 @@ namespace YuzuTest.Binary
 
 			Assert.AreEqual(
 				typeof(Dictionary<string, object>),
-				bd.FromBytes(new byte[] { 0x22, 0x10, (byte)RoughType.Any, 00, 00, 00, 00 }).GetType());
+				bd.FromBytes([0x22, 0x10, (byte)RoughType.Any, 00, 00, 00, 00]).GetType());
 			CollectionAssert.AreEqual(
 				(List<object>)bd.FromBytes(SX("21 11 02 00 00 00 01 05 10 " + XS("abc"))),
 				new object[] { (sbyte)5, "abc" });
@@ -1658,7 +1658,7 @@ namespace YuzuTest.Binary
 			bd.FromBytes(w, result);
 			Assert.AreEqual(sample.About, w.About);
 
-			bd.FromBytes(w, new byte[] { 0x20, 01, 00, 01, 00, 00, 00, 00, 00 });
+			bd.FromBytes(w, [0x20, 01, 00, 01, 00, 00, 00, 00, 00]);
 			Assert.AreEqual("", w.About);
 
 			var wg = (SampleWithNullFieldCompact)bdg.FromBytes(SX(
@@ -1676,7 +1676,7 @@ namespace YuzuTest.Binary
 			Assert.IsNull(w2.F);
 
 			Assert.AreEqual("11", XS(bs.ToBytes(null)));
-			Assert.IsNull(bd.FromBytes(new byte[] { 0x11 }));
+			Assert.IsNull(bd.FromBytes([0x11]));
 		}
 
 		[TestMethod]
@@ -1862,7 +1862,7 @@ namespace YuzuTest.Binary
 			var bd = new BinaryDeserializer();
 			bd.Options.TagMode = TagMode.Names;
 
-			var v1 = new List<SampleDerivedB> { new SampleDerivedB { FB = 10 }, new SampleDerivedB { FB = 20 } };
+			var v1 = new List<SampleDerivedB> { new() { FB = 10 }, new() { FB = 20 } };
 
 			var result1 = bs.ToBytes(v1);
 			Assert.AreEqual(
@@ -2124,9 +2124,9 @@ namespace YuzuTest.Binary
 			bd.BinaryOptions.AutoSignature = true;
 			Assert.AreEqual(17, bd.FromBytes<int>(result1));
 
-			XAssert.Throws<YuzuException>(() => bd.FromBytes(new byte[] { 0x05, 0x11, 0, 0, 0 }), "ignature");
+			XAssert.Throws<YuzuException>(() => bd.FromBytes([0x05, 0x11, 0, 0, 0]), "ignature");
 
-			var ms = new MemoryStream(new byte[] { 0x05, 0x12, 0, 0, 0 });
+			var ms = new MemoryStream([0x05, 0x12, 0, 0, 0]);
 			bd.Reader = new BinaryReader(ms);
 			Assert.IsFalse(bd.IsValidSignature());
 			bd.BinaryOptions.AutoSignature = false;
@@ -2353,11 +2353,11 @@ namespace YuzuTest.Binary
 
 			XAssert.Throws<YuzuException>(() => bdg.Generate<ISample>(), "ISample");
 			XAssert.Throws<YuzuException>(() => bdg.Generate<SampleAbstract>(), "SampleAbstract");
-			XAssert.Throws<YuzuException>(() => bd.FromBytes<int>(new byte[] { 0xFF }), "255");
+			XAssert.Throws<YuzuException>(() => bd.FromBytes<int>([0xFF]), "255");
 
-			XAssert.Throws<YuzuException>(() => bd.FromBytes(new byte[] { 0xFF }), "255");
-			XAssert.Throws<YuzuException>(() => bd.FromBytes<int>(new byte[] { 0xFF }), "255");
-			XAssert.Throws<YuzuException>(() => bd.FromBytes<int>(new byte[] { 07 }), "Int32");
+			XAssert.Throws<YuzuException>(() => bd.FromBytes([0xFF]), "255");
+			XAssert.Throws<YuzuException>(() => bd.FromBytes<int>([0xFF]), "255");
+			XAssert.Throws<YuzuException>(() => bd.FromBytes<int>([07]), "Int32");
 
 			XAssert.Throws<YuzuException>(() => bd.FromBytes<Sample1>(SX(
 				"20 01 00 " + XS("notype") + " 00 00 00 00"

@@ -21,7 +21,7 @@ namespace Yuzu.Util
 
 	internal static class Utils
 	{
-		public static object[] ZeroObjects = new object[] { };
+		public static object[] ZeroObjects = [];
 
 		public static string QuoteCSharpStringLiteral(string s)
 		{
@@ -55,7 +55,7 @@ namespace Yuzu.Util
 			t.Namespace == "System" ? t.IsValueType :
 			t.IsClass || t.IsValueType ? null : (bool?)false;
 
-		private static ConcurrentDictionary<Type, Type> collectionInterfaceForType = new ();
+		private static ConcurrentDictionary<Type, Type> collectionInterfaceForType = new();
 
 		public static Type GetICollection(Type t)
 		{
@@ -88,7 +88,7 @@ namespace Yuzu.Util
 			}
 		}
 
-		private static ConcurrentDictionary<Type, Type> enumerableInterfaceForType = new ();
+		private static ConcurrentDictionary<Type, Type> enumerableInterfaceForType = new();
 
 		public static Type GetIEnumerable(Type t)
 		{
@@ -167,7 +167,7 @@ namespace Yuzu.Util
 				DeclaringTypes(t.DeclaringType, separator) + t.DeclaringType.Name + separator;
 		}
 
-		private static Dictionary<Type, string> knownTypes = new () {
+		private static Dictionary<Type, string> knownTypes = new() {
 			{ typeof(byte),  "byte" },
 			{ typeof(sbyte), "sbyte" },
 			{ typeof(short), "short" },
@@ -220,8 +220,8 @@ namespace Yuzu.Util
 
 	public static class TypeSerializer
 	{
-		private static LinkedList<Assembly> assembliesLru = new ();
-		private static ConcurrentDictionary<string, Type> cache = new ();
+		private static LinkedList<Assembly> assembliesLru = [];
+		private static ConcurrentDictionary<string, Type> cache = new();
 
 		static TypeSerializer()
 		{
@@ -360,7 +360,7 @@ namespace Yuzu.Util
 
 	internal class NullYuzuUnknownStorage : YuzuUnknownStorage
 	{
-		internal static NullYuzuUnknownStorage Instance = new ();
+		internal static NullYuzuUnknownStorage Instance = new();
 		public override void Add(string name, object value) { }
 	}
 
@@ -377,7 +377,7 @@ namespace Yuzu.Util
 			public Action<object> Run;
 		}
 
-		internal List<MethodAction> Actions = new ();
+		internal List<MethodAction> Actions = [];
 
 		public void MaybeAdd(MethodInfo m, Type attr)
 		{
@@ -394,7 +394,7 @@ namespace Yuzu.Util
 
 	public static class IdGenerator
 	{
-		static char[] lastId = new char[] { 'A', 'A', 'A', 'A' };
+		static char[] lastId = ['A', 'A', 'A', 'A'];
 
 		private static void NextId()
 		{
