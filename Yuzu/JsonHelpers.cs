@@ -56,12 +56,12 @@ namespace Yuzu.Json
 		{
 			for (int i = 0; i < 10; ++i)
 				for (int j = 0; j < 10; ++j)
-					digitPairsZero[i * 10 + j] = new byte[] { (byte)((int)'0' + i), (byte)((int)'0' + j) };
+					digitPairsZero[i * 10 + j] = [(byte)((int)'0' + i), (byte)((int)'0' + j)];
 			for (int j = 0; j < 10; ++j)
-				digitPairsNoZero[j] = new byte[] { (byte)((int)'0' + j) };
+				digitPairsNoZero[j] = [(byte)((int)'0' + j)];
 			for (int i = 1; i < 10; ++i)
 				for (int j = 0; j < 10; ++j)
-					digitPairsNoZero[i * 10 + j] = new byte[] { (byte)((int)'0' + i), (byte)((int)'0' + j) };
+					digitPairsNoZero[i * 10 + j] = [(byte)((int)'0' + i), (byte)((int)'0' + j)];
 		}
 
 		private static void WriteUIntInternal(BinaryWriter writer, uint x)
@@ -260,9 +260,9 @@ namespace Yuzu.Json
 
 	internal static class SystemForcedPrimitiveTypes
 	{
-		private static Type[] systemTypes = {
+		private static Type[] systemTypes = [
 			typeof(string), typeof(DateTime), typeof(DateTimeOffset), typeof(TimeSpan), typeof(Guid),
-		};
+		];
 
 		public static bool Contains(Type t) => Array.IndexOf(systemTypes, t) != -1;
 	}

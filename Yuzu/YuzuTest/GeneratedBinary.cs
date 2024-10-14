@@ -195,7 +195,7 @@ namespace YuzuGenBin
 				result.Children = (global::System.Collections.Generic.Dictionary<string, global::YuzuTest.SampleDict>)null;
 				var tmp1 = d.Reader.ReadInt32();
 				if (tmp1 >= 0) {
-					result.Children = new global::System.Collections.Generic.Dictionary<string, global::YuzuTest.SampleDict>();
+					result.Children = [];
 					while (--tmp1 >= 0) {
 						var tmp2 = d.Reader.ReadString();
 						if (tmp2 == "" && d.Reader.ReadBoolean()) tmp2 = null;
@@ -225,7 +225,7 @@ namespace YuzuGenBin
 				result.d = (global::System.Collections.Generic.SortedDictionary<string, int>)null;
 				var tmp1 = d.Reader.ReadInt32();
 				if (tmp1 >= 0) {
-					result.d = new global::System.Collections.Generic.SortedDictionary<string, int>();
+					result.d = [];
 					while (--tmp1 >= 0) {
 						var tmp2 = d.Reader.ReadString();
 						if (tmp2 == "" && d.Reader.ReadBoolean()) tmp2 = null;
@@ -255,7 +255,7 @@ namespace YuzuGenBin
 			result.E = (global::System.Collections.Generic.Dictionary<global::YuzuTest.SampleEnum, int>)null;
 			var tmp1 = d.Reader.ReadInt32();
 			if (tmp1 >= 0) {
-				result.E = new global::System.Collections.Generic.Dictionary<global::YuzuTest.SampleEnum, int>();
+				result.E = [];
 				while (--tmp1 >= 0) {
 					var tmp2 = (global::YuzuTest.SampleEnum)d.Reader.ReadInt32();
 					var tmp3 = d.Reader.ReadInt32();
@@ -267,7 +267,7 @@ namespace YuzuGenBin
 			result.I = (global::System.Collections.Generic.Dictionary<int, int>)null;
 			var tmp4 = d.Reader.ReadInt32();
 			if (tmp4 >= 0) {
-				result.I = new global::System.Collections.Generic.Dictionary<int, int>();
+				result.I = [];
 				while (--tmp4 >= 0) {
 					var tmp5 = d.Reader.ReadInt32();
 					var tmp6 = d.Reader.ReadInt32();
@@ -279,7 +279,7 @@ namespace YuzuGenBin
 			result.K = (global::System.Collections.Generic.Dictionary<global::YuzuTest.SampleKey, int>)null;
 			var tmp7 = d.Reader.ReadInt32();
 			if (tmp7 >= 0) {
-				result.K = new global::System.Collections.Generic.Dictionary<global::YuzuTest.SampleKey, int>();
+				result.K = [];
 				while (--tmp7 >= 0) {
 					var tmp8 = (global::YuzuTest.SampleKey)dg.ReadObject<global::YuzuTest.SampleKey>();
 					var tmp9 = d.Reader.ReadInt32();
@@ -475,12 +475,12 @@ namespace YuzuGenBin
 			result.M = (global::System.Collections.Generic.List<global::System.Collections.Generic.List<int>>)null;
 			var tmp1 = d.Reader.ReadInt32();
 			if (tmp1 >= 0) {
-				result.M = new global::System.Collections.Generic.List<global::System.Collections.Generic.List<int>>();
+				result.M = [];
 				while (--tmp1 >= 0) {
 					var tmp2 = (global::System.Collections.Generic.List<int>)null;
 					var tmp3 = d.Reader.ReadInt32();
 					if (tmp3 >= 0) {
-						tmp2 = new global::System.Collections.Generic.List<int>();
+						tmp2 = [];
 						while (--tmp3 >= 0) {
 							var tmp4 = d.Reader.ReadInt32();
 							tmp2.Add(tmp4);
@@ -609,7 +609,7 @@ namespace YuzuGenBin
 			result.E = (global::System.Collections.Generic.List<global::YuzuTest.SampleBase>)null;
 			var tmp1 = d.Reader.ReadInt32();
 			if (tmp1 >= 0) {
-				result.E = new global::System.Collections.Generic.List<global::YuzuTest.SampleBase>();
+				result.E = [];
 				while (--tmp1 >= 0) {
 					var tmp2 = (global::YuzuTest.SampleBase)dg.ReadObject<global::YuzuTest.SampleBase>();
 					result.E.Add(tmp2);
@@ -742,7 +742,7 @@ namespace YuzuGenBin
 			result.Children = (global::System.Collections.Generic.List<global::YuzuTest.SamplePerson>)null;
 			var tmp1 = d.Reader.ReadInt32();
 			if (tmp1 >= 0) {
-				result.Children = new global::System.Collections.Generic.List<global::YuzuTest.SamplePerson>();
+				result.Children = [];
 				while (--tmp1 >= 0) {
 					var tmp2 = (global::YuzuTest.SamplePerson)dg.ReadObject<global::YuzuTest.SamplePerson>();
 					result.Children.Add(tmp2);
@@ -833,7 +833,7 @@ namespace YuzuGenBin
 			result.A = (global::YuzuTest.SampleCollection<global::YuzuTest.ISample>)null;
 			var tmp1 = d.Reader.ReadInt32();
 			if (tmp1 >= 0) {
-				result.A = new global::YuzuTest.SampleCollection<global::YuzuTest.ISample>();
+				result.A = [];
 				while (--tmp1 >= 0) {
 					var tmp2 = (global::YuzuTest.ISample)dg.ReadObject<global::YuzuTest.ISample>();
 					result.A.Add(tmp2);
@@ -844,7 +844,7 @@ namespace YuzuGenBin
 				result.B = (global::YuzuTest.SampleCollection<int>)null;
 				var tmp3 = d.Reader.ReadInt32();
 				if (tmp3 >= 0) {
-					result.B = new global::YuzuTest.SampleCollection<int>();
+					result.B = [];
 					while (--tmp3 >= 0) {
 						var tmp4 = d.Reader.ReadInt32();
 						result.B.Add(tmp4);
@@ -856,7 +856,7 @@ namespace YuzuGenBin
 				result.C = (global::YuzuTest.SampleCollection<global::YuzuTest.SamplePoint>)null;
 				var tmp5 = d.Reader.ReadInt32();
 				if (tmp5 >= 0) {
-					result.C = new global::YuzuTest.SampleCollection<global::YuzuTest.SamplePoint>();
+					result.C = [];
 					while (--tmp5 >= 0) {
 						var tmp6 = new global::YuzuTest.SamplePoint();
 						dg.EnsureClassDef(typeof(global::YuzuTest.SamplePoint));
@@ -1054,7 +1054,7 @@ namespace YuzuGenBin
 			result.A = (global::System.Collections.Generic.List<global::YuzuTest.SampleAoS.S>)null;
 			var tmp1 = d.Reader.ReadInt32();
 			if (tmp1 >= 0) {
-				result.A = new global::System.Collections.Generic.List<global::YuzuTest.SampleAoS.S>();
+				result.A = [];
 				while (--tmp1 >= 0) {
 					var tmp2 = (global::YuzuTest.SampleAoS.S)dg.ReadObject<global::YuzuTest.SampleAoS.S>();
 					result.A.Add(tmp2);

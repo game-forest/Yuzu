@@ -121,15 +121,15 @@ namespace YuzuTest
 	public class SampleWithCopyable
 	{
 		[YuzuRequired]
-		public SampleCopyable P = new SampleCopyable();
+		public SampleCopyable P = new();
 	}
 
 	public class SampleWithCopyableItems
 	{
 		[YuzuRequired, YuzuCopyable]
-		public Sample1 P = new Sample1();
+		public Sample1 P = new();
 		[YuzuRequired, YuzuCopyable]
-		public List<int> L = new List<int>();
+		public List<int> L = [];
 	}
 
 	[YuzuAllowReadingFromAncestor]
@@ -241,7 +241,7 @@ namespace YuzuTest
 	public class SampleEmptyList
 	{
 		[YuzuMember]
-		public List<string> E = new List<string>();
+		public List<string> E = [];
 	}
 
 	public class SampleArray
@@ -523,14 +523,14 @@ namespace YuzuTest
 		public SamplePerson(Random rnd, int depth)
 		{
 			Counter++;
-			StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new();
 			var len = rnd.Next(1, 40);
 			for (int i = 0; i < len; ++i)
 				sb.Append((char)rnd.Next((int)'a', (int)'z' + 1));
 			Name = sb.ToString();
 			Birth = new DateTime(1999, rnd.Next(10) + 1, 13);
 			var childCount = rnd.Next(28 / depth);
-			Children = new List<SamplePerson>();
+			Children = [];
 			for (int i = 0; i < childCount; ++i)
 				Children.Add(new SamplePerson(rnd, depth + 1));
 			EyeColor = new Color { R = (byte)rnd.Next(256), G = (byte)rnd.Next(256), B = (byte)rnd.Next(256) };
@@ -621,7 +621,7 @@ namespace YuzuTest
 
 	public partial class SampleCollection<T> : ICollection<T>
 	{
-		private List<T> impl = new List<T>();
+		private List<T> impl = [];
 		public int Count { get { return impl.Count; } }
 		public bool IsReadOnly { get { return false; } }
 		public void Add(T item) { impl.Add(item); }
@@ -634,11 +634,12 @@ namespace YuzuTest
 
 		public int Filter = 0;
 		[YuzuSerializeItemIf]
-		public bool SaveItemIf(int index, object item) =>
-			Filter == 1 ? index % 2 == 0 :
-			Filter == 2 ? (int)item % 2 == 0 :
-			Filter == 3 ? false :
-			true;
+		public bool SaveItemIf(int index, object item) => Filter switch
+		{
+			1 => index % 2 == 0,
+			2 => (int)item % 2 == 0,
+			_ => Filter != 3
+		};
 	}
 
 	public readonly partial record struct A
@@ -697,7 +698,7 @@ namespace YuzuTest
 
 	public class SampleExplicitCollection<T> : ICollection<T>
 	{
-		private List<T> impl = new List<T>();
+		private List<T> impl = [];
 		int ICollection<T>.Count { get { return impl.Count; } }
 		bool ICollection<T>.IsReadOnly { get { return false; } }
 		void ICollection<T>.Add(T item) { impl.Add(item); }
@@ -711,7 +712,7 @@ namespace YuzuTest
 
 	public class SampleMultiCollection : List<string>, ICollection<int>
 	{
-		private List<int> impl = new List<int>();
+		private List<int> impl = [];
 		int ICollection<int>.Count { get { return impl.Count; } }
 		bool ICollection<int>.IsReadOnly { get { return false; } }
 		void ICollection<int>.Add(int item) { impl.Add(item); }
@@ -734,29 +735,29 @@ namespace YuzuTest
 	public class SampleWithCollection
 	{
 		[YuzuRequired]
-		public SampleCollection<ISample> A = new SampleCollection<ISample>();
+		public SampleCollection<ISample> A = [];
 		[YuzuMember]
-		public SampleCollection<int> B = new SampleCollection<int>();
+		public SampleCollection<int> B = [];
 		[YuzuMember]
-		public SampleCollection<SamplePoint> C = new SampleCollection<SamplePoint>();
+		public SampleCollection<SamplePoint> C = [];
 	}
 
 	public class SampleWithCollectionMerge
 	{
 		[YuzuRequired]
-		public SampleCollection<int> A { get; } = new SampleCollection<int>();
+		public SampleCollection<int> A { get; } = [];
 	}
 
 	public class SampleWithCollectionDefault
 	{
 		[YuzuMember]
-		public List<int> B = new List<int> { 1 };
+		public List<int> B = [1];
 	}
 
 	public class SampleWithCollectionDefaultNonSerializable
 	{
 		[YuzuMember]
-		public SampleCollection<int> B = new SampleCollection<int>();
+		public SampleCollection<int> B = [];
 		public SampleWithCollectionDefaultNonSerializable()
 		{
 			B.Add(1);
@@ -767,7 +768,7 @@ namespace YuzuTest
 	public class SampleIEnumerable
 	{
 		[YuzuRequired]
-		public IEnumerable<int> L = new int[] { 1, 2, 3 };
+		public IEnumerable<int> L = [1, 2, 3];
 	}
 
 	public class SampleBeforeSerialization
@@ -822,23 +823,23 @@ namespace YuzuTest
 	public class SampleMerge
 	{
 		[YuzuRequired]
-		public Dictionary<int, int> DI { get; } = new Dictionary<int, int>();
+		public Dictionary<int, int> DI { get; } = [];
 		[YuzuRequired]
-		public List<int> LI { get; } = new List<int>();
+		public List<int> LI { get; } = [];
 		[YuzuOptional, YuzuMerge]
 		public Sample1 M;
 
-		public static SampleMerge Make() => new SampleMerge { M = new Sample1() };
+		public static SampleMerge Make() => new() { M = new Sample1() };
 	}
 
 	public class SampleMergeNonPrimitive
 	{
 		[YuzuRequired]
-		public Dictionary<int, Sample1> DI { get; } = new Dictionary<int, Sample1>();
+		public Dictionary<int, Sample1> DI { get; } = [];
 		[YuzuRequired]
-		public List<Sample1> LI { get; } = new List<Sample1>();
+		public List<Sample1> LI { get; } = [];
 		[YuzuOptional, YuzuMerge]
-		public Sample1 M = new Sample1();
+		public Sample1 M = new();
 	}
 
 	public class SampleNested
@@ -866,14 +867,14 @@ namespace YuzuTest
 	public class SampleClonerGenDerived
 	{
 		[YuzuMember]
-		public Sample1 S = new Sample1();
+		public Sample1 S = new();
 	}
 
 	public class SampleUnknown
 	{
 		[YuzuMember]
 		public int X;
-		public YuzuUnknownStorage Storage = new YuzuUnknownStorage();
+		public YuzuUnknownStorage Storage = new();
 	}
 
 	public class SampleUnknownDictOfLists
@@ -886,9 +887,9 @@ namespace YuzuTest
 				typeof(SampleUnknownDictOfLists),
 				o => o.AddAttr(new YuzuAlias("Something")));
 
-		public static SampleUnknownDictOfLists Sample = new SampleUnknownDictOfLists {
+		public static SampleUnknownDictOfLists Sample = new() {
 			F = new Dictionary<int, List<SampleBoolBase>> {
-				{ 7, new List<SampleBoolBase>{ new SampleBool { B = true } } } }
+				{ 7, [new SampleBool { B = true }] } }
 		};
 	}
 
@@ -999,7 +1000,7 @@ namespace YuzuTest
 		private SamplePrivateConstructor() {}
 
 		[YuzuFactory]
-		public static SamplePrivateConstructor Make() => new SamplePrivateConstructor();
+		public static SamplePrivateConstructor Make() => new();
 	}
 
 	public class SampleConstructorParam
@@ -1010,7 +1011,7 @@ namespace YuzuTest
 		public SampleConstructorParam(int x) { X = x; }
 
 		[YuzuFactory]
-		public static SampleConstructorParam Make() => new SampleConstructorParam(72);
+		public static SampleConstructorParam Make() => new(72);
 	}
 
 	[ProtoContract]
@@ -1057,7 +1058,7 @@ namespace YuzuTest
 
 		[YuzuRequired]
 		[ProtoMember(1)]
-		public List<S> A = new List<S>();
+		public List<S> A = [];
 	}
 
 	public class Bad1

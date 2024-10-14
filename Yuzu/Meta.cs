@@ -13,8 +13,8 @@ namespace Yuzu.Metadata
 
 	public class Meta
 	{
-		private static ConcurrentDictionary<Tuple<Type, CommonOptions>, Meta> cache = new ();
-		private static ConcurrentDictionary<CommonOptions, AliasCacheType> readAliasCache = new ();
+		private static ConcurrentDictionary<Tuple<Type, CommonOptions>, Meta> cache = new();
+		private static ConcurrentDictionary<CommonOptions, AliasCacheType> readAliasCache = new();
 
 		public class Item : IComparable<Item>
 		{
@@ -68,7 +68,7 @@ namespace Yuzu.Metadata
 
 		public readonly Type Type;
 		private MetaOptions Options;
-		public readonly List<Item> Items = new ();
+		public readonly List<Item> Items = [];
 		public readonly bool IsCompact;
 		public bool IsCopyable;
 		public object Default { get; private set; }
@@ -86,13 +86,13 @@ namespace Yuzu.Metadata
 		public MethodInfo FactoryMethod;
 		public Func<object> Factory;
 
-		public Dictionary<string, Item> TagToItem = new ();
+		public Dictionary<string, Item> TagToItem = [];
 		public Func<object, YuzuUnknownStorage> GetUnknownStorage;
 
-		public ActionList BeforeSerialization = new ();
-		public ActionList AfterSerialization = new ();
-		public ActionList BeforeDeserialization = new ();
-		public ActionList AfterDeserialization = new ();
+		public ActionList BeforeSerialization = new();
+		public ActionList AfterSerialization = new();
+		public ActionList BeforeDeserialization = new();
+		public ActionList AfterDeserialization = new();
 
 #if !iOS // Apple forbids code generation.
 		private static Action<object, object> SetterGenericHelper<TTarget, TParam>(MethodInfo m)
@@ -114,7 +114,7 @@ namespace Yuzu.Metadata
 			var helper = typeof(Meta).
 				GetMethod(nameof(SetterGenericHelper), BindingFlags.Static | BindingFlags.NonPublic).
 				MakeGenericMethod(m.DeclaringType, m.GetParameters()[0].ParameterType);
-			return (Action<object, object>)helper.Invoke(null, new object[] { m });
+			return (Action<object, object>)helper.Invoke(null, [m]);
 		}
 
 		private static Func<object, object> BuildGetter(MethodInfo m)
@@ -122,7 +122,7 @@ namespace Yuzu.Metadata
 			var helper = typeof(Meta).
 				GetMethod(nameof(GetterGenericHelper), BindingFlags.Static | BindingFlags.NonPublic).
 				MakeGenericMethod(m.DeclaringType, m.ReturnType);
-			return (Func<object, object>)helper.Invoke(null, new object[] { m });
+			return (Func<object, object>)helper.Invoke(null, [m]);
 		}
 #endif
 
@@ -137,7 +137,7 @@ namespace Yuzu.Metadata
 
 			public ItemAttrs(MemberInfo m, MetaOptions options, YuzuItemOptionality opt)
 			{
-				var attrTypes = new Type[] {
+				var attrTypes = new[] {
 					options.OptionalAttribute,
 					options.RequiredAttribute,
 					options.MemberAttribute,

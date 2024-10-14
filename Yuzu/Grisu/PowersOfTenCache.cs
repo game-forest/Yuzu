@@ -1,4 +1,4 @@
-﻿// Copyright 2010 the V8 project authors. All rights reserved.
+// Copyright 2010 the V8 project authors. All rights reserved.
 // Copyright 2011-2012, Kevin Ring. All rights reserved.
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -87,8 +87,7 @@ namespace Yuzu.Grisu
             public short decimal_exponent;
         };
 
-        static readonly CachedPower[] kCachedPowers = new CachedPower[]
-        {
+        static readonly CachedPower[] kCachedPowers = [
           new CachedPower() {significand = 0xfa8fd5a0081c0288, binary_exponent = -1220, decimal_exponent = -348},
           new CachedPower() {significand = 0xbaaee17fa23ebf76, binary_exponent = -1193, decimal_exponent = -340},
           new CachedPower() {significand = 0x8b16fb203055ac76, binary_exponent = -1166, decimal_exponent = -332},
@@ -176,7 +175,7 @@ namespace Yuzu.Grisu
           new CachedPower() {significand = 0x9e19db92b4e31ba9, binary_exponent = 1013, decimal_exponent = 324},
           new CachedPower() {significand = 0xeb96bf6ebadf77d9, binary_exponent = 1039, decimal_exponent = 332},
           new CachedPower() {significand = 0xaf87023b9bf0ee6b, binary_exponent = 1066, decimal_exponent = 340},
-        };
+        ];
 
         const int kCachedPowersOffset = 348;  // -1 * the first decimal_exponent.
         const double kD_1_LOG2_10 = 0.30102999566398114;  //  1 / lg(10)

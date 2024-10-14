@@ -1,4 +1,4 @@
-﻿// Copyright 2010 the V8 project authors. All rights reserved.
+// Copyright 2010 the V8 project authors. All rights reserved.
 // Copyright 2011-2012, Kevin Ring. All rights reserved.
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -408,10 +408,9 @@ namespace Yuzu.Grisu
 
         // Inspired by the method for finding an integer log base 10 from here:
         // http://graphics.stanford.edu/~seander/bithacks.html#IntegerLog10
-        private static readonly uint[] kSmallPowersOfTen = new uint[]
-        {
+        private static readonly uint[] kSmallPowersOfTen = [
             0, 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000
-        };
+        ];
 
         static void BiggestPowerTen(uint number,
                                     int number_bits,

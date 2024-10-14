@@ -20,9 +20,9 @@ namespace YuzuTest
 	[TestClass]
 	public class TestSpeed
 	{
-		private static MemoryStream bsStructProp = new MemoryStream();
-		private static List<Sample1> listSample1 = new List<Sample1>();
-		private static List<Sample2> listSample2 = new List<Sample2>();
+		private static MemoryStream bsStructProp = new();
+		private static List<Sample1> listSample1 = [];
+		private static List<Sample2> listSample2 = [];
 
 		[ClassInitialize]
 		public static void Init(TestContext context)
@@ -43,7 +43,7 @@ namespace YuzuTest
 		[TestMethod]
 		public void TestJsonLongListStr()
 		{
-			var list1 = new SampleList { E = new List<string>() };
+			var list1 = new SampleList { E = [] };
 			for (int i = 0; i < 100000; ++i)
 				list1.E.Add(i.ToString());
 
@@ -64,7 +64,7 @@ namespace YuzuTest
 		[TestMethod]
 		public void TestProtobufNetLongListStr()
 		{
-			var list1 = new SampleList { E = new List<string>() };
+			var list1 = new SampleList { E = [] };
 			for (int i = 0; i < 100000; ++i)
 				list1.E.Add(i.ToString());
 
@@ -103,9 +103,9 @@ namespace YuzuTest
 		[TestMethod]
 		public void TestJsonLongListInt()
 		{
-			var list1 = new SampleMatrix { M = new List<List<int>>() };
+			var list1 = new SampleMatrix { M = [] };
 			for (int i = 0; i < 300; ++i) {
-				list1.M.Add(new List<int>());
+				list1.M.Add([]);
 				for (int j = 0; j < 400; ++j)
 					list1.M[i].Add(i * j * 97);
 			}
@@ -131,9 +131,9 @@ namespace YuzuTest
 		[TestMethod]
 		public void TestCloneLongListInt()
 		{
-			var list1 = new SampleMatrix { M = new List<List<int>>() };
+			var list1 = new SampleMatrix { M = [] };
 			for (int i = 0; i < 1000; ++i) {
-				list1.M.Add(new List<int>());
+				list1.M.Add([]);
 				for (int j = 0; j < 400; ++j)
 					list1.M[i].Add(i * j * 97);
 			}
@@ -287,14 +287,14 @@ namespace YuzuTest
 	public class TestSpeedPerson
 	{
 		private static SamplePerson person;
-		private static MemoryStream jsonStream = new MemoryStream();
-		private static MemoryStream binaryStream = new MemoryStream();
-		private static MemoryStream protobufStream = new MemoryStream();
+		private static MemoryStream jsonStream = new();
+		private static MemoryStream binaryStream = new();
+		private static MemoryStream protobufStream = new();
 
 		[ClassInitialize]
 		public static void Init(TestContext context) {
 			SamplePerson.Counter = 0;
-			Random rnd = new Random(20151125);
+			Random rnd = new(20151125);
 			person = new SamplePerson(rnd, 1);
 			var js = new JsonSerializer();
 			js.JsonOptions.Indent = "";
@@ -359,7 +359,7 @@ namespace YuzuTest
 		{
 			var jd = new JsonDeserializer();
 			jd.Options.TagMode = TagMode.Aliases;
-			SamplePerson p = new SamplePerson();
+			SamplePerson p = new();
 			jsonStream.Position = 0;
 			jd.FromStream(p, jsonStream);
 			Assert.AreEqual(person.Name, p.Name);
@@ -371,7 +371,7 @@ namespace YuzuTest
 			var jd = new JsonDeserializer();
 			jd.Options.TagMode = TagMode.Aliases;
 			jd.JsonOptions.Unordered = true;
-			SamplePerson p = new SamplePerson();
+			SamplePerson p = new();
 			jsonStream.Position = 0;
 			jd.FromStream(p, jsonStream);
 			Assert.AreEqual(person.Name, p.Name);
@@ -381,7 +381,7 @@ namespace YuzuTest
 		public void TestBinaryRead()
 		{
 			var bd = new BinaryDeserializer();
-			SamplePerson p = new SamplePerson();
+			SamplePerson p = new();
 			binaryStream.Position = 0;
 			bd.FromStream(p, binaryStream);
 			Assert.AreEqual(person.Name, p.Name);
@@ -413,7 +413,7 @@ namespace YuzuTest
 			var jd = new JsonDeserializer();
 			jd.Options.TagMode = TagMode.Aliases;
 			jd.Options.AllowEmptyTypes = true;
-			object p = new object();
+			object p = new();
 			jsonStream.Position = 0;
 			p = jd.FromStream(jsonStream);
 			Assert.AreEqual(person.Name, ((Dictionary<string, object>)p)["1"]);

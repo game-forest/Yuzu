@@ -30,7 +30,7 @@ internal class Diagnostics
 	}
 
 	public static readonly DiagnosticDescriptor UnhandledException =
-		new (
+		new(
 			"YZ1001",
 			"Unhandled exception occurred",
 			"YuzuGenerator caused an exception {0}: {1}",

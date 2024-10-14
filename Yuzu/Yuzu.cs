@@ -46,7 +46,7 @@ namespace Yuzu
 		public readonly string WriteAlias;
 		public YuzuAlias(string alias) : base()
 		{
-			ReadAliases = new string[] { alias };
+			ReadAliases = [alias];
 			WriteAlias = alias;
 		}
 		public YuzuAlias(string[] read = null, string write = null) : base()
@@ -215,8 +215,8 @@ namespace Yuzu
 	public class MetaItemOverride
 	{
 		public MemberInfo Info;
-		public ConcurrentBag<Attribute> Attributes = new ();
-		public ConcurrentBag<Type> NegatedAttributes = new ();
+		public ConcurrentBag<Attribute> Attributes = [];
+		public ConcurrentBag<Type> NegatedAttributes = [];
 
 		public MetaItemOverride AddAttr(Attribute attr)
 		{
@@ -243,7 +243,7 @@ namespace Yuzu
 
 	public class MetaOverride: MetaItemOverride {
 		public Type TypeInfo() => Info as Type;
-		public ConcurrentDictionary<string, MetaItemOverride> Items = new ();
+		public ConcurrentDictionary<string, MetaItemOverride> Items = new();
 
 		public new MetaOverride AddAttr(Attribute attr)
 		{
@@ -277,7 +277,7 @@ namespace Yuzu
 
 	public class MetaOptions
 	{
-		public static MetaOptions Default = new ();
+		public static MetaOptions Default = new();
 
 		public Type RequiredAttribute = typeof(YuzuRequired);
 		public Type OptionalAttribute = typeof(YuzuOptional);
@@ -317,7 +317,7 @@ namespace Yuzu
 		public Func<Attribute, IEnumerable<string>> GetReadAliases = attr => (attr as YuzuAlias).ReadAliases;
 		public Func<Attribute, string> GetWriteAlias = attr => (attr as YuzuAlias).WriteAlias;
 
-		private ConcurrentDictionary<Type, MetaOverride> overrides = new ();
+		private ConcurrentDictionary<Type, MetaOverride> overrides = new();
 
 		public MetaOptions AddOverride(Type t, Action<MetaOverride> after = null)
 		{
@@ -376,7 +376,7 @@ namespace Yuzu
 	public class YuzuUnknown: DynamicObject
 	{
 		public string ClassTag;
-		public SortedDictionary<string, object> Fields = new ();
+		public SortedDictionary<string, object> Fields = [];
 
 		public static dynamic Dyn(object obj)
 		{
@@ -407,7 +407,7 @@ namespace Yuzu
 			public object Value;
 			static public int Comparer(Item i1, Item i2) { return String.CompareOrdinal(i1.Name, i2.Name); }
 		}
-		public List<Item> Fields = new ();
+		public List<Item> Fields = [];
 		public bool IsOrdered { get; private set; }
 		internal object Internal;
 
@@ -442,7 +442,7 @@ namespace Yuzu
 
 	public abstract class AbstractSerializer
 	{
-		public CommonOptions Options = new ();
+		public CommonOptions Options = new();
 		public abstract void ToWriter(object obj, BinaryWriter writer);
 		public abstract string ToString(object obj);
 		public abstract byte[] ToBytes(object obj);
@@ -526,7 +526,7 @@ namespace Yuzu
 
 	public abstract class AbstractDeserializer
 	{
-		public CommonOptions Options = new ();
+		public CommonOptions Options = new();
 
 		public abstract object FromReader(object obj, BinaryReader reader);
 		public abstract object FromString(object obj, string source);

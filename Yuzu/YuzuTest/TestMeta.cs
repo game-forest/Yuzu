@@ -246,7 +246,7 @@ namespace YuzuTest.Metadata
 			XAssert.Throws<YuzuException>(() => Meta.Get(typeof(ToSurrogateChain), opt2), "chain");
 		}
 
-		[YuzuAlias(read: new string[] { "Dup", "Dup" })]
+		[YuzuAlias(read: ["Dup", "Dup"])]
 		internal class DuplicateReadAlias
 		{
 			[YuzuRequired]

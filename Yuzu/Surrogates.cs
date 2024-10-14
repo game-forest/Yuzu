@@ -16,7 +16,7 @@ namespace Yuzu.Metadata
 			Both = 3,
 		}
 
-		private static ConcurrentDictionary<Tuple<Type, MetaOptions>, State> surrogateTypes = new ();
+		private static ConcurrentDictionary<Tuple<Type, MetaOptions>, State> surrogateTypes = new();
 
 		private MethodInfo methodIf;
 		public MethodInfo MethodTo;
@@ -88,7 +88,7 @@ namespace Yuzu.Metadata
 						methodIf.Name, methodIf.ReturnType.Name);
 				if (methodIf.IsStatic) {
 					CheckAccepts(methodIf, "SurrogateIf", ownerType);
-					FuncIf = obj => (bool)methodIf.Invoke(null, new object[] { obj });
+					FuncIf = obj => (bool)methodIf.Invoke(null, [obj]);
 				} else {
 					var p = methodIf.GetParameters();
 					if (p.Length != 0)
@@ -106,7 +106,7 @@ namespace Yuzu.Metadata
 					throw Error("ToSurrogate '{0}' returns owner type", MethodTo.Name);
 				if (MethodTo.IsStatic) {
 					CheckAccepts(MethodTo, "ToSurrogate", ownerType);
-					FuncTo = obj => MethodTo.Invoke(null, new object[] { obj });
+					FuncTo = obj => MethodTo.Invoke(null, [obj]);
 				} else {
 					var p = MethodTo.GetParameters();
 					if (p.Length != 0)
@@ -129,7 +129,7 @@ namespace Yuzu.Metadata
 						throw Error("FromSurrogate '{0}' accepts owner type", MethodFrom.Name);
 				}
 				CheckAccepts(MethodFrom, "FromSurrogate", SurrogateType);
-				FuncFrom = obj => MethodFrom.Invoke(null, new object[] { obj });
+				FuncFrom = obj => MethodFrom.Invoke(null, [obj]);
 			}
 
 			if (SurrogateType != null)

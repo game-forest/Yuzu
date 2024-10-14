@@ -112,7 +112,7 @@ namespace Yuzu.Deserializer
 				throw Error("Expected type '{0}', but got '{1}'", expectedType.Name, typeName);
 		}
 
-		protected Stack<object> objStack = new ();
+		protected Stack<object> objStack = new();
 
 		protected Action<T> GetAction<T>(string name)
 		{

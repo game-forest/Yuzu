@@ -42,7 +42,7 @@ namespace YuzuTest
 		public int X;
 	}
 
-	[YuzuAlias(read: new string[] { "Name1", "Name2" })]
+	[YuzuAlias(read: ["Name1", "Name2"])]
 	public class SampleAliasMany
 	{
 		[YuzuRequired]
@@ -58,9 +58,9 @@ namespace YuzuTest
 			public int F;
 		}
 		[YuzuMember]
-		public Dictionary<int, Sample_Renamed> Samples = new Dictionary<int, Sample_Renamed>();
+		public Dictionary<int, Sample_Renamed> Samples = [];
 
-		public static RenameDictionaryValue Data = new RenameDictionaryValue {
+		public static RenameDictionaryValue Data = new() {
 			Samples = new Dictionary<int, Sample_Renamed> { { 1, new Sample_Renamed { F = 1 } } }
 		};
 	}
@@ -74,9 +74,9 @@ namespace YuzuTest
 			public int F;
 		}
 		[YuzuMember]
-		public Dictionary<Sample_Renamed, int> Samples = new Dictionary<Sample_Renamed, int>();
+		public Dictionary<Sample_Renamed, int> Samples = [];
 
-		public static RenameDictionaryKey Data = new RenameDictionaryKey {
+		public static RenameDictionaryKey Data = new() {
 			Samples = new Dictionary<Sample_Renamed, int> { { new Sample_Renamed { F = 2 }, 2 } }
 		};
 	}
@@ -90,10 +90,10 @@ namespace YuzuTest
 			public int F;
 		}
 		[YuzuMember]
-		public List<Sample_Renamed> Samples = new List<Sample_Renamed>();
+		public List<Sample_Renamed> Samples = [];
 
-		public static RenameListType Data = new RenameListType {
-			Samples = new List<Sample_Renamed> { new Sample_Renamed { F = 3 } }
+		public static RenameListType Data = new() {
+			Samples = [new Sample_Renamed { F = 3 }]
 		};
 	}
 
@@ -106,10 +106,10 @@ namespace YuzuTest
 			public int F;
 		}
 		[YuzuMember]
-		public HashSet<Sample_Renamed> Samples = new HashSet<Sample_Renamed>();
+		public HashSet<Sample_Renamed> Samples = [];
 
-		public static RenameHashSetType Data = new RenameHashSetType {
-			Samples = new HashSet<Sample_Renamed> { new Sample_Renamed { F = 4 } }
+		public static RenameHashSetType Data = new() {
+			Samples = [new Sample_Renamed { F = 4 }]
 		};
 	}
 
@@ -130,9 +130,9 @@ namespace YuzuTest
 			public static string TypeFieldName => nameof(Type);
 		}
 		[YuzuMember]
-		public GenericSample_Renamed<Sample> Samples = new GenericSample_Renamed<Sample>();
+		public GenericSample_Renamed<Sample> Samples = new();
 
-		public static RenameCustomGenericType Data = new RenameCustomGenericType {
+		public static RenameCustomGenericType Data = new() {
 			Samples = new GenericSample_Renamed<Sample>() { Type = new Sample { F = 5 } }
 		};
 	}
@@ -152,10 +152,10 @@ namespace YuzuTest
 			public T Type;
 		}
 		[YuzuMember]
-		public GenericSample<Sample_Renamed> Samples = new GenericSample<Sample_Renamed>();
+		public GenericSample<Sample_Renamed> Samples = new();
 
 		public static RenameCustomGenericTypeGenericArgumentType Data =
-			new RenameCustomGenericTypeGenericArgumentType {
+			new() {
 				Samples = new GenericSample<Sample_Renamed>() { Type = new Sample_Renamed { F = 6 } }
 			};
 	}
@@ -165,7 +165,7 @@ namespace YuzuTest
 		[YuzuMember]
 		public SampleAliasForNestedClassWhenEnclosingClassRenamed_Renamed F;
 
-		public static EnclosingClassForEnclosingClass Sample = new EnclosingClassForEnclosingClass {
+		public static EnclosingClassForEnclosingClass Sample = new() {
 			F = new SampleAliasForNestedClassWhenEnclosingClassRenamed_Renamed {
 				NestedClassField = new SampleAliasForNestedClassWhenEnclosingClassRenamed_Renamed.NestedClass { F = 666 }
 			}
@@ -194,7 +194,7 @@ namespace YuzuTest
 		[YuzuMember]
 		public SampleAliasClassToBeRenamed_Renamed Bar_Renamed;
 
-		public YuzuUnknownStorage UnknownStorage = new YuzuUnknownStorage();
+		public YuzuUnknownStorage UnknownStorage = new();
 	}
 
 	public class SampleAliasWithinUnknownContainer
@@ -202,6 +202,6 @@ namespace YuzuTest
 		[YuzuMember]
 		public SampleAliasClassToBeRenamed_Renamed Foo_Renamed;
 
-		public YuzuUnknownStorage UnknownStorage = new YuzuUnknownStorage();
+		public YuzuUnknownStorage UnknownStorage = new();
 	}
 }
