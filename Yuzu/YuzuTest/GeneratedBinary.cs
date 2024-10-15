@@ -476,11 +476,13 @@ namespace YuzuGenBin
 			var tmp1 = d.Reader.ReadInt32();
 			if (tmp1 >= 0) {
 				result.M = [];
+				result.M.Capacity += tmp1;
 				while (--tmp1 >= 0) {
 					var tmp2 = (global::System.Collections.Generic.List<int>)null;
 					var tmp3 = d.Reader.ReadInt32();
 					if (tmp3 >= 0) {
 						tmp2 = [];
+						tmp2.Capacity += tmp3;
 						while (--tmp3 >= 0) {
 							var tmp4 = d.Reader.ReadInt32();
 							tmp2.Add(tmp4);
@@ -610,6 +612,7 @@ namespace YuzuGenBin
 			var tmp1 = d.Reader.ReadInt32();
 			if (tmp1 >= 0) {
 				result.E = [];
+				result.E.Capacity += tmp1;
 				while (--tmp1 >= 0) {
 					var tmp2 = (global::YuzuTest.SampleBase)dg.ReadObject<global::YuzuTest.SampleBase>();
 					result.E.Add(tmp2);
@@ -743,6 +746,7 @@ namespace YuzuGenBin
 			var tmp1 = d.Reader.ReadInt32();
 			if (tmp1 >= 0) {
 				result.Children = [];
+				result.Children.Capacity += tmp1;
 				while (--tmp1 >= 0) {
 					var tmp2 = (global::YuzuTest.SamplePerson)dg.ReadObject<global::YuzuTest.SamplePerson>();
 					result.Children.Add(tmp2);
@@ -960,6 +964,7 @@ namespace YuzuGenBin
 			if (2 != fd.OurIndex) throw dg.Error("2!=" + fd.OurIndex);
 			var tmp4 = d.Reader.ReadInt32();
 			if (tmp4 >= 0) {
+				result.LI.Capacity += tmp4;
 				while (--tmp4 >= 0) {
 					var tmp5 = d.Reader.ReadInt32();
 					result.LI.Add(tmp5);
@@ -1055,6 +1060,7 @@ namespace YuzuGenBin
 			var tmp1 = d.Reader.ReadInt32();
 			if (tmp1 >= 0) {
 				result.A = [];
+				result.A.Capacity += tmp1;
 				while (--tmp1 >= 0) {
 					var tmp2 = (global::YuzuTest.SampleAoS.S)dg.ReadObject<global::YuzuTest.SampleAoS.S>();
 					result.A.Add(tmp2);
