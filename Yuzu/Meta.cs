@@ -64,6 +64,11 @@ namespace Yuzu.Metadata
 				var tag = Tag(options);
 				return Name + (tag == Name ? "" : " (" + tag + ")");
 			}
+
+			public override string ToString()
+			{
+				return string.Equals(Name, Alias, StringComparison.Ordinal) ? Name : $"{Alias}({Name})";
+			}
 		}
 
 		public readonly Type Type;
