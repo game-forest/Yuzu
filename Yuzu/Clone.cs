@@ -186,7 +186,7 @@ namespace Yuzu.Clone
 				var surrogateCloner = MakeSurrogateCloner(meta);
 				if (surrogateCloner != null)
 					return surrogateCloner;
-				var oc = new ObjectCloner(this, meta, ReferenceResolver);
+				var oc = new ObjectCloner(this, meta);
 				return oc.Get();
 			}
 			throw new NotImplementedException("Unable to clone type: " + t.FullName);

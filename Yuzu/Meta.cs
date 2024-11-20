@@ -233,12 +233,12 @@ namespace Yuzu.Metadata
 				IsOptional = ia.Required == null,
 				IsCompact = attrs.HasAttr(Options.CompactAttribute),
 				IsCopyable = attrs.HasAttr(Options.CopyableAttribute),
-				IsMember = ia.Member != null,
-				SerializeCond = serializeCond != null ?
+				IsMember = !options.IgnoreSerializeCondition && ia.Member != null,
+				SerializeCond = !options.IgnoreSerializeCondition && serializeCond != null ?
 					Options.GetSerializeCondition(serializeCond, Type) : null,
-				SerializeIfMethod = serializeCond != null ?
+				SerializeIfMethod = !options.IgnoreSerializeCondition && serializeCond != null ?
 					Options.GetSerializeMethod(serializeCond, Type) : null,
-				DefaultValue = serializeCond != null ?
+				DefaultValue = !options.IgnoreSerializeCondition && serializeCond != null ?
 					Options.GetDefault(serializeCond) : YuzuNoDefault.NoDefault,
 				Name = m.Name,
 			};
@@ -293,16 +293,15 @@ namespace Yuzu.Metadata
 				item.IsCompact = true;
 			if (!over.HasAttr(Options.CopyableAttribute))
 				CheckCopyable(item.Type, options);
-
-			if (ia.Member != null && item.SerializeCond == null && !Type.IsAbstract && !Type.IsInterface)
+			if (item.IsMember && item.SerializeCond == null && !Type.IsAbstract && !Type.IsInterface)
 				item.SerializeCond = GetSerializeIf(item, options);
 			Items.Add(item);
 		}
 
-		private void AddMethod(MethodInfo m)
+		private void AddMethod(MethodInfo m, CommonOptions options)
 		{
 			var attrs = Options.GetItem(m);
-			if (attrs.HasAttr(Options.SerializeItemIfAttribute)) {
+			if (!options.IgnoreSerializeCondition && attrs.HasAttr(Options.SerializeItemIfAttribute)) {
 				if (Utils.GetIEnumerable(Type) == null) {
 					throw Error("SerializeItemIf may only be used inside of IEnumerable");
 				}
@@ -386,7 +385,7 @@ namespace Yuzu.Metadata
 								AllKind.HasFlag(YuzuItemKind.Property) && g != null);
 						break;
 					case MemberTypes.Method:
-						AddMethod(m as MethodInfo);
+						AddMethod(m as MethodInfo, options);
 						break;
 				}
 			}
