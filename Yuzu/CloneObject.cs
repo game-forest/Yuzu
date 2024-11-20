@@ -72,12 +72,9 @@ namespace Yuzu.Clone
 
 	internal class ObjectCloner : ObjectItemsWrapper
 	{
-		private readonly IReferenceResolver referenceResolver;
-
-		public ObjectCloner(Cloner cl, Meta meta, IReferenceResolver referenceResolver)
+		public ObjectCloner(Cloner cl, Meta meta)
 			: base(cl, meta)
 		{
-			this.referenceResolver = referenceResolver;
 		}
 
 		internal Func<object, object> Get()
@@ -97,15 +94,18 @@ namespace Yuzu.Clone
 			if (src.GetType() != meta.Type)
 				return cl.DeepObject(src);
 			object reference = null;
-			if (meta.SerializeByReference && referenceResolver != null) {
-				reference = referenceResolver.GetReference(src, out var alreadyExists);
+			if (cl.ReferenceResolver != null) {
+				throw new NotImplementedException();
+			}
+			if (meta.SerializeByReference && cl.ReferenceResolver != null) {
+				reference = cl.ReferenceResolver.GetReference(src, out var alreadyExists);
 				if (alreadyExists) {
-					return referenceResolver.ResolveReference(reference);
+					return cl.ReferenceResolver.ResolveReference(reference, typeof(void)); // FIXME: type
 				}
 			}
 			var result = meta.Factory();
 			if (reference != null) {
-				referenceResolver.AddReference(reference, result);
+				cl.ReferenceResolver.AddReference(reference, result);
 			}
 			CopyCopyable(result, src);
 			return result;
@@ -117,16 +117,19 @@ namespace Yuzu.Clone
 				return null;
 			if (src.GetType() != meta.Type)
 				return cl.DeepObject(src);
+			if (cl.ReferenceResolver != null) {
+				throw new NotImplementedException();
+			}
 			object reference = null;
-			if (meta.SerializeByReference && referenceResolver != null) {
-				reference = referenceResolver.GetReference(src, out var alreadyExists);
+			if (meta.SerializeByReference && cl.ReferenceResolver != null) {
+				reference = cl.ReferenceResolver.GetReference(src, out var alreadyExists);
 				if (alreadyExists) {
-					return referenceResolver.ResolveReference(reference);
+					return cl.ReferenceResolver.ResolveReference(reference, typeof(void)); // FIXME: type
 				}
 			}
 			var result = meta.Factory();
 			if (reference != null) {
-				referenceResolver.AddReference(reference, result);
+				cl.ReferenceResolver.AddReference(reference, result);
 			}
 			if (cloners[0] == null)
 				MakeFieldCloners();
@@ -143,16 +146,19 @@ namespace Yuzu.Clone
 			if (src.GetType() != meta.Type)
 				return cl.DeepObject(src);
 			meta.BeforeSerialization.Run(src);
+			if (cl.ReferenceResolver != null) {
+				throw new NotImplementedException();
+			}
 			object reference = null;
-			if (meta.SerializeByReference && referenceResolver != null) {
-				reference = referenceResolver.GetReference(src, out var alreadyExists);
+			if (meta.SerializeByReference && cl.ReferenceResolver != null) {
+				reference = cl.ReferenceResolver.GetReference(src, out var alreadyExists);
 				if (alreadyExists) {
-					return referenceResolver.ResolveReference(reference);
+					return cl.ReferenceResolver.ResolveReference(reference, meta.Type); // FIXME: type
 				}
 			}
 			var result = meta.Factory();
 			if (reference != null) {
-				referenceResolver.AddReference(reference, result);
+				cl.ReferenceResolver.AddReference(reference, result);
 			}
 			if (cloners.Length > 0 && cloners[0] == null)
 				MakeFieldCloners();

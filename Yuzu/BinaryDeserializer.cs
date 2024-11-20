@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 using Yuzu.Deserializer;
 using Yuzu.Metadata;
@@ -158,6 +157,7 @@ namespace Yuzu.Binary
 
 		protected void ReadIntoCollection<T>(ICollection<T> list)
 		{
+			list.Clear();
 			var rf = ReadValueFunc(typeof(T));
 			var count = Reader.ReadInt32();
 			for (int i = 0; i < count; ++i)
@@ -202,6 +202,7 @@ namespace Yuzu.Binary
 
 		protected void ReadIntoDictionary<K, V>(IDictionary<K, V> dict)
 		{
+			dict.Clear();
 			var rk = ReadValueFunc(typeof(K));
 			var rv = ReadValueFunc(typeof(V));
 			var count = Reader.ReadInt32();
@@ -530,6 +531,9 @@ namespace Yuzu.Binary
 				(!Meta.Get(expectedType, Options).AllowReadingFromAncestor || expectedType.BaseType != def.Meta.Type)
 			)
 				throw Error("Unable to read type {0} into {1}", def.Meta.Type, expectedType);
+			if (reference != null) {
+				ReferenceResolver.AddReference(reference, obj);
+			}
 			def.ReadFields(this, def, obj);
 		}
 
@@ -575,7 +579,7 @@ namespace Yuzu.Binary
 			if (classId == BinarySerializeOptions.ReferenceTag) {
 				EnsureReferenceResolver();
 				var reference = referenceReadFunc();
-				return ReferenceResolver.ResolveReference(reference);
+				return ReferenceResolver.ResolveReference(reference, typeof(T));
 			}
 			var def = GetClassDef(classId);
 			var result = MakeAndCheckAssignable<T>(def, objectId);
@@ -586,30 +590,6 @@ namespace Yuzu.Binary
 				}
 				def.ReadFields(this, def, result);
 			}
-			return result;
-		}
-
-		protected object ReadObjectUnchecked<T>() where T : class
-		{
-			var classId = Reader.ReadInt16();
-			if (classId == 0)
-				return null;
-			object objectId = null;
-			if (classId == BinarySerializeOptions.IdTag) {
-				EnsureReferenceResolver();
-				objectId = referenceReadFunc();
-				classId = Reader.ReadInt16();
-			}
-			if (classId == BinarySerializeOptions.ReferenceTag) {
-				EnsureReferenceResolver();
-				var reference = referenceReadFunc();
-				return ReferenceResolver.ResolveReference(reference);
-			}
-			var def = GetClassDef(classId);
-			if (def.Make != null)
-				return def.Make(this, def, objectId);
-			var result = def.Meta.Factory();
-			def.ReadFields(this, def, result);
 			return result;
 		}
 

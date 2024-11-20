@@ -131,6 +131,7 @@ namespace Yuzu.Json
 
 		protected string RequireUnescapedString()
 		{
+			return RequireString(); // TODO: It's needed for generic animator type deserialization
 			sb.Clear();
 			if (RequireOrNull('"')) return null;
 			while (true) {
@@ -523,6 +524,7 @@ namespace Yuzu.Json
 
 		protected void ReadIntoCollection<T>(ICollection<T> list)
 		{
+			list.Clear();
 			// ReadValue might invoke a new serializer, so we must not rely on PutBack.
 			if (SkipSpacesCarefully() == ']') {
 				Require(']');
@@ -572,6 +574,7 @@ namespace Yuzu.Json
 
 		protected void ReadIntoDictionary<K, V>(IDictionary<K, V> dict)
 		{
+			dict.Clear();
 			// ReadValue might invoke a new serializer, so we must not rely on PutBack.
 			if (SkipSpacesCarefully() == '}') {
 				Require('}');
@@ -736,7 +739,7 @@ namespace Yuzu.Json
 						EnsureReferenceResolver();
 						var r = referenceReadFunc();
 						Require('}');
-						return ReferenceResolver.ResolveReference(r);
+						return ReferenceResolver.ResolveReference(r, typeof(object));
 					}
 					if (name == JsonOptions.IdTag) {
 						EnsureReferenceResolver();
@@ -1110,7 +1113,7 @@ namespace Yuzu.Json
 					if (name == JsonOptions.ReferenceTag) {
 						var r = referenceReadFunc();
 						Require('}');
-						return (T)ReferenceResolver.ResolveReference(r);
+						return (T)ReferenceResolver.ResolveReference(r, typeof(T));
 					}
 					if (name == JsonOptions.IdTag) {
 						id = referenceReadFunc();
@@ -1193,7 +1196,7 @@ namespace Yuzu.Json
 			if (name == JsonOptions.ReferenceTag) {
 				var r = referenceReadFunc();
 				Require('}');
-				return (T)ReferenceResolver.ResolveReference(r);
+				return (T)ReferenceResolver.ResolveReference(r, typeof(T));
 			}
 			if (name == JsonOptions.IdTag) {
 				id = referenceReadFunc();
@@ -1252,6 +1255,15 @@ namespace Yuzu.Json
 							return obj;
 						}
 						var name = GetNextName(first: true);
+						if (name == JsonOptions.ReferenceTag) {
+							throw Error("Unable to resolve reference into object");
+						}
+						if (name == JsonOptions.IdTag) {
+							EnsureReferenceResolver();
+							var id = referenceReadFunc();
+							ReferenceResolver.AddReference(id, obj);
+							name = GetNextName(first: false);
+						}
 						if (name != JsonOptions.ClassTag)
 							return ReadFields(obj, name);
 						CheckExpectedType(RequireUnescapedString(), expectedType);

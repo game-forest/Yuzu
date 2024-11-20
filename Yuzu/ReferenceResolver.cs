@@ -12,7 +12,7 @@ namespace Yuzu
 		/// <summary>
 		/// Returns an object for the given reference or throws an exception.
 		/// </summary>
-		object ResolveReference(object reference);
+		object ResolveReference(object reference, Type memberType);
 
 		/// <summary>
 		/// Registers a newly deserialized object.
@@ -36,7 +36,7 @@ namespace Yuzu
 		/// <summary>
 		/// Returns an object for the given reference or throws an exception.
 		/// </summary>
-		public abstract object ResolveReference(TReference reference);
+		public abstract object ResolveReference(TReference reference, Type memberType);
 
 		/// <summary>
 		/// Registers a newly deserialized object.
@@ -52,7 +52,8 @@ namespace Yuzu
 		/// </summary>
 		public abstract TReference GetReference(object obj, out bool alreadyExists);
 
-		object IReferenceResolver.ResolveReference(object reference) => ResolveReference((TReference)reference);
+		object IReferenceResolver.ResolveReference(object reference, Type memberType) =>
+			ResolveReference((TReference)reference, memberType);
 
 		void IReferenceResolver.AddReference(object reference, object obj) => AddReference((TReference)reference, obj);
 

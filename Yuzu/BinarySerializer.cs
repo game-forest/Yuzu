@@ -555,8 +555,8 @@ namespace Yuzu.Binary
 				writer.Write((short)0);
 				return;
 			}
-			var def = GetClassDef(obj, out var isNewDef);
-			if (def.Meta.SerializeByReference && ReferenceResolver != null) {
+			// TODO: Meta.Get()???
+			if (Meta.Get(obj.GetType(), Options).SerializeByReference && ReferenceResolver != null) {
 				var reference = ReferenceResolver.GetReference(obj, out var alreadyExists);
 				if (alreadyExists) {
 					writer.Write((short)BinarySerializeOptions.ReferenceTag);
@@ -566,6 +566,7 @@ namespace Yuzu.Binary
 				writer.Write(BinarySerializeOptions.IdTag);
 				referenceWriteFunc(reference);
 			}
+			var def = GetClassDef(obj, out var isNewDef);
 			WriteClassId(def, isNewDef);
 			WriteFields(def, obj);
 		}
