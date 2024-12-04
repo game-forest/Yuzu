@@ -451,10 +451,15 @@ namespace Yuzu
 
 		public IReferenceResolver ReferenceResolver;
 
-		public abstract void ToWriter(object obj, BinaryWriter writer);
-		public abstract string ToString(object obj);
-		public abstract byte[] ToBytes(object obj);
-		public abstract void ToStream(object obj, Stream target);
+		public void ToWriter(object obj, BinaryWriter writer) => ToWriter(obj, writer, typeof(object));
+		public string ToString(object obj) => ToString(obj, typeof(object));
+		public byte[] ToBytes(object obj) => ToBytes(obj, typeof(object));
+		public void ToStream(object obj, Stream target) => ToStream(obj, target, typeof(object));
+
+		public abstract void ToWriter(object obj, BinaryWriter writer, Type t);
+		public abstract string ToString(object obj, Type t);
+		public abstract byte[] ToBytes(object obj, Type t);
+		public abstract void ToStream(object obj, Stream target, Type t);
 
 		protected Action<object> MakeDelegateAction(MethodInfo m) =>
 			(Action<object>)Delegate.CreateDelegate(typeof(Action<object>), this, m);
@@ -474,34 +479,34 @@ namespace Yuzu
 
 		protected virtual void Initialize() { }
 
-		protected abstract void ToWriter(object obj);
+		protected abstract void ToWriter(object obj, Type t);
 
-		public override void ToWriter(object obj, BinaryWriter writer)
+		public override void ToWriter(object obj, BinaryWriter writer, Type t)
 		{
 			this.writer = writer;
 			Initialize();
-			ToWriter(obj);
+			ToWriter(obj, t);
 		}
 
-		public override string ToString(object obj)
+		public override string ToString(object obj, Type t)
 		{
 			var ms = new MemoryStream();
-			ToStream(obj, ms);
+			ToStream(obj, ms, t);
 			return Encoding.UTF8.GetString(ms.GetBuffer(), 0, (int)ms.Length);
 		}
 
-		public override byte[] ToBytes(object obj)
+		public override byte[] ToBytes(object obj, Type t)
 		{
 			var ms = new MemoryStream();
-			ToStream(obj, ms);
+			ToStream(obj, ms, t);
 			var result = ms.GetBuffer();
 			Array.Resize(ref result, (int)ms.Length);
 			return result;
 		}
 
-		public override void ToStream(object obj, Stream target)
+		public override void ToStream(object obj, Stream target, Type t)
 		{
-			ToWriter(obj, new BinaryWriter(target));
+			ToWriter(obj, new BinaryWriter(target), t);
 		}
 	}
 
@@ -509,28 +514,28 @@ namespace Yuzu
 	{
 		protected StringBuilder builder;
 
-		protected abstract void ToBuilder(object obj);
+		protected abstract void ToBuilder(object obj, Type t);
 
-		public override void ToWriter(object obj, BinaryWriter writer)
+		public override void ToWriter(object obj, BinaryWriter writer, Type t)
 		{
-			writer.Write(ToBytes(obj));
+			writer.Write(ToBytes(obj, t));
 		}
 
-		public override string ToString(object obj)
+		public override string ToString(object obj, Type t)
 		{
 			builder = new StringBuilder();
-			ToBuilder(obj);
+			ToBuilder(obj, t);
 			return builder.ToString();
 		}
 
-		public override byte[] ToBytes(object obj)
+		public override byte[] ToBytes(object obj, Type t)
 		{
-			return Encoding.UTF8.GetBytes(ToString(obj));
+			return Encoding.UTF8.GetBytes(ToString(obj, t));
 		}
 
-		public override void ToStream(object obj, Stream target)
+		public override void ToStream(object obj, Stream target, Type t)
 		{
-			var b = ToBytes(obj);
+			var b = ToBytes(obj, t);
 			target.Write(b, 0, b.Length);
 		}
 	}
@@ -541,20 +546,30 @@ namespace Yuzu
 
 		public IReferenceResolver ReferenceResolver;
 
-		public abstract object FromReader(object obj, BinaryReader reader);
-		public abstract object FromString(object obj, string source);
-		public abstract object FromStream(object obj, Stream source);
-		public abstract object FromBytes(object obj, byte[] bytes);
+		public void FromReader(object obj, BinaryReader reader) => FromReader(obj, reader, typeof(object));
+		public void FromString(object obj, string source) => FromString(obj, source, typeof(object));
+		public void FromStream(object obj, Stream source) => FromStream(obj, source, typeof(object));
+		public void FromBytes(object obj, byte[] bytes) => FromBytes(obj, bytes, typeof(object));
 
-		public abstract object FromReader(BinaryReader reader);
-		public abstract object FromString(string source);
-		public abstract object FromStream(Stream source);
-		public abstract object FromBytes(byte[] bytes);
+		public abstract object FromReader(object obj, BinaryReader reader, Type t);
+		public abstract object FromString(object obj, string source, Type t);
+		public abstract object FromStream(object obj, Stream source, Type t);
+		public abstract object FromBytes(object obj, byte[] bytes, Type t);
 
-		public abstract T FromReader<T>(BinaryReader reader);
-		public abstract T FromString<T>(string source);
-		public abstract T FromStream<T>(Stream source);
-		public abstract T FromBytes<T>(byte[] bytes);
+		public object FromReader(BinaryReader reader, Type t) => FromReader(null, reader, t);
+		public object FromString(string source, Type t) => FromString(null, source, t);
+		public object FromStream(Stream source, Type t) => FromStream(null, source, t);
+		public object FromBytes(byte[] bytes, Type t) => FromBytes(null, bytes, t);
+
+		public object FromReader(BinaryReader reader) => FromReader(reader, typeof(object));
+		public object FromString(string source) => FromString(source, typeof(object));
+		public object FromStream(Stream source) => FromStream(source, typeof(object));
+		public object FromBytes(byte[] bytes) => FromBytes(bytes, typeof(object));
+
+		public T FromReader<T>(BinaryReader reader) => (T)FromReader(reader, typeof(T));
+		public T FromString<T>(string source) => (T)FromString(source, typeof(T));
+		public T FromStream<T>(Stream source) => (T)FromStream(source, typeof(T));
+		public T FromBytes<T>(byte[] bytes) => (T)FromBytes(bytes, typeof(T));
 	}
 
 	public interface IGenerator

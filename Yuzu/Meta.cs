@@ -407,11 +407,11 @@ namespace Yuzu.Metadata
 			if (Utils.GetIEnumerable(Type) != null) {
 				if (Items.Count > 0)
 					throw Error("Serializable fields in collection are not supported");
+			} else if (
+				  !options.AllowEmptyTypes && Items.Count == 0 && !(Type.IsInterface || Type.IsAbstract)
+			) {
+				//throw Error("No serializable fields");
 			}
-			else if (
-				!options.AllowEmptyTypes && Items.Count == 0 && !(Type.IsInterface || Type.IsAbstract)
-			)
-				throw Error("No serializable fields");
 		}
 
 		public bool HasAnyTrigger() =>

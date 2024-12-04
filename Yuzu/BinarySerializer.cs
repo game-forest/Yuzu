@@ -59,19 +59,6 @@ namespace Yuzu.Binary
 			}
 		}
 
-		protected void WriteAny(object obj)
-		{
-			if (obj == null) {
-				writer.Write((byte)RoughType.Any);
-				return;
-			}
-			var t = obj.GetType();
-			if (t == typeof(object))
-				throw new YuzuException("WriteAny of unknown type");
-			WriteRoughType(t);
-			GetWriteFunc(t)(obj);
-		}
-
 		protected void WriteRecord(object obj) => GetWriteFunc(obj.GetType())(obj);
 
 		private Dictionary<Type, Action<object>> writerCache;
@@ -111,8 +98,6 @@ namespace Yuzu.Binary
 				{ typeof(TimeSpan), WriteTimeSpan },
 				{ typeof(Guid), WriteGuid },
 				{ typeof(string), WriteString },
-				{ typeof(object), WriteAny },
-
 				{ typeof(Record), WriteRecord },
 				{ typeof(YuzuUnknown), WriteUnknown },
 				{ typeof(YuzuUnknownBinary), WriteUnknownBinary },
@@ -741,20 +726,14 @@ namespace Yuzu.Binary
 			throw new NotImplementedException(t.Name);
 		}
 
-		protected override void ToWriter(object obj)
+		protected override void ToWriter(object obj, Type t)
 		{
 			if (BinaryOptions.AutoSignature)
 				WriteSignature();
-			WriteAny(obj);
+			WriteRoughType(t);
+			GetWriteFunc(t)(obj);
 		}
 
 		public void WriteSignature() { writer.Write(BinaryOptions.Signature); }
-
-		public override string ToString(object obj)
-		{
-			var ms = new System.IO.MemoryStream();
-			ToStream(obj, ms);
-			return Convert.ToBase64String(ms.GetBuffer(), 0, (int)ms.Length);
-		}
 	}
 }

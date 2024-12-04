@@ -118,12 +118,6 @@ namespace Yuzu.Binary
 			throw Error("Unknown rough type {0}", rt);
 		}
 
-		protected object ReadAny()
-		{
-			var t = ReadType();
-			return t == typeof(object) ? null : ReadValueFunc(t)();
-		}
-
 		private void InitReaders()
 		{
 			readerCache = new Dictionary<Type, Func<object>>() {
@@ -145,7 +139,6 @@ namespace Yuzu.Binary
 				{ typeof(TimeSpan), ReadTimeSpanObj },
 				{ typeof(Guid), ReadGuidObj },
 				{ typeof(string), ReadString },
-				{ typeof(object), ReadAny },
 				{ typeof(Record), ReadObject<object> },
 			};
 		}
@@ -515,14 +508,14 @@ namespace Yuzu.Binary
 			var classId = Reader.ReadInt16();
 			if (classId == 0)
 				throw Error("Unable to read null into object");
+			if (classId == BinarySerializeOptions.ReferenceTag) {
+				throw Error("Unable to resolve reference into object");
+			}
 			object reference = null;
 			if (classId == BinarySerializeOptions.IdTag) {
 				EnsureReferenceResolver();
 				reference = referenceReadFunc();
 				classId = Reader.ReadInt16();
-			}
-			if (classId == BinarySerializeOptions.ReferenceTag) {
-				throw Error("Unable to resolve reference into object");
 			}
 			var def = GetClassDef(classId);
 			var expectedType = obj.GetType();
@@ -541,13 +534,13 @@ namespace Yuzu.Binary
 		{
 			var classId = Reader.ReadInt16();
 			object reference = null;
+			if (classId == BinarySerializeOptions.ReferenceTag) {
+				throw Error("Unable to resolve reference into object");
+			}
 			if (classId == BinarySerializeOptions.IdTag) {
 				EnsureReferenceResolver();
 				reference = referenceReadFunc();
 				classId = Reader.ReadInt16();
-			}
-			if (classId == BinarySerializeOptions.ReferenceTag) {
-				throw Error("Unable to resolve reference into object");
 			}
 			var def = GetClassDef(classId);
 			def.ReadFields(this, def, obj);
@@ -570,16 +563,16 @@ namespace Yuzu.Binary
 			var classId = Reader.ReadInt16();
 			if (classId == 0)
 				return null;
+			if (classId == BinarySerializeOptions.ReferenceTag) {
+				EnsureReferenceResolver();
+				var reference = referenceReadFunc();
+				return ReferenceResolver.ResolveReference(reference, typeof(T));
+			}
 			object objectId = null;
 			if (classId == BinarySerializeOptions.IdTag) {
 				EnsureReferenceResolver();
 				objectId = referenceReadFunc();
 				classId = Reader.ReadInt16();
-			}
-			if (classId == BinarySerializeOptions.ReferenceTag) {
-				EnsureReferenceResolver();
-				var reference = referenceReadFunc();
-				return ReferenceResolver.ResolveReference(reference, typeof(T));
 			}
 			var def = GetClassDef(classId);
 			var result = MakeAndCheckAssignable<T>(def, objectId);
@@ -779,40 +772,24 @@ namespace Yuzu.Binary
 			if (icoll != null)
 				return MakeDelegateAction(
 					Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadIntoCollectionNG), icoll));
-			if ((t.IsClass || t.IsInterface || Utils.IsStruct(t)) && t != typeof(object))
+			if (t.IsClass || t.IsInterface || Utils.IsStruct(t))
 				return MakeDelegateAction(Utils.GetPrivateGeneric(GetType(), nameof(ReadIntoObject), t));
 			throw Error("Unable to merge field of type {0}", t);
 		}
 
-		public override object FromReaderInt()
+		public override object FromReader(object obj, Type t)
 		{
 			if (BinaryOptions.AutoSignature)
 				CheckSignature();
-			return ReadAny();
-		}
-
-		public override object FromReaderInt(object obj)
-		{
-			var expectedType = obj.GetType();
-			if (expectedType == typeof(object))
-				throw Error("Unable to read into untyped object");
-			if (BinaryOptions.AutoSignature)
-				CheckSignature();
-			if (!ReadCompatibleType(expectedType))
-				throw Error("Incompatible type to read into {0}", expectedType.Name);
-			MergeValueFunc(expectedType)(obj);
+			if (!ReadCompatibleType(t)) {
+				throw Error("Incompatible type");
+			}
+			if (obj != null) {
+				MergeValueFunc(t)(obj);
+			} else {
+				obj = ReadValueFunc(t)();
+			}
 			return obj;
-		}
-
-		public override T FromReaderInt<T>()
-		{
-			if (BinaryOptions.AutoSignature)
-				CheckSignature();
-			if (typeof(T) == typeof(object))
-				return (T)ReadAny();
-			if (!ReadCompatibleType(typeof(T)))
-				throw Error("Incompatible type to read into {0}", typeof(T));
-			return (T)ReadValueFunc(typeof(T))();
 		}
 
 		// If possible, preserves stream position if signature is absent.
@@ -838,27 +815,6 @@ namespace Yuzu.Binary
 		{
 			if (!IsValidSignature())
 				throw Error("Signature not found");
-		}
-
-		public override object FromString(string source)
-		{
-			return FromReader(new System.IO.BinaryReader(
-				new System.IO.MemoryStream(Convert.FromBase64String(source), false))
-			);
-		}
-
-		public override T FromString<T>(string source)
-		{
-			return FromReader<T>(new System.IO.BinaryReader(
-				new System.IO.MemoryStream(Convert.FromBase64String(source), false))
-			);
-		}
-
-		public override object FromString(object obj, string source)
-		{
-			return FromReader(obj, new System.IO.BinaryReader(
-				new System.IO.MemoryStream(Convert.FromBase64String(source), false))
-			);
 		}
 	}
 }

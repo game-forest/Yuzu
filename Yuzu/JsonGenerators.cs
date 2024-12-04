@@ -50,34 +50,6 @@ namespace Yuzu.Json
 				MakeDeserializer(className).FromReaderIntPartial(name);
 		}
 
-		private object FromReaderIntGenerated()
-		{
-			KillBuf();
-			Require('{');
-			CheckClassTag(GetNextName(first: true));
-			var typeName = RequireUnescapedString();
-			return MaybeReadObject(typeName, GetNextName(first: false));
-		}
-
-		protected object FromReaderIntGenerated(object obj)
-		{
-			KillBuf();
-			Require('{');
-			var expectedType = obj.GetType();
-			string name = GetNextName(first: true);
-			if (name == JsonOptions.ClassTag) {
-				CheckExpectedType(RequireUnescapedString(), expectedType);
-				name = GetNextName(first: false);
-			}
-			return name == null ? obj :
-				MakeDeserializer(TypeSerializer.Serialize(obj.GetType())).ReadFields(obj, name);
-		}
-
-		public override object FromReaderInt()
-		{
-			return FromReaderIntGenerated();
-		}
-
 		public T DefaultFactory<T>() where T : new() => new ();
 		public T FromReaderTyped<T>(BinaryReader reader) where T : new()
 		{
@@ -93,7 +65,7 @@ namespace Yuzu.Json
 			if (ch == '[') return (T)ReadFieldsCompact(factory());
 			var name = GetNextName(true);
 			if (name != JsonOptions.ClassTag) return (T)ReadFields(factory(), name);
-			var typeName = RequireUnescapedString();
+			var typeName = RequireString();
 			return (T)MaybeReadObject(typeName, GetNextName(first: false));
 		}
 
@@ -107,7 +79,7 @@ namespace Yuzu.Json
 				return null;
 			}
 			CheckClassTag(GetNextName(first: true));
-			var typeName = RequireUnescapedString();
+			var typeName = RequireString();
 			return (T)MaybeReadObject(typeName, GetNextName(first: false));
 		}
 	}
@@ -493,11 +465,6 @@ namespace Yuzu.Json
 			}
 			cw.PutEndBlock();
 			cw.Put("\n");
-		}
-
-		public override object FromReaderInt(object obj)
-		{
-			return FromReaderIntGenerated(obj);
 		}
 
 		public override object FromReaderIntPartial(string name)

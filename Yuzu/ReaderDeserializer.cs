@@ -14,74 +14,28 @@ namespace Yuzu.Deserializer
 		public BinaryReader Reader;
 
 		protected virtual void Initialize() { }
-		public abstract object FromReaderInt();
-		public abstract object FromReaderInt(object obj);
-		public abstract T FromReaderInt<T>();
+		public abstract object FromReader(object obj, Type t);
 
-		public override object FromReader(object obj, BinaryReader reader)
+		public override object FromReader(object obj, BinaryReader reader, Type t)
 		{
 			Reader = reader;
 			Initialize();
-			return FromReaderInt(obj);
+			return FromReader(obj, t);
 		}
 
-		public override object FromString(object obj, string source)
+		public override object FromString(object obj, string source, Type t)
 		{
-			return FromReader(obj, new BinaryReader(new MemoryStream(Encoding.UTF8.GetBytes(source), false)));
+			return FromReader(obj, new BinaryReader(new MemoryStream(Encoding.UTF8.GetBytes(source), false)), t);
 		}
 
-		public override object FromStream(object obj, Stream source)
+		public override object FromStream(object obj, Stream source, Type t)
 		{
-			return FromReader(obj, new BinaryReader(source));
+			return FromReader(obj, new BinaryReader(source), t);
 		}
 
-		public override object FromBytes(object obj, byte[] bytes)
+		public override object FromBytes(object obj, byte[] bytes, Type t)
 		{
-			return FromStream(obj, new MemoryStream(bytes, false));
-		}
-
-		public override object FromReader(BinaryReader reader)
-		{
-			Reader = reader;
-			Initialize();
-			return FromReaderInt();
-		}
-
-		public override object FromString(string source)
-		{
-			return FromReader(new BinaryReader(new MemoryStream(Encoding.UTF8.GetBytes(source), false)));
-		}
-
-		public override object FromStream(Stream source)
-		{
-			return FromReader(new BinaryReader(source));
-		}
-
-		public override object FromBytes(byte[] bytes)
-		{
-			return FromStream(new MemoryStream(bytes, false));
-		}
-
-		public override T FromReader<T>(BinaryReader reader)
-		{
-			Reader = reader;
-			Initialize();
-			return FromReaderInt<T>();
-		}
-
-		public override T FromString<T>(string source)
-		{
-			return FromReader<T>(new BinaryReader(new MemoryStream(Encoding.UTF8.GetBytes(source), false)));
-		}
-
-		public override T FromStream<T>(Stream source)
-		{
-			return FromReader<T>(new BinaryReader(source));
-		}
-
-		public override T FromBytes<T>(byte[] bytes)
-		{
-			return FromStream<T>(new MemoryStream(bytes, false));
+			return FromStream(obj, new MemoryStream(bytes, false), t);
 		}
 
 		protected YuzuException Error(string message, params object[] args)
