@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 
@@ -229,28 +229,28 @@ namespace Yuzu.Json
 
 	internal static class JsonNumberReader
 	{
-		public static char ReadDigits(BinaryReader reader, StringBuilder sb, char ch)
+		public static int ReadDigits(BinaryReader reader, StringBuilder sb, int ch)
 		{
 			while ('0' <= ch && ch <= '9') {
-				sb.Append(ch);
-				ch = reader.ReadChar();
+				sb.Append((char)ch);
+				ch = reader.Read();
 			}
 			return ch;
 		}
 
-		public static char ReadUnsignedFloat(BinaryReader reader, StringBuilder sb, char ch)
+		public static int ReadUnsignedFloat(BinaryReader reader, StringBuilder sb, int ch)
 		{
 			ch = ReadDigits(reader, sb, ch);
 			if (ch == '.') {
-				sb.Append(ch);
-				ch = ReadDigits(reader, sb, reader.ReadChar());
+				sb.Append((char)ch);
+				ch = ReadDigits(reader, sb, reader.Read());
 			}
 			if (ch == 'e' || ch == 'E') {
-				sb.Append(ch);
-				ch = reader.ReadChar();
+				sb.Append((char)ch);
+				ch = reader.Read();
 				if (ch == '+' || ch == '-') {
-					sb.Append(ch);
-					ch = reader.ReadChar();
+					sb.Append((char)ch);
+					ch = reader.Read();
 				}
 				ch = ReadDigits(reader, sb, ch);
 			}

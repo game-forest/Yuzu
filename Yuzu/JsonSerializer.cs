@@ -984,17 +984,9 @@ namespace Yuzu.Json
 			meta.AfterSerialization.Run(obj);
 		}
 
-		protected override void ToWriter(object obj)
+		protected override void ToWriter(object obj, Type t)
 		{
-			if (obj == null) {
-				writer.Write(nullBytes);
-				return;
-			}
-			var t = obj.GetType();
-			if (JsonOptions.SaveClass.HasFlag(JsonSaveClass.UnknownPrimitive) && !IsUserObject(t))
-				WriteTypedPrimitive(obj, t);
-			else
-				GetWriteFunc(t)(obj);
+			GetWriteFunc(t)(obj);
 		}
 	}
 

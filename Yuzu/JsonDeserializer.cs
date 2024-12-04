@@ -17,22 +17,22 @@ namespace Yuzu.Json
 		public static JsonDeserializer Instance = new();
 		public JsonSerializeOptions JsonOptions = new();
 
-		private char? buf;
+		private int? buf;
 
 		protected override void Initialize()
 		{
 			buf = null;
 			if (JsonOptions.BOM && Reader.PeekChar() == '\uFEFF')
-				Reader.ReadChar();
+				Reader.Read();
 			if (ReferenceResolver != null) {
 				referenceReadFunc = ReadValueFunc(ReferenceResolver.ReferenceType);
 			}
 		}
 
-		private char Next()
+		private int Next()
 		{
 			if (!buf.HasValue)
-				return Reader.ReadChar();
+				return Reader.Read();
 			var result = buf.Value;
 			buf = null;
 			return result;
@@ -44,33 +44,33 @@ namespace Yuzu.Json
 				throw Error("Unconsumed character: {0}", buf);
 		}
 
-		private void PutBack(char ch)
+		private void PutBack(int ch)
 		{
 			if (buf.HasValue)
 				throw new YuzuAssert();
 			buf = ch;
 		}
 
-		private char SkipSpaces()
+		private int SkipSpaces()
 		{
-			char ch = Next();
+			int ch = Next();
 			if (JsonOptions.Comments)
 				while (true) {
 					if (ch == '/') {
-						ch = Reader.ReadChar();
+						ch = Reader.Read();
 						if (ch != '/')
 							throw Error("Expected '/', but found '{0}'", ch);
 						do {
-							ch = Reader.ReadChar();
+							ch = Reader.Read();
 						} while (ch != '\n') ;
 					}
 					else if (ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r')
 						break;
-					ch = Reader.ReadChar();
+					ch = Reader.Read();
 				}
 			else
 				while (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
-					ch = Reader.ReadChar();
+					ch = Reader.Read();
 			return ch;
 		}
 
@@ -83,14 +83,14 @@ namespace Yuzu.Json
 				while (true) {
 					var v = Reader.PeekChar();
 					if (v == '/') {
-						Reader.ReadChar();
+						Reader.Read();
 						v = Reader.PeekChar();
 						// Unable to look ahead 2 chars, so disallow lone slash.
 						if (v != '/')
 							throw Error("Expected '/', but found '{0}'",
 								v > 0 ? ((char)v).ToString() : "EOF");
 						do {
-							Reader.ReadChar();
+							Reader.Read();
 							v = Reader.PeekChar();
 							if (v < 0)
 								return '\0';
@@ -98,18 +98,18 @@ namespace Yuzu.Json
 					}
 					if (v != ' ' && v != '\t' && v != '\n' && v != '\r')
 						return (char)v;
-					Reader.ReadChar();
+					Reader.Read();
 				}
 			else
 				while (true) {
 					var v = Reader.PeekChar();
 					if (v != ' ' && v != '\t' && v != '\n' && v != '\r')
 						return v < 0 ? '\0' : (char)v;
-					Reader.ReadChar();
+					Reader.Read();
 				}
 		}
 
-		protected char Require(params char[] chars)
+		protected int Require(params int[] chars)
 		{
 			var ch = SkipSpaces();
 			if(Array.IndexOf(chars, ch) < 0)
@@ -118,9 +118,9 @@ namespace Yuzu.Json
 		}
 
 		protected void Require(string s)
-		{
+		{	
 			foreach (var ch in s) {
-				var r = Reader.ReadChar();
+				var r = Reader.Read();
 				if (r != ch)
 					throw Error("Expected '{0}', but found '{1}'", ch, r);
 			}
@@ -129,29 +129,15 @@ namespace Yuzu.Json
 		// Optimization: avoid re-creating StringBuilder.
 		private StringBuilder sb = new();
 
-		protected string RequireUnescapedString()
-		{
-			return RequireString(); // TODO: It's needed for generic animator type deserialization
-			sb.Clear();
-			if (RequireOrNull('"')) return null;
-			while (true) {
-				var ch = Reader.ReadChar();
-				if (ch == '"')
-					break;
-				sb.Append(ch);
-			}
-			return sb.ToString();
-		}
-
 		protected string RequireString()
 		{
 			sb.Clear();
 			if (RequireOrNull('"')) return null;
 			while (true) {
 				// Optimization: buf is guaranteed to be empty after Require, so no need to call Next.
-				char ch;
+				int ch;
 				try {
-					ch = Reader.ReadChar();
+					ch = Reader.Read();
 				}
 				catch (ArgumentException) {
 					// Encountered surrogate pair. Ignore replacement (\uFFFD) inserted by ReadChars.
@@ -163,12 +149,12 @@ namespace Yuzu.Json
 				if (ch == '"')
 					break;
 				if (ch == '\\') {
-					ch = Reader.ReadChar();
+					ch = Reader.Read();
 					if (ch == 'u') {
 						int code = 0;
 						for (int i = 0; i < 4; ++i) {
-							ch = Reader.ReadChar();
-							int h = ch <= 'f' ? JsonEscapeData.hexDigits[ch] : -1;
+							ch = Reader.Read();
+							int h = unchecked((uint)ch) <= 'f' ? JsonEscapeData.hexDigits[ch] : -1;
 							if (h < 0)
 								throw Error("Bad hexadecimal digit in unicode escape: '{0}'", ch);
 							code = code * 16 + h;
@@ -176,13 +162,13 @@ namespace Yuzu.Json
 						ch = (char)code;
 					}
 					else {
-						var escaped = ch <= 't' ? JsonEscapeData.unescapeChars[ch] : '\0';
+						var escaped = unchecked((uint)ch) <= 't' ? JsonEscapeData.unescapeChars[ch] : '\0';
 						if (escaped == 0)
 							throw Error("Unexpected escape chararcter: '{0}'", ch);
 						ch = escaped;
 					}
 				}
-				sb.Append(ch);
+				sb.Append((char)ch);
 			}
 			return sb.ToString();
 		}
@@ -223,7 +209,7 @@ namespace Yuzu.Json
 			while ('0' <= ch && ch <= '9') {
 				var d = (uint)ch - (uint)'0';
 				checked { result = result * 10 + d; }
-				ch = Reader.ReadChar();
+				ch = Reader.Read();
 			}
 			if (JsonOptions.NumberAsString) {
 				if (ch != '"')
@@ -243,18 +229,18 @@ namespace Yuzu.Json
 			}
 			int result = 0;
 			if (ch == '-') {
-				ch = Reader.ReadChar();
+				ch = Reader.Read();
 				while ('0' <= ch && ch <= '9') {
 					var d = (int)'0' - (int)ch;
 					checked { result = result * 10 + d; }
-					ch = Reader.ReadChar();
+					ch = Reader.Read();
 				}
 			}
 			else {
 				while ('0' <= ch && ch <= '9') {
 					var d = (int)ch - (int)'0';
 					checked { result = result * 10 + d; }
-					ch = Reader.ReadChar();
+					ch = Reader.Read();
 				}
 			}
 			if (JsonOptions.NumberAsString) {
@@ -271,13 +257,13 @@ namespace Yuzu.Json
 			if (JsonOptions.NumberAsString || JsonOptions.Int64AsString) {
 				if (ch != '"')
 					throw Error("Expected '\"' but found '{0}'", ch);
-				ch = Reader.ReadChar();
+				ch = Reader.Read();
 			}
 			ulong result = 0;
 			while ('0' <= ch && ch <= '9') {
 				var d = (ulong)ch - (ulong)'0';
 				checked { result = result * 10 + d; }
-				ch = Reader.ReadChar();
+				ch = Reader.Read();
 			}
 			if (JsonOptions.NumberAsString || JsonOptions.Int64AsString) {
 				if (ch != '"')
@@ -294,18 +280,18 @@ namespace Yuzu.Json
 			if (JsonOptions.NumberAsString || JsonOptions.Int64AsString) {
 				if (ch != '"')
 					throw Error("Expected '\"' but found '{0}'", ch);
-				ch = Reader.ReadChar();
+				ch = Reader.Read();
 			}
 			int sign = 1;
 			if (ch == '-') {
 				sign = -1;
-				ch = Reader.ReadChar();
+				ch = Reader.Read();
 			}
 			long result = 0;
 			while ('0' <= ch && ch <= '9') {
 				var d = sign * ((long)ch - (long)'0');
 				checked { result = result * 10 + d; }
-				ch = Reader.ReadChar();
+				ch = Reader.Read();
 			}
 			if (JsonOptions.NumberAsString || JsonOptions.Int64AsString) {
 				if (ch != '"')
@@ -327,8 +313,8 @@ namespace Yuzu.Json
 			}
 			bool neg = ch == '-';
 			if (neg) {
-				sb.Append(ch);
-				ch = Reader.ReadChar();
+				sb.Append((char)ch);
+				ch = Reader.Read();
 			}
 			if (ch == 'N') {
 				Require(JsonOptions.NumberAsString ? "aN\"" : "aN");
@@ -358,8 +344,8 @@ namespace Yuzu.Json
 			}
 			bool neg = ch == '-';
 			if (neg) {
-				sb.Append(ch);
-				ch = Reader.ReadChar();
+				sb.Append((char)ch);
+				ch = Reader.Read();
 			}
 			if (ch == 'N') {
 				Require(JsonOptions.NumberAsString ? "aN\"" : "aN");
@@ -384,8 +370,8 @@ namespace Yuzu.Json
 			var ch = SkipSpaces();
 			bool neg = ch == '-';
 			if (neg) {
-				sb.Append(ch);
-				ch = Reader.ReadChar();
+				sb.Append((char)ch);
+				ch = Reader.Read();
 			}
 			ch = JsonNumberReader.ReadUnsignedFloat(Reader, sb, ch);
 			PutBack(ch);
@@ -403,8 +389,8 @@ namespace Yuzu.Json
 			}
 			bool neg = ch == '-';
 			if (neg) {
-				sb.Append(ch);
-				ch = Reader.ReadChar();
+				sb.Append((char)ch);
+				ch = Reader.Read();
 			}
 			if (ch == 'N') {
 				Require(JsonOptions.NumberAsString ? "aN\"" : "aN");
@@ -417,16 +403,16 @@ namespace Yuzu.Json
 			ch = JsonNumberReader.ReadDigits(Reader, sb, ch);
 			var isFloat = ch == '.';
 			if (isFloat) {
-				sb.Append(ch);
-				ch = JsonNumberReader.ReadDigits(Reader, sb, Reader.ReadChar());
+				sb.Append((char)ch);
+				ch = JsonNumberReader.ReadDigits(Reader, sb, Reader.Read());
 			}
 			if (ch == 'e' || ch == 'E') {
 				isFloat = true;
-				sb.Append(ch);
-				ch = Reader.ReadChar();
+				sb.Append((char)ch);
+				ch = Reader.Read();
 				if (ch == '+' || ch == '-') {
-					sb.Append(ch);
-					ch = Reader.ReadChar();
+					sb.Append((char)ch);
+					ch = Reader.Read();
 				}
 				ch = JsonNumberReader.ReadDigits(Reader, sb, ch);
 			}
@@ -457,19 +443,19 @@ namespace Yuzu.Json
 
 		protected decimal RequireDecimalAsString()
 		{
-			return decimal.Parse(RequireUnescapedString(), CultureInfo.InvariantCulture);
+			return decimal.Parse(RequireString(), CultureInfo.InvariantCulture);
 		}
 
 		protected DateTime RequireDateTime()
 		{
-			var s = JsonOptions.DateFormat == "O" ? RequireUnescapedString() : RequireString();
+			var s = JsonOptions.DateFormat == "O" ? RequireString() : RequireString();
 			return DateTime.ParseExact(
 				s, JsonOptions.DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 		}
 
 		protected DateTimeOffset RequireDateTimeOffset()
 		{
-			var s = JsonOptions.DateFormat == "O" ? RequireUnescapedString() : RequireString();
+			var s = JsonOptions.DateFormat == "O" ? RequireString() : RequireString();
 			return DateTimeOffset.ParseExact(
 				s, JsonOptions.DateTimeOffsetFormat,
 				CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
@@ -477,11 +463,11 @@ namespace Yuzu.Json
 
 		protected TimeSpan RequireTimeSpan()
 		{
-			var s = JsonOptions.TimeSpanFormat == "c" ? RequireUnescapedString() : RequireString();
+			var s = JsonOptions.TimeSpanFormat == "c" ? RequireString() : RequireString();
 			return TimeSpan.ParseExact(s, JsonOptions.TimeSpanFormat, CultureInfo.InvariantCulture);
 		}
 
-		protected Guid RequireGuid() => Guid.Parse(RequireUnescapedString());
+		protected Guid RequireGuid() => Guid.Parse(RequireString());
 
 		protected string GetNextName(bool first)
 		{
@@ -497,10 +483,10 @@ namespace Yuzu.Json
 				throw Error("Expected '\"' but found '{0}'", ch);
 			sb.Clear();
 			while (true) {
-				ch = Reader.ReadChar();
+				ch = Reader.Read();
 				if (ch == '"')
 					break;
-				sb.Append(ch);
+				sb.Append((char)ch);
 			}
 			Require(':');
 			return sb.ToString();
@@ -514,7 +500,7 @@ namespace Yuzu.Json
 			return true;
 		}
 
-		protected char RequireBracketOrNull()
+		protected int RequireBracketOrNull()
 		{
 			var ch = Require('{', '[', 'n');
 			if (ch == 'n')
@@ -694,7 +680,7 @@ namespace Yuzu.Json
 			return array;
 		}
 
-		private Action<T> ReadAction<T>() { return GetAction<T>(RequireUnescapedString()); }
+		private Action<T> ReadAction<T>() { return GetAction<T>(RequireString()); }
 
 		private object ReadNullable(Func<object> normalRead)
 		{
@@ -710,7 +696,7 @@ namespace Yuzu.Json
 		private object ReadTypedPrimitive(Type t)
 		{
 			Require(',');
-			if (RequireUnescapedString() != JsonOptions.ValueTag)
+			if (RequireString() != JsonOptions.ValueTag)
 				throw Error("Primitive type value expected");
 			Require(':');
 			var result = ReadValueFunc(t)();
@@ -759,7 +745,7 @@ namespace Yuzu.Json
 						}
 						return any;
 					}
-					var typeName = RequireUnescapedString();
+					var typeName = RequireString();
 					var t = Meta.GetTypeByReadAlias(typeName, Options) ?? TypeSerializer.Deserialize(typeName);
 					if (t == null) {
 						var result = new YuzuUnknown { ClassTag = typeName };
@@ -871,7 +857,6 @@ namespace Yuzu.Json
 			{ typeof(DateTimeOffset), RequireDateTimeOffsetObj },
 			{ typeof(TimeSpan), RequireTimeSpanObj },
 			{ typeof(Guid), RequireGuidObj },
-			{ typeof(object), ReadAnyObject },
 		};
 
 		private Func<object> MakeReaderFunc(Type t)
@@ -948,7 +933,7 @@ namespace Yuzu.Json
 				var d = MakeDelegateAction(m);
 				return obj => { Require('['); d(obj); };
 			}
-			if ((t.IsClass || t.IsInterface) && t != typeof(object)) {
+			if (t.IsClass || t.IsInterface) {
 				var m = Utils.GetPrivateGeneric(GetType(), nameof(ReadIntoObject), t);
 				return MakeDelegateAction(m);
 			}
@@ -1124,7 +1109,7 @@ namespace Yuzu.Json
 						obj = CreateAndRegisterObject(meta, id);
 						return (T)ReadFields(obj, name);
 					}
-					var typeName = RequireUnescapedString();
+					var typeName = RequireString();
 					var t = FindType(typeName);
 					if (typeof(T).IsAssignableFrom(t)) {
 						var meta = Meta.Get(t, Options);
@@ -1171,13 +1156,23 @@ namespace Yuzu.Json
 			switch (Require('{', '[')) {
 				case '{':
 					var name = GetNextName(first: true);
-					if (name != JsonOptions.ClassTag) {
-						ReadFields(obj, name);
+					if (name == JsonOptions.ReferenceTag) {
+						throw new InvalidOperationException("Unable to resolve reference into object");
 					}
-					else {
-						CheckExpectedType(RequireUnescapedString(), typeof(T));
-						ReadFields(obj, GetNextName(first: false));
+					object id = null;
+					if (name == JsonOptions.IdTag) {
+						id = referenceReadFunc();
+						EnsureReferenceResolver();
+						name = GetNextName(first: false);
 					}
+					if (name == JsonOptions.ClassTag) {
+						CheckExpectedType(RequireString(), obj.GetType());
+						name = GetNextName(first: false);
+					}
+					if (id != null) {
+						ReferenceResolver.AddReference(id, obj);
+					}
+					ReadFields(obj, name);
 					return;
 				case '[':
 					ReadFieldsCompact(obj);
@@ -1203,7 +1198,7 @@ namespace Yuzu.Json
 				name = GetNextName(first: false);
 			}
 			CheckClassTag(name);
-			var typeName = RequireUnescapedString();
+			var typeName = RequireString();
 			var t = FindType(typeName);
 			if (!typeof(T).IsAssignableFrom(t))
 				throw Error("Expected interface '{0}', but got '{1}'", typeof(T), typeName);
@@ -1219,7 +1214,7 @@ namespace Yuzu.Json
 					var name = GetNextName(first: true);
 					if (name != JsonOptions.ClassTag)
 						return ReadFields(obj, name);
-					CheckExpectedType(RequireUnescapedString(), typeof(T));
+					CheckExpectedType(RequireString(), typeof(T));
 					return ReadFields(obj, GetNextName(first: false));
 				case '[':
 					return ReadFieldsCompact(obj);
@@ -1228,63 +1223,14 @@ namespace Yuzu.Json
 			}
 		}
 
-		public override object FromReaderInt()
+		public override object FromReader(object obj, Type t)
 		{
-			return FromReaderIntHelper(ReadAnyObject);
-		}
-
-		private T FromReaderIntHelper<T>(Func<T> f)
-		{
-			return f();
-		}
-
-		public override object FromReaderInt(object obj)
-		{
-			return FromReaderIntHelper(() => {
-				KillBuf();
-				var expectedType = obj.GetType();
-				if (expectedType == typeof(object))
-					throw Error("Unable to read into bare object");
-				switch (RequireBracketOrNull()) {
-					case 'n':
-						return null;
-					case '{':
-						if (expectedType.IsGenericType && expectedType.GetGenericTypeDefinition() == typeof(Dictionary<,>)) {
-							var m = Utils.GetPrivateCovariantGenericAll(GetType(), nameof(ReadIntoDictionaryNG), expectedType);
-							MakeDelegateAction(m)(obj);
-							return obj;
-						}
-						var name = GetNextName(first: true);
-						if (name == JsonOptions.ReferenceTag) {
-							throw Error("Unable to resolve reference into object");
-						}
-						if (name == JsonOptions.IdTag) {
-							EnsureReferenceResolver();
-							var id = referenceReadFunc();
-							ReferenceResolver.AddReference(id, obj);
-							name = GetNextName(first: false);
-						}
-						if (name != JsonOptions.ClassTag)
-							return ReadFields(obj, name);
-						CheckExpectedType(RequireUnescapedString(), expectedType);
-						return ReadFields(obj, GetNextName(first: false));
-					case '[':
-						var icoll = Utils.GetICollection(expectedType);
-						if (icoll != null) {
-							var m = Utils.GetPrivateCovariantGeneric(GetType(), nameof(ReadIntoCollectionNG), icoll);
-							MakeDelegateAction(m)(obj);
-							return obj;
-						}
-						return ReadFieldsCompact(obj);
-					default:
-						throw new YuzuAssert();
-				}
-			});
-		}
-
-		public override T FromReaderInt<T>()
-		{
-			return FromReaderIntHelper(() => (T)ReadValueFunc(typeof(T))());
+			if (obj != null) {
+				MergeValueFunc(t)(obj);
+			} else {
+				obj = ReadValueFunc(t)();
+			}
+			return obj;
 		}
 	}
 }
