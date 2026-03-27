@@ -1437,7 +1437,7 @@ namespace YuzuTest.Json
 			Assert.IsInstanceOfType(f, typeof(SampleObj));
 			Assert.AreEqual(null, ((SampleObj)f).F);
 			d1 = YuzuUnknown.Dyn(d);
-			Assert.AreEqual(null, d1.F.F);
+			Assert.AreEqual(null, (object)d1.F.F);
 
 			var js = new JsonSerializer();
 			js.JsonOptions.Indent = "";
