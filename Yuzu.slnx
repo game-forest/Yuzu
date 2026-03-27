@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="Yuzu.csproj" />
+  <Project Path="Yuzu/YuzuTest/AssemblyTest/AssemblyTest.csproj" />
+  <Project Path="Yuzu/YuzuTest/YuzuTest.csproj">
+    <BuildDependency Project="Yuzu/YuzuTest/AssemblyTest/AssemblyTest.csproj" />
+  </Project>
+  <Project Path="YuzuGenerator/YuzuGenerator.csproj" />
+</Solution>

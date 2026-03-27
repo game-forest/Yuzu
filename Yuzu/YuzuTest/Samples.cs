@@ -1119,7 +1119,7 @@ namespace YuzuTest
 				StringAssert.Contains(ex.Message, expectedExceptionMessage, "Bad exception message");
 				return;
 			}
-			Assert.Fail("Expected exception:<{0}>. Actual exception: none.", typeof(TExpectedException).Name);
+			Assert.Fail($"Expected exception:<{typeof(TExpectedException).Name}>. Actual exception: none.");
 		}
 	}
 }
