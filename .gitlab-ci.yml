@@ -18,9 +18,9 @@ push_to_github:
     - git config --replace-all user.name "Game Forest"
     - git remote add github git@github.com:game-forest/Yuzu.git; if ($?) { } else { echo "remote already set" }
     - git fetch github
-    - git branch -D $env:CI_BUILD_REF_NAME; if ($?) { } else { echo "branch doesn't exist" }
-    - git checkout --track origin/$env:CI_BUILD_REF_NAME
-    - git push --force github $env:CI_BUILD_REF_NAME
+    - git branch -D $env:CI_COMMIT_REF_NAME; if ($?) { } else { echo "branch doesn't exist" }
+    - git checkout --track origin/$env:CI_COMMIT_REF_NAME
+    - git push --force github $env:CI_COMMIT_REF_NAME
 
 run_tests:
     stage: test
