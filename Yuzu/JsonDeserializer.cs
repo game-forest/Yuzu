@@ -219,6 +219,15 @@ namespace Yuzu.Json
 				checked { result = result * 10 + d; }
 				ch = Reader.ReadChar();
 			}
+			if (JsonOptions.RemoveTrailingZeros && ch == '.') {
+				ch = Reader.ReadChar();
+				while (ch == '0') {
+					ch = Reader.ReadChar();
+				}
+				if ('0' < ch && ch <= '9') {
+					throw Error("Expected '0' but found '{0}'", ch);
+				}
+			}
 			if (JsonOptions.NumberAsString) {
 				if (ch != '"')
 					throw Error("Expected '\"' but found '{0}'", ch);
@@ -251,6 +260,15 @@ namespace Yuzu.Json
 					ch = Reader.ReadChar();
 				}
 			}
+			if (JsonOptions.RemoveTrailingZeros && ch == '.') {
+				ch = Reader.ReadChar();
+				while (ch == '0') {
+					ch = Reader.ReadChar();
+				}
+				if ('0' < ch && ch <= '9') {
+					throw Error("Expected '0' but found '{0}'", ch);
+				}
+			}
 			if (JsonOptions.NumberAsString) {
 				if (ch != '"')
 					throw Error("Expected '\"' but found '{0}'", ch);
@@ -272,6 +290,15 @@ namespace Yuzu.Json
 				var d = (ulong)ch - (ulong)'0';
 				checked { result = result * 10 + d; }
 				ch = Reader.ReadChar();
+			}
+			if (JsonOptions.RemoveTrailingZeros && ch == '.') {
+				ch = Reader.ReadChar();
+				while (ch == '0') {
+					ch = Reader.ReadChar();
+				}
+				if ('0' < ch && ch <= '9') {
+					throw Error("Expected '0' but found '{0}'", ch);
+				}
 			}
 			if (JsonOptions.NumberAsString || JsonOptions.Int64AsString) {
 				if (ch != '"')
@@ -300,6 +327,15 @@ namespace Yuzu.Json
 				var d = sign * ((long)ch - (long)'0');
 				checked { result = result * 10 + d; }
 				ch = Reader.ReadChar();
+			}
+			if (JsonOptions.RemoveTrailingZeros && ch == '.') {
+				ch = Reader.ReadChar();
+				while (ch == '0') {
+					ch = Reader.ReadChar();
+				}
+				if ('0' < ch && ch <= '9') {
+					throw Error("Expected '0' but found '{0}'", ch);
+				}
 			}
 			if (JsonOptions.NumberAsString || JsonOptions.Int64AsString) {
 				if (ch != '"')

@@ -70,6 +70,10 @@ namespace Yuzu.Json
 		private bool numberAsString = false;
 		public bool NumberAsString { get { return numberAsString; } set { numberAsString = value; generation++; } }
 
+		private bool removeTrailingZeros = false;
+
+		public bool RemoveTrailingZeros { get => removeTrailingZeros; set { removeTrailingZeros = value; generation++; } }
+
 		public bool Unordered = false;
 
 		private bool comments = false;
