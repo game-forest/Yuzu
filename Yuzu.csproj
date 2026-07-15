@@ -5,7 +5,10 @@
     <AssemblyName>Yuzu</AssemblyName>
     <RootNamespace>Yuzu</RootNamespace>
     <TargetFramework>net10.0</TargetFramework>
-    <RuntimeIdentifiers>win-x64;android-arm;android-x86;android-arm64;android-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+	
+  <PropertyGroup Condition="$(DefineConstants.Contains('UWP'))">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
