@@ -7,7 +7,7 @@
     <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
 	
-  <PropertyGroup Condition="$(DefineConstants.Contains('UWP'))">
+  <PropertyGroup Condition="$(DefineConstants.Contains('G5'))">
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
 
