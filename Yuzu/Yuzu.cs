@@ -75,12 +75,16 @@ namespace Yuzu
 
 		public override Func<object, object, bool> MakeChecker(Type tObj)
 		{
+			var checkerMethodName = $"Yuzu_{Method}_Static";
 			var methodInfo = tObj.GetMethod(
-				$"Yuzu_{Method}_Static",
+				checkerMethodName,
 				BindingFlags.FlattenHierarchy | BindingFlags.Static | BindingFlags.Public
 			);
 			if (methodInfo == null || !methodInfo.IsStatic) {
-				throw new YuzuException();
+				throw new YuzuException(
+					$"Failed to find static checker method '{checkerMethodName}'" +
+					$"for type '{tObj.Name}'"
+				);
 			}
 			return (Func<object, object, bool>)Delegate.CreateDelegate(typeof(Func<object, object, bool>), methodInfo);
 		}
