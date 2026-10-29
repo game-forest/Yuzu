@@ -4,5 +4,5 @@
   <Project Path="Yuzu/YuzuTest/YuzuTest.csproj">
     <BuildDependency Project="Yuzu/YuzuTest/AssemblyTest/AssemblyTest.csproj" />
   </Project>
-  <Project Path="YuzuGenerator/YuzuGenerator.csproj" />
+  <Project Path="Yuzu.Generator/Yuzu.Generator.csproj" />
 </Solution>

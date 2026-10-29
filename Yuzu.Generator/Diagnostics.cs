@@ -33,7 +33,7 @@ internal class Diagnostics
 		new(
 			"YZ1001",
 			"Unhandled exception occurred",
-			"YuzuGenerator caused an exception {0}: {1}",
+			"Yuzu.Generator caused an exception {0}: {1}",
 			Category,
 			DiagnosticSeverity.Error,
 			true

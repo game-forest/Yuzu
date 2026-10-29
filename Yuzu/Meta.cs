@@ -324,7 +324,7 @@ namespace Yuzu.Metadata
 						throw new YuzuException(
 							$"Non-static method {m.Name} with {nameof(SerializeItemIf)} " +
 							$"attribute doesn't have corresponding generated static method. " +
-							"Make sure YuzuGenerator project is included."
+							"Make sure Yuzu.Generator is referenced as project or package."
 						);
 					}
 					SerializeItemIfMethod = m;
